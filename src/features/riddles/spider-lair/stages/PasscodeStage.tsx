@@ -40,14 +40,14 @@ export const PasscodeStage: React.FC<PasscodeStageProps> = ({ onAdvance }) => {
         <span
             key={i}
             className={`w-4 h-4 rounded-full inline-block mx-1 transition-colors duration-200 ${i < pin.length
-                    ? 'bg-[#ff007f] shadow-[0_0_10px_rgba(255,0,127,0.6)]'
-                    : 'bg-gray-700 border border-[#b0005d]'
+                ? 'bg-[#ff007f] shadow-[0_0_10px_rgba(255,0,127,0.6)]'
+                : 'bg-gray-700 border border-[#b0005d]'
                 }`}
         />
     ));
 
     const pinButtonClass =
-        'w-14 h-14 text-2xl bg-black/50 hover:bg-[#ff007f]/20 border border-[#b0005d] hover:border-[#ff007f] rounded font-semibold transition-all duration-200 text-pink-200';
+        'w-12 h-12 text-2xl bg-black/50 hover:bg-[#ff007f]/20 border border-[#b0005d] hover:border-[#ff007f] rounded font-semibold transition-all duration-200 text-pink-200';
 
     return (
         <div className="text-center space-y-8 w-full max-w-sm">

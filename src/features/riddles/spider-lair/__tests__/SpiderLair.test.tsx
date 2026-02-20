@@ -37,7 +37,7 @@ vi.mock('../stages/PasscodeStage', () => ({
 vi.mock('../stages/LyricsStage', () => ({
     LyricsStage: ({ onAdvance }: { onAdvance: () => void }) => (
         <div>
-            <h2>Spider Dance</h2>
+            <h2>Fill In the Blanks</h2>
             <button onClick={onAdvance}>Mock Lyrics</button>
         </div>
     ),

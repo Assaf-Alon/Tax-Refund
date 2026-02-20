@@ -6,7 +6,7 @@ interface CreatureStageProps {
     onAdvance: () => void;
 }
 
-const CORRECT_ANSWER = 'clawmaiden';
+const ACCEPTED_ANSWERS = ['silk monster', 'clawmaiden'];
 
 export const CreatureStage: React.FC<CreatureStageProps> = ({ onAdvance }) => {
     const [inputValue, setInputValue] = useState('');
@@ -14,7 +14,7 @@ export const CreatureStage: React.FC<CreatureStageProps> = ({ onAdvance }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (inputValue.toLowerCase().trim() === CORRECT_ANSWER) {
+        if (ACCEPTED_ANSWERS.includes(inputValue.toLowerCase().trim())) {
             onAdvance();
         } else {
             setError('The creature stares at you, unimpressed...');
@@ -55,7 +55,7 @@ export const CreatureStage: React.FC<CreatureStageProps> = ({ onAdvance }) => {
                 <p className="text-red-400 text-sm animate-pulse">{error}</p>
             )}
 
-            <HintButton hint="She has claws and she's a maiden..." cooldownSeconds={60} />
+            <HintButton hint="Woven from silk, born to destroy..." cooldownSeconds={60} />
         </div>
     );
 };

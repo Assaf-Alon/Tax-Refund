@@ -14,16 +14,20 @@ export const CongratsPage: React.FC = () => {
 
             <div className="flex flex-col items-center gap-6">
                 <img
-                    src={carrefourImg}
-                    alt="Carrefour"
-                    className="max-w-xs rounded-lg border border-[#b0005d] shadow-[0_0_20px_rgba(255,0,127,0.3)]"
-                />
-                <img
                     src={gitGudGif}
                     alt="Git Gud"
                     className="max-w-xs rounded-lg"
                 />
+                <img
+                    src={carrefourImg}
+                    alt="Carrefour"
+                    className="max-w-xs rounded-lg border border-[#b0005d] shadow-[0_0_20px_rgba(255,0,127,0.3)]"
+                />
             </div>
+
+            <p className="text-pink-200/60 italic text-sm">
+                I wonder what the next location might be...
+            </p>
 
             <div className="p-4 border border-[#ff007f]/30 bg-black/40 inline-block font-mono text-xs text-[#ff007f]/70">
                 Web Status: CLEARED

@@ -15,44 +15,44 @@ describe('CharacterInput', () => {
         cleanup();
     });
 
-    it('renders input boxes for alphabetic chars and spans for static chars', () => {
-        render(<CharacterInput expectedValue="A B" onComplete={onComplete} />);
+    it('renders input boxes for alphabetic chars and spans for apostrophes', () => {
+        render(<CharacterInput expectedValue="it's" onComplete={onComplete} />);
 
-        // 'A' and 'B' should be inputs, ' ' should be a span
+        // 'i', 't', 's' should be inputs; apostrophe should be a span
         expect(screen.getByTestId('input-0')).toBeTruthy();
-        expect(screen.getByTestId('static-1')).toBeTruthy();
-        expect(screen.getByTestId('input-2')).toBeTruthy();
+        expect(screen.getByTestId('input-1')).toBeTruthy();
+        expect(screen.getByTestId('static-2')).toBeTruthy();
+        expect(screen.getByTestId('input-3')).toBeTruthy();
     });
 
     it('auto-focuses next input on typing, skipping static chars', () => {
-        render(<CharacterInput expectedValue="A B" onComplete={onComplete} />);
+        render(<CharacterInput expectedValue="it's" onComplete={onComplete} />);
 
-        const inputA = screen.getByTestId('input-0') as HTMLInputElement;
-        const inputB = screen.getByTestId('input-2') as HTMLInputElement;
+        const inputI = screen.getByTestId('input-0') as HTMLInputElement;
+        const inputT = screen.getByTestId('input-1') as HTMLInputElement;
 
-        // Focus first input and type
-        inputA.focus();
-        fireEvent.change(inputA, { target: { value: 'A' } });
+        inputI.focus();
+        fireEvent.change(inputI, { target: { value: 'i' } });
+        expect(document.activeElement).toBe(inputT);
 
-        // Focus should jump to inputB (skipping the space span)
-        expect(document.activeElement).toBe(inputB);
+        // typing 't' should skip the apostrophe and focus 's'
+        fireEvent.change(inputT, { target: { value: 't' } });
+        const inputS = screen.getByTestId('input-3') as HTMLInputElement;
+        expect(document.activeElement).toBe(inputS);
     });
 
-    it('moves focus back on backspace from empty input, skipping static chars', () => {
-        render(<CharacterInput expectedValue="A B" onComplete={onComplete} />);
+    it('moves focus back on backspace from empty input', () => {
+        render(<CharacterInput expectedValue="HI" onComplete={onComplete} />);
 
-        const inputA = screen.getByTestId('input-0') as HTMLInputElement;
-        const inputB = screen.getByTestId('input-2') as HTMLInputElement;
+        const input0 = screen.getByTestId('input-0') as HTMLInputElement;
+        const input1 = screen.getByTestId('input-1') as HTMLInputElement;
 
-        // Type A first to fill it
-        inputA.focus();
-        fireEvent.change(inputA, { target: { value: 'A' } });
+        input0.focus();
+        fireEvent.change(input0, { target: { value: 'H' } });
 
-        // Now inputB is focused but empty — press backspace
-        fireEvent.keyDown(inputB, { key: 'Backspace' });
-
-        // Focus should jump back to inputA
-        expect(document.activeElement).toBe(inputA);
+        // input1 is focused but empty — press backspace
+        fireEvent.keyDown(input1, { key: 'Backspace' });
+        expect(document.activeElement).toBe(input0);
     });
 
     it('calls onComplete when all characters match', () => {
@@ -77,5 +77,12 @@ describe('CharacterInput', () => {
         fireEvent.change(input1, { target: { value: 'Y' } });
 
         expect(onComplete).not.toHaveBeenCalled();
+    });
+
+    it('makes inputs read-only when locked', () => {
+        render(<CharacterInput expectedValue="HI" onComplete={onComplete} locked={true} />);
+
+        const input0 = screen.getByTestId('input-0') as HTMLInputElement;
+        expect(input0.readOnly).toBe(true);
     });
 });
