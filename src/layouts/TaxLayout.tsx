@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 
 export const TaxLayout: React.FC = () => {
     return (
@@ -25,7 +25,7 @@ export const TaxLayout: React.FC = () => {
             <footer className="bg-gray-100 text-gray-500 py-6 mt-12 text-center text-sm border-t border-gray-200">
                 <p>&copy; 2026 Department of Fiscal Adjustments. All rights reserved.</p>
                 <div className="mt-2 flex justify-center gap-4">
-                    <span className="hover:underline cursor-pointer">Privacy Policy</span>
+                    <Link to="/admin" className="hover:underline cursor-pointer">Privacy Policy</Link>
                     <span className="hover:underline cursor-pointer">Accessibility</span>
                     <span className="hover:underline cursor-pointer">Contact</span>
                 </div>
