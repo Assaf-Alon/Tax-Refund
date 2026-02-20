@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 
 export const RiddleLayout: React.FC = () => {
     return (
-        <div className="min-h-screen bg-slate-900 text-green-400 font-mono tracking-wide selection:bg-green-900 selection:text-white">
+        <div className="min-h-screen min-w-full bg-slate-900 text-green-400 font-mono tracking-wide selection:bg-green-900 selection:text-white overflow-x-hidden">
             <div className="fixed inset-0 pointer-events-none opacity-5 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-green-900 via-transparent to-transparent"></div>
 
             <header className="p-4 border-b border-green-900/30 flex justify-between items-center bg-black/20 backdrop-blur-sm sticky top-0 z-10">

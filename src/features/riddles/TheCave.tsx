@@ -103,7 +103,7 @@ export const TheCave: React.FC = () => {
 
     return (
         <div className="text-center space-y-6">
-            <h1 className="text-5xl font-bold text-green-500 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]">CONGRATULATIONS</h1>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-green-500 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]">CONGRATULATIONS</h1>
             <p className="text-xl opacity-80">You have completed the pilot module.</p>
             <div className="p-4 border border-green-900/50 bg-black/40 inline-block font-mono text-xs">
                 System Status: OPERATIONAL
