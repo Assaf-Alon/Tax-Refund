@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { loadState } from '../../shared/logic/gameState';
 import { AdminDashboard } from './AdminDashboard';
+import { PinPad } from '../../shared/ui/PinPad';
 
 const ADMIN_PIN = '0000';
 
@@ -47,8 +48,6 @@ export const PinGate: React.FC = () => {
         />
     ));
 
-    const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-
     return (
         <div className="flex flex-col items-center gap-8 py-8">
             <h2 className="text-xl font-semibold text-gray-700">Enter Admin PIN</h2>
@@ -57,30 +56,7 @@ export const PinGate: React.FC = () => {
                 {dots}
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
-                {digits.map(d => (
-                    <button
-                        key={d}
-                        onClick={() => handleDigit(d)}
-                        className="w-14 h-14 text-2xl bg-gray-200 hover:bg-gray-300 rounded font-semibold transition-colors"
-                    >
-                        {d}
-                    </button>
-                ))}
-                <button
-                    onClick={handleBackspace}
-                    className="w-14 h-14 text-2xl bg-gray-200 hover:bg-gray-300 rounded font-semibold transition-colors"
-                >
-                    ←
-                </button>
-                <button
-                    onClick={() => handleDigit('0')}
-                    className="w-14 h-14 text-2xl bg-gray-200 hover:bg-gray-300 rounded font-semibold transition-colors"
-                >
-                    0
-                </button>
-                <div className="w-14 h-14" /> {/* empty cell */}
-            </div>
+            <PinPad onDigit={handleDigit} onBackspace={handleBackspace} />
         </div>
     );
 };

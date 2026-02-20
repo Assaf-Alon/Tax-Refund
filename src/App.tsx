@@ -3,6 +3,7 @@ import { TaxLayout } from './layouts/TaxLayout';
 import { RiddleLayout } from './layouts/RiddleLayout';
 import { HomePage } from './features/taxes/HomePage';
 import { TheCave } from './features/riddles/TheCave';
+import { SpiderLair } from './features/riddles/spider-lair/SpiderLair';
 import { PinGate } from './features/admin/PinGate';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route element={<RiddleLayout />}>
           <Route path="/the-cave" element={<TheCave />} />
         </Route>
+        <Route path="/spider-lair" element={<SpiderLair />} />
 
         {/* Catch-all redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
@@ -28,3 +30,4 @@ function App() {
 }
 
 export default App;
+
