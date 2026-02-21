@@ -11,6 +11,7 @@ import miteImg from './assets/mite.png';
 import spiderDanceOriginal from './assets/Toby Fox - Spider Dance.mp3';
 import spiderDanceCover from './assets/Spider Dance Cover.mp3';
 import { useAudio } from '../../../shared/utils/useAudio';
+import { DevSkipButton } from '../../admin/DevSkipButton';
 
 const RIDDLE_ID = 'spider-lair';
 
@@ -188,6 +189,8 @@ export const SpiderLair: React.FC = () => {
             <footer className="text-center p-8 text-xs text-[#ff007f]/20">
                 <p>silk_thread_v2.4 // end_of_web</p>
             </footer>
+
+            <DevSkipButton riddleId={RIDDLE_ID} currentStage={stage} totalStages={12} onSkip={handleAdvance} />
         </div>
     );
 };

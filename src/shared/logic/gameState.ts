@@ -4,6 +4,7 @@ export interface GameState {
     inventory: string[];
     adminSettings: {
         bypassPinOnLocalhost: boolean;
+        devToolsEnabled: boolean;
     };
 }
 
@@ -13,7 +14,8 @@ const defaultState: GameState = {
     riddleProgress: {},
     inventory: [],
     adminSettings: {
-        bypassPinOnLocalhost: true
+        bypassPinOnLocalhost: true,
+        devToolsEnabled: false
     }
 };
 

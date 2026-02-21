@@ -6,9 +6,9 @@ import { PinPad } from '../../shared/ui/PinPad';
 const ADMIN_PIN = '0000';
 
 export const PinGate: React.FC = () => {
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isDev = import.meta.env.DEV;
     const state = loadState();
-    const bypassEnabled = isLocalhost && state.adminSettings.bypassPinOnLocalhost;
+    const bypassEnabled = isDev && state.adminSettings.bypassPinOnLocalhost;
 
     const [unlocked, setUnlocked] = useState(bypassEnabled);
     const [pin, setPin] = useState('');

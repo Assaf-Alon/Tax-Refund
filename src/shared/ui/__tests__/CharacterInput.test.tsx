@@ -5,7 +5,7 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { CharacterInput } from '../CharacterInput';
 
 describe('CharacterInput', () => {
-    let onComplete: ReturnType<typeof vi.fn>;
+    let onComplete: any;
 
     beforeEach(() => {
         onComplete = vi.fn();

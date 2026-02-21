@@ -106,6 +106,7 @@ export function useAudio(src: string | null, options: UseAudioOptions = {}) {
                     };
                     document.addEventListener('click', interactionListener);
                     document.addEventListener('pointerdown', interactionListener);
+                    document.addEventListener('keydown', interactionListener);
                 } else {
                     console.error('Audio playback error:', error);
                 }
@@ -116,6 +117,7 @@ export function useAudio(src: string | null, options: UseAudioOptions = {}) {
             if (interactionListener) {
                 document.removeEventListener('click', interactionListener);
                 document.removeEventListener('pointerdown', interactionListener);
+                document.removeEventListener('keydown', interactionListener);
                 interactionListener = null;
             }
         };
