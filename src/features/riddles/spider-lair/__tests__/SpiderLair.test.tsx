@@ -16,17 +16,8 @@ vi.mock('../CongratsPage', () => ({
     CongratsPage: () => <div>CONGRATULATIONS</div>,
 }));
 
-vi.mock('../stages/CreatureStage', () => ({
-    CreatureStage: ({ onAdvance }: { onAdvance: () => void }) => (
-        <div>
-            <h2>What Creature Is This?</h2>
-            <button onClick={onAdvance}>Mock Advance</button>
-        </div>
-    ),
-}));
-
-vi.mock('../stages/PasscodeStage', () => ({
-    PasscodeStage: ({ onAdvance }: { onAdvance: () => void }) => (
+vi.mock('../stages/SpiderLairPinStage', () => ({
+    SpiderLairPinStage: ({ onAdvance }: { onAdvance: () => void }) => (
         <div>
             <h2>The Web Lock</h2>
             <button onClick={onAdvance}>Mock Unlock</button>
@@ -34,20 +25,20 @@ vi.mock('../stages/PasscodeStage', () => ({
     ),
 }));
 
-vi.mock('../stages/LyricsStage', () => ({
-    LyricsStage: ({ onAdvance }: { onAdvance: () => void }) => (
+vi.mock('../stages/SpiderLairLyricsStage', () => ({
+    SpiderLairLyricsStage: ({ onAdvance }: { onAdvance: () => void }) => (
         <div>
-            <h2>Fill In the Blanks</h2>
+            <h2>Spider Dance</h2>
             <button onClick={onAdvance}>Mock Lyrics</button>
         </div>
     ),
 }));
 
-vi.mock('../stages/SkarrsingerStage', () => ({
-    SkarrsingerStage: ({ onAdvance }: { onAdvance: () => void }) => (
+vi.mock('../stages/SpiderLairTextAnswerStage', () => ({
+    SpiderLairTextAnswerStage: ({ title, onAdvance }: { title: string; onAdvance: () => void }) => (
         <div>
-            <h2>The Spider's Riddle</h2>
-            <button onClick={onAdvance}>Mock Riddle</button>
+            <h2>{title}</h2>
+            <button onClick={onAdvance}>Mock Text Answer</button>
         </div>
     ),
 }));
@@ -57,15 +48,6 @@ vi.mock('../stages/EntranceStage', () => ({
         <div>
             <h1>The Spider's Lair</h1>
             <button onClick={onAdvance}>Enter the Webs</button>
-        </div>
-    ),
-}));
-
-vi.mock('../stages/TextAnswerStage', () => ({
-    TextAnswerStage: ({ title, onAdvance }: { title: string; onAdvance: () => void }) => (
-        <div>
-            <h2>{title}</h2>
-            <button onClick={onAdvance}>Mock Text Answer</button>
         </div>
     ),
 }));
@@ -159,6 +141,14 @@ describe('SpiderLair', () => {
         renderWithRouter(<SpiderLair />);
 
         expect(screen.getByText('Name This Place')).toBeTruthy();
+    });
+
+    it('renders TextAnswerStage for stage 9 (Name This Creature)', () => {
+        vi.mocked(gameState.getRiddleProgress).mockReturnValue(9);
+
+        renderWithRouter(<SpiderLair />);
+
+        expect(screen.getByText('Name This Creature')).toBeTruthy();
     });
 
     it('renders TextAnswerStage for stage 10 (A Command to Remember)', () => {

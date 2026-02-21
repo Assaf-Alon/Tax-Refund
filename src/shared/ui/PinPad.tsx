@@ -37,7 +37,7 @@ export const PinPad: React.FC<PinPadProps> = ({
             >
                 0
             </button>
-            <div className="w-12 h-12" /> {/* empty cell */}
+            <button className={buttonClassName} style={{ visibility: 'hidden' }} aria-hidden="true" />
         </div>
     );
 };

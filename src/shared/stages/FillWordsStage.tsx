@@ -1,26 +1,26 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { CharacterInput } from '../../../../shared/ui/CharacterInput';
-import type { CharacterInputHandle } from '../../../../shared/ui/CharacterInput';
-import { HintButton } from '../../../../shared/ui/HintButton';
+import { CharacterInput } from '../ui/CharacterInput';
+import type { CharacterInputHandle } from '../ui/CharacterInput';
+import { HintButton } from '../ui/HintButton';
+import type { FillWordsTheme } from './types';
 
-interface LyricsStageProps {
+export interface FillWordsStageProps {
+    title: string;
+    introContent?: React.ReactNode;
+    lines: string[];
+    hint?: string;
+    hintCooldown?: number;
     onAdvance: () => void;
+    theme?: FillWordsTheme;
 }
 
-const LYRICS_LINES = [
-    "I think it's time for a date",
-    "I've got a craving and I think you're my taste",
-    "So won't you come out and play?",
-    "Darling it's your lucky day",
-];
-
-interface WordToken {
+export interface WordToken {
     word: string;       // the actual word (may include apostrophes)
     trailing: string;   // trailing punctuation: ? , etc.
 }
 
 /** Split a lyrics line into word tokens, separating trailing punctuation */
-function tokenizeLine(line: string): WordToken[] {
+export function tokenizeLine(line: string): WordToken[] {
     return line.split(' ').map(raw => {
         // Strip trailing punctuation (?,!.) from the word
         const match = raw.match(/^(.+?)([?,!.]*$)/);
@@ -31,9 +31,17 @@ function tokenizeLine(line: string): WordToken[] {
     });
 }
 
-export const LyricsStage: React.FC<LyricsStageProps> = ({ onAdvance }) => {
+export const FillWordsStage: React.FC<FillWordsStageProps> = ({
+    title,
+    introContent,
+    lines,
+    hint,
+    hintCooldown = 60,
+    onAdvance,
+    theme,
+}) => {
     // Flatten all words across all lines into a single list for tracking
-    const linesTokens = LYRICS_LINES.map(tokenizeLine);
+    const linesTokens = lines.map(tokenizeLine);
     const allWords = linesTokens.flat();
     const totalWords = allWords.length;
 
@@ -71,27 +79,19 @@ export const LyricsStage: React.FC<LyricsStageProps> = ({ onAdvance }) => {
     let globalIdx = 0;
 
     return (
-        <div className="text-center space-y-6 w-full max-w-2xl">
-            <h2 className="text-2xl text-[#ff007f]">Spider Dance</h2>
-            <p className="text-pink-200/70 text-sm">
-                Complete the lyrics. The spider hums the tune...
-            </p>
+        <div className={theme?.container ?? 'text-center space-y-6 w-full max-w-2xl'}>
+            <h2 className={theme?.title ?? 'text-2xl font-bold'}>{title}</h2>
 
-            {/* Show the hint: the passcode IS the first line */}
-            <p className="text-[#ff007f] font-mono text-lg tracking-wider">
-                2, 4, 6, 8
-            </p>
+            {introContent}
 
             <div className="space-y-3">
                 {linesTokens.map((tokens, lineIdx) => {
                     const lineElements = tokens.map((token, wordIdx) => {
-                        const thisGlobalIdx = globalIdx;
-                        globalIdx++;
-
+                        const thisGlobalIdx = globalIdx++;
                         return (
                             <React.Fragment key={`${lineIdx}-${wordIdx}`}>
                                 {wordIdx > 0 && (
-                                    <span className="inline-block w-3 sm:w-5" />
+                                    <span className={theme?.wordGap ?? 'inline-block w-3 sm:w-5'} />
                                 )}
                                 <CharacterInput
                                     ref={el => { wordRefs.current[thisGlobalIdx] = el; }}
@@ -101,7 +101,7 @@ export const LyricsStage: React.FC<LyricsStageProps> = ({ onAdvance }) => {
                                     autoFocus={thisGlobalIdx === 0}
                                 />
                                 {token.trailing && (
-                                    <span className="text-[#ff007f]/60 font-mono text-sm sm:text-lg">
+                                    <span className={theme?.trailingPunctuation ?? 'opacity-60'}>
                                         {token.trailing}
                                     </span>
                                 )}
@@ -117,7 +117,7 @@ export const LyricsStage: React.FC<LyricsStageProps> = ({ onAdvance }) => {
                 })}
             </div>
 
-            <HintButton hint="Spider Dance — Undertale" cooldownSeconds={60} />
+            {hint && <HintButton hint={hint} cooldownSeconds={hintCooldown} />}
         </div>
     );
 };

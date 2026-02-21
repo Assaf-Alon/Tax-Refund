@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getRiddleProgress, updateRiddleProgress } from '../../../shared/logic/gameState';
 import { EntranceStage } from './stages/EntranceStage';
-import { PasscodeStage } from './stages/PasscodeStage';
-import { LyricsStage } from './stages/LyricsStage';
-import { SkarrsingerStage } from './stages/SkarrsingerStage';
-import { CreatureStage } from './stages/CreatureStage';
-import { TextAnswerStage } from './stages/TextAnswerStage';
+import { SpiderLairPinStage } from './stages/SpiderLairPinStage';
+import { SpiderLairLyricsStage } from './stages/SpiderLairLyricsStage';
+import { SpiderLairTextAnswerStage } from './stages/SpiderLairTextAnswerStage';
+import clawmaidenImg from './assets/Clawmaiden.png';
 import { CongratsPage } from './CongratsPage';
 import slabImg from './assets/slab.png';
 import miteImg from './assets/mite.png';
@@ -31,14 +30,30 @@ export const SpiderLair: React.FC = () => {
             case 0:
                 return <EntranceStage onAdvance={handleAdvance} />;
             case 1:
-                return <PasscodeStage onAdvance={handleAdvance} />;
+                return <SpiderLairPinStage onAdvance={handleAdvance} />;
             case 2:
-                return <LyricsStage onAdvance={handleAdvance} />;
+                return <SpiderLairLyricsStage onAdvance={handleAdvance} />;
             case 3:
-                return <SkarrsingerStage onAdvance={handleAdvance} />;
+                return (
+                    <SpiderLairTextAnswerStage
+                        title="The Spider's Riddle"
+                        prompt={
+                            <>
+                                <blockquote className="border-l-4 border-[#ff007f]/50 pl-4 text-pink-200/90 italic text-lg">
+                                    &quot;I sing, I fight, I kill. But mostly kill.&quot;
+                                </blockquote>
+                                <p className="text-pink-200/60 text-sm">Who speaks these words?</p>
+                            </>
+                        }
+                        placeholder="Name..."
+                        acceptedAnswers={['skarrsinger karmelita', 'karmelita']}
+                        hint="A singer from Silksong... with claws."
+                        onAdvance={handleAdvance}
+                    />
+                );
             case 4:
                 return (
-                    <TextAnswerStage
+                    <SpiderLairTextAnswerStage
                         title="A Question of Acts"
                         prompt="How many acts are there to Silksong?"
                         acceptedAnswers={['3']}
@@ -48,7 +63,7 @@ export const SpiderLair: React.FC = () => {
                 );
             case 5:
                 return (
-                    <TextAnswerStage
+                    <SpiderLairTextAnswerStage
                         title="A Dark Act"
                         prompt="In what act does Pharloom get aids?"
                         acceptedAnswers={['3']}
@@ -60,7 +75,7 @@ export const SpiderLair: React.FC = () => {
                 );
             case 6:
                 return (
-                    <TextAnswerStage
+                    <SpiderLairTextAnswerStage
                         title="Allies in Battle"
                         prompt="I use them to help against tough opponents..."
                         acceptedAnswers={['friends', 'cogfly']}
@@ -71,10 +86,22 @@ export const SpiderLair: React.FC = () => {
                     />
                 );
             case 7:
-                return <CreatureStage onAdvance={handleAdvance} />;
+                return (
+                    <SpiderLairTextAnswerStage
+                        title="What Creature Is This?"
+                        prompt=""
+                        image={clawmaidenImg}
+                        imageAlt="A mysterious creature"
+                        acceptedAnswers={['silk monster', 'clawmaiden']}
+                        hint="Woven from silk, born to destroy..."
+                        errorMessage="The creature stares at you, unimpressed..."
+                        placeholder="Name this creature..."
+                        onAdvance={handleAdvance}
+                    />
+                );
             case 8:
                 return (
-                    <TextAnswerStage
+                    <SpiderLairTextAnswerStage
                         title="Name This Place"
                         prompt="What's the name of the place in this image?"
                         acceptedAnswers={['the slab', 'slab']}
@@ -88,7 +115,7 @@ export const SpiderLair: React.FC = () => {
                 );
             case 9:
                 return (
-                    <TextAnswerStage
+                    <SpiderLairTextAnswerStage
                         title="Name This Creature"
                         prompt="What's the name of this f*cker?"
                         acceptedAnswers={['hitler', 'mite']}
@@ -102,7 +129,7 @@ export const SpiderLair: React.FC = () => {
                 );
             case 10:
                 return (
-                    <TextAnswerStage
+                    <SpiderLairTextAnswerStage
                         title="A Command to Remember"
                         prompt="What CLI command does Hornet often use when speaking to the knight?"
                         acceptedAnswers={['git gud', 'git good']}

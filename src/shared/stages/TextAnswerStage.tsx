@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { HintButton } from '../../../../shared/ui/HintButton';
-import { isCloseEnough } from '../../../../shared/logic/fuzzyMatch';
+import { HintButton } from '../ui/HintButton';
+import { isCloseEnough } from '../logic/fuzzyMatch';
+import type { TextAnswerTheme } from './types';
 
-interface TextAnswerStageProps {
+export interface TextAnswerStageProps {
     title: string;
     prompt: string | React.ReactNode;
     acceptedAnswers: string[];
@@ -12,6 +13,9 @@ interface TextAnswerStageProps {
     onAdvance: () => void;
     image?: string;
     imageAlt?: string;
+    placeholder?: string;
+    submitButtonLabel?: string;
+    theme?: TextAnswerTheme;
 }
 
 export const TextAnswerStage: React.FC<TextAnswerStageProps> = ({
@@ -20,10 +24,13 @@ export const TextAnswerStage: React.FC<TextAnswerStageProps> = ({
     acceptedAnswers,
     hint,
     hintCooldown = 60,
-    errorMessage = 'The web rejects your answer...',
+    errorMessage = 'Wrong answer. Try again.',
     onAdvance,
     image,
     imageAlt,
+    placeholder = 'Answer...',
+    submitButtonLabel = 'Answer',
+    theme,
 }) => {
     const [inputValue, setInputValue] = useState('');
     const [error, setError] = useState('');
@@ -39,21 +46,21 @@ export const TextAnswerStage: React.FC<TextAnswerStageProps> = ({
     };
 
     return (
-        <div className="text-center space-y-8 w-full max-w-lg">
-            <h2 className="text-2xl text-[#ff007f]">{title}</h2>
+        <div className={theme?.container ?? 'text-center space-y-8 w-full max-w-lg'}>
+            <h2 className={theme?.title ?? 'text-2xl font-bold'}>{title}</h2>
 
             {image && (
                 <div className="flex justify-center">
                     <img
                         src={image}
                         alt={imageAlt ?? ''}
-                        className="max-w-xs rounded-lg border border-[#b0005d] shadow-[0_0_20px_rgba(255,0,127,0.3)]"
+                        className={theme?.imageWrapper ?? 'max-w-xs rounded-lg border border-gray-600'}
                     />
                 </div>
             )}
 
             {typeof prompt === 'string' ? (
-                <p className="text-pink-200/60 text-sm">{prompt}</p>
+                <p className={theme?.promptText ?? 'text-sm opacity-60'}>{prompt}</p>
             ) : (
                 prompt
             )}
@@ -63,20 +70,20 @@ export const TextAnswerStage: React.FC<TextAnswerStageProps> = ({
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    className="w-full max-w-xs bg-black/50 border border-[#b0005d] p-3 text-center text-pink-100 focus:border-[#ff007f] focus:outline-none focus:ring-1 focus:ring-[#ff007f] transition-colors rounded"
-                    placeholder="Answer..."
+                    className={theme?.input ?? 'w-full max-w-xs bg-black/50 border border-gray-600 p-3 text-center focus:outline-none focus:ring-1 transition-colors rounded'}
+                    placeholder={placeholder}
                     autoFocus
                 />
                 <button
                     type="submit"
-                    className="px-6 py-2 bg-[#ff007f]/10 border border-[#b0005d] hover:bg-[#ff007f]/20 hover:border-[#ff007f] transition-all duration-200 text-xs uppercase tracking-wider text-pink-200 rounded"
+                    className={theme?.submitButton ?? 'px-6 py-2 border border-gray-600 hover:bg-gray-800 transition-all duration-200 text-xs uppercase tracking-wider rounded'}
                 >
-                    Answer
+                    {submitButtonLabel}
                 </button>
             </form>
 
             {error && (
-                <p className="text-red-400 text-sm animate-pulse">{error}</p>
+                <p className={theme?.errorText ?? 'text-red-400 text-sm animate-pulse'}>{error}</p>
             )}
 
             {hint && (
