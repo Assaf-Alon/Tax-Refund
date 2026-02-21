@@ -8,11 +8,23 @@ import clawmaidenImg from './assets/Clawmaiden.png';
 import { CongratsPage } from './CongratsPage';
 import slabImg from './assets/slab.png';
 import miteImg from './assets/mite.png';
+import spiderDanceOriginal from './assets/Toby Fox - Spider Dance.mp3';
+import spiderDanceCover from './assets/Spider Dance Cover.mp3';
+import { useAudio } from '../../../shared/utils/useAudio';
 
 const RIDDLE_ID = 'spider-lair';
 
 export const SpiderLair: React.FC = () => {
     const [stage, setStage] = useState<number>(0);
+
+    let audioSrc: string | null = null;
+    if (stage >= 0 && stage <= 2) {
+        audioSrc = spiderDanceOriginal;
+    } else if (stage > 2 && stage < 11) { // Up to Congrats page
+        audioSrc = spiderDanceCover;
+    }
+
+    useAudio(audioSrc, { loop: true });
 
     useEffect(() => {
         const savedStage = getRiddleProgress(RIDDLE_ID);
