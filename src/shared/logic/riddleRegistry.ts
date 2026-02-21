@@ -18,7 +18,11 @@ export const RIDDLE_REGISTRY: RiddleMeta[] = [
         id: 'spider-lair',
         name: 'Spider Lair',
         path: '/spider-lair',
-        totalStages: 6,
-        stageLabels: ['Entrance', 'Passcode', 'Lyrics', 'Skarrsinger', 'Creature', 'Completed'],
+        totalStages: 12,
+        stageLabels: [
+            'Entrance', 'Passcode', 'Lyrics', 'Skarrsinger',
+            'Acts', 'Aids', 'Friends', 'Creature',
+            'Slab', 'Mite', 'Git Gud', 'Completed',
+        ],
     },
 ];

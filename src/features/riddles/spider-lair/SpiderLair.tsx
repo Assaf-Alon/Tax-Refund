@@ -5,7 +5,10 @@ import { PasscodeStage } from './stages/PasscodeStage';
 import { LyricsStage } from './stages/LyricsStage';
 import { SkarrsingerStage } from './stages/SkarrsingerStage';
 import { CreatureStage } from './stages/CreatureStage';
+import { TextAnswerStage } from './stages/TextAnswerStage';
 import { CongratsPage } from './CongratsPage';
+import slabImg from './assets/slab.png';
+import miteImg from './assets/mite.png';
 
 const RIDDLE_ID = 'spider-lair';
 
@@ -34,8 +37,82 @@ export const SpiderLair: React.FC = () => {
             case 3:
                 return <SkarrsingerStage onAdvance={handleAdvance} />;
             case 4:
-                return <CreatureStage onAdvance={handleAdvance} />;
+                return (
+                    <TextAnswerStage
+                        title="A Question of Acts"
+                        prompt="How many acts are there to Silksong?"
+                        acceptedAnswers={['3']}
+                        errorMessage="The threads tighten... try again."
+                        onAdvance={handleAdvance}
+                    />
+                );
             case 5:
+                return (
+                    <TextAnswerStage
+                        title="A Dark Act"
+                        prompt="In what act does Pharloom get aids?"
+                        acceptedAnswers={['3']}
+                        hint="The final act holds the darkest secret..."
+                        hintCooldown={60}
+                        errorMessage="Wrong answer. The web trembles."
+                        onAdvance={handleAdvance}
+                    />
+                );
+            case 6:
+                return (
+                    <TextAnswerStage
+                        title="Allies in Battle"
+                        prompt="I use them to help against tough opponents..."
+                        acceptedAnswers={['friends', 'cogfly']}
+                        hint="Small, buzzy, and loyal..."
+                        hintCooldown={60}
+                        errorMessage="That's not who helps you... 🛸"
+                        onAdvance={handleAdvance}
+                    />
+                );
+            case 7:
+                return <CreatureStage onAdvance={handleAdvance} />;
+            case 8:
+                return (
+                    <TextAnswerStage
+                        title="Name This Place"
+                        prompt="What's the name of the place in this image?"
+                        acceptedAnswers={['the slab', 'slab']}
+                        hint="A flat, cold resting place..."
+                        hintCooldown={60}
+                        errorMessage="That's wrong. Try again."
+                        onAdvance={handleAdvance}
+                        image={slabImg}
+                        imageAlt="A mysterious location"
+                    />
+                );
+            case 9:
+                return (
+                    <TextAnswerStage
+                        title="Name This Creature"
+                        prompt="What's the name of this f*cker?"
+                        acceptedAnswers={['hitler', 'mite']}
+                        hint="Small, annoying, and a Nazi"
+                        hintCooldown={60}
+                        errorMessage="Nope. Try a specific enemy of Jews..."
+                        onAdvance={handleAdvance}
+                        image={miteImg}
+                        imageAlt="A small annoying creature"
+                    />
+                );
+            case 10:
+                return (
+                    <TextAnswerStage
+                        title="A Command to Remember"
+                        prompt="What CLI command does Hornet often use when speaking to the knight?"
+                        acceptedAnswers={['git gud', 'git good']}
+                        hint="A version control system..."
+                        hintCooldown={60}
+                        errorMessage="The spider shakes her head... Not good."
+                        onAdvance={handleAdvance}
+                    />
+                );
+            case 11:
                 return <CongratsPage />;
             default:
                 return <CongratsPage />;
@@ -66,7 +143,7 @@ export const SpiderLair: React.FC = () => {
             </header>
 
             <main className="container mx-auto p-4 md:p-12 min-h-[80vh] flex flex-col items-center justify-center relative z-0">
-                {renderStage()}
+                <React.Fragment key={stage}>{renderStage()}</React.Fragment>
             </main>
 
             <footer className="text-center p-8 text-xs text-[#ff007f]/20">

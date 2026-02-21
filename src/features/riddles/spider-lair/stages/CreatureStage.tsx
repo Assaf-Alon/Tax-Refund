@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HintButton } from '../../../../shared/ui/HintButton';
+import { isCloseEnough } from '../../../../shared/logic/fuzzyMatch';
 import clawmaidenImg from '../assets/Clawmaiden.png';
 
 interface CreatureStageProps {
@@ -14,7 +15,7 @@ export const CreatureStage: React.FC<CreatureStageProps> = ({ onAdvance }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (ACCEPTED_ANSWERS.includes(inputValue.toLowerCase().trim())) {
+        if (isCloseEnough(inputValue, ACCEPTED_ANSWERS)) {
             onAdvance();
         } else {
             setError('The creature stares at you, unimpressed...');

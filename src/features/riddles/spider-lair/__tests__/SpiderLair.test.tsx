@@ -61,6 +61,18 @@ vi.mock('../stages/EntranceStage', () => ({
     ),
 }));
 
+vi.mock('../stages/TextAnswerStage', () => ({
+    TextAnswerStage: ({ title, onAdvance }: { title: string; onAdvance: () => void }) => (
+        <div>
+            <h2>{title}</h2>
+            <button onClick={onAdvance}>Mock Text Answer</button>
+        </div>
+    ),
+}));
+
+vi.mock('../assets/slab.png', () => ({ default: 'slab.png' }));
+vi.mock('../assets/mite.png', () => ({ default: 'mite.png' }));
+
 import { SpiderLair } from '../SpiderLair';
 import * as gameState from '../../../../shared/logic/gameState';
 
@@ -109,8 +121,64 @@ describe('SpiderLair', () => {
         expect(screen.getByText('The Web Lock')).toBeTruthy();
     });
 
-    it('renders CongratsPage when progress is at stage 5', () => {
+    it('renders TextAnswerStage for stage 4 (A Question of Acts)', () => {
+        vi.mocked(gameState.getRiddleProgress).mockReturnValue(4);
+
+        renderWithRouter(<SpiderLair />);
+
+        expect(screen.getByText('A Question of Acts')).toBeTruthy();
+    });
+
+    it('renders TextAnswerStage for stage 5 (A Dark Act)', () => {
         vi.mocked(gameState.getRiddleProgress).mockReturnValue(5);
+
+        renderWithRouter(<SpiderLair />);
+
+        expect(screen.getByText('A Dark Act')).toBeTruthy();
+    });
+
+    it('renders TextAnswerStage for stage 6 (Allies in Battle)', () => {
+        vi.mocked(gameState.getRiddleProgress).mockReturnValue(6);
+
+        renderWithRouter(<SpiderLair />);
+
+        expect(screen.getByText('Allies in Battle')).toBeTruthy();
+    });
+
+    it('renders CreatureStage at stage 7', () => {
+        vi.mocked(gameState.getRiddleProgress).mockReturnValue(7);
+
+        renderWithRouter(<SpiderLair />);
+
+        expect(screen.getByText('What Creature Is This?')).toBeTruthy();
+    });
+
+    it('renders TextAnswerStage for stage 8 (Name This Place)', () => {
+        vi.mocked(gameState.getRiddleProgress).mockReturnValue(8);
+
+        renderWithRouter(<SpiderLair />);
+
+        expect(screen.getByText('Name This Place')).toBeTruthy();
+    });
+
+    it('renders TextAnswerStage for stage 10 (A Command to Remember)', () => {
+        vi.mocked(gameState.getRiddleProgress).mockReturnValue(10);
+
+        renderWithRouter(<SpiderLair />);
+
+        expect(screen.getByText('A Command to Remember')).toBeTruthy();
+    });
+
+    it('renders CongratsPage when progress is at stage 11', () => {
+        vi.mocked(gameState.getRiddleProgress).mockReturnValue(11);
+
+        renderWithRouter(<SpiderLair />);
+
+        expect(screen.getByText('CONGRATULATIONS')).toBeTruthy();
+    });
+
+    it('renders CongratsPage for any stage beyond 11', () => {
+        vi.mocked(gameState.getRiddleProgress).mockReturnValue(99);
 
         renderWithRouter(<SpiderLair />);
 

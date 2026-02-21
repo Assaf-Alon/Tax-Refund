@@ -2,35 +2,61 @@ import React, { useState } from 'react';
 import { HintButton } from '../../../../shared/ui/HintButton';
 import { isCloseEnough } from '../../../../shared/logic/fuzzyMatch';
 
-interface SkarrsingerStageProps {
+interface TextAnswerStageProps {
+    title: string;
+    prompt: string | React.ReactNode;
+    acceptedAnswers: string[];
+    hint?: string;
+    hintCooldown?: number;
+    errorMessage?: string;
     onAdvance: () => void;
+    image?: string;
+    imageAlt?: string;
 }
 
-const ACCEPTED_ANSWERS = ['skarrsinger karmelita', 'karmelita'];
-
-export const SkarrsingerStage: React.FC<SkarrsingerStageProps> = ({ onAdvance }) => {
+export const TextAnswerStage: React.FC<TextAnswerStageProps> = ({
+    title,
+    prompt,
+    acceptedAnswers,
+    hint,
+    hintCooldown = 60,
+    errorMessage = 'The web rejects your answer...',
+    onAdvance,
+    image,
+    imageAlt,
+}) => {
     const [inputValue, setInputValue] = useState('');
     const [error, setError] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (isCloseEnough(inputValue, ACCEPTED_ANSWERS)) {
+        if (isCloseEnough(inputValue, acceptedAnswers)) {
             onAdvance();
         } else {
-            setError('The web rejects your answer...');
+            setError(errorMessage);
             setInputValue('');
         }
     };
 
     return (
         <div className="text-center space-y-8 w-full max-w-lg">
-            <h2 className="text-2xl text-[#ff007f]">The Spider's Riddle</h2>
+            <h2 className="text-2xl text-[#ff007f]">{title}</h2>
 
-            <blockquote className="border-l-4 border-[#ff007f]/50 pl-4 text-pink-200/90 italic text-lg">
-                "I sing, I fight, I kill. But mostly kill."
-            </blockquote>
+            {image && (
+                <div className="flex justify-center">
+                    <img
+                        src={image}
+                        alt={imageAlt ?? ''}
+                        className="max-w-xs rounded-lg border border-[#b0005d] shadow-[0_0_20px_rgba(255,0,127,0.3)]"
+                    />
+                </div>
+            )}
 
-            <p className="text-pink-200/60 text-sm">Who speaks these words?</p>
+            {typeof prompt === 'string' ? (
+                <p className="text-pink-200/60 text-sm">{prompt}</p>
+            ) : (
+                prompt
+            )}
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4 items-center">
                 <input
@@ -38,7 +64,7 @@ export const SkarrsingerStage: React.FC<SkarrsingerStageProps> = ({ onAdvance })
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     className="w-full max-w-xs bg-black/50 border border-[#b0005d] p-3 text-center text-pink-100 focus:border-[#ff007f] focus:outline-none focus:ring-1 focus:ring-[#ff007f] transition-colors rounded"
-                    placeholder="Name..."
+                    placeholder="Answer..."
                     autoFocus
                 />
                 <button
@@ -53,7 +79,9 @@ export const SkarrsingerStage: React.FC<SkarrsingerStageProps> = ({ onAdvance })
                 <p className="text-red-400 text-sm animate-pulse">{error}</p>
             )}
 
-            <HintButton hint="A singer from Silksong... with claws." cooldownSeconds={60} />
+            {hint && (
+                <HintButton hint={hint} cooldownSeconds={hintCooldown} />
+            )}
         </div>
     );
 };
