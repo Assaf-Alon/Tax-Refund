@@ -5,17 +5,27 @@ import { DrawSequenceStage } from '../../../shared/stages/DrawSequenceStage';
 import { TextAnswerStage } from '../../../shared/stages/TextAnswerStage';
 import { CongratsStage } from '../../../shared/stages/CongratsStage';
 import { DevSkipButton } from '../../admin/DevSkipButton';
+import { QuantumStage } from './stages/QuantumStage';
 import outerWildsLogo from './assets/OuterWildsLogo.png';
 import outerWildsTheme from './assets/Outer Wilds.mp3';
 import { useAudio } from '../../../shared/utils/useAudio';
 
 const RIDDLE_ID = 'outer-wilds';
 
+const SHARED_TEXT_THEME = {
+    container: "text-center space-y-8 w-full max-w-lg z-10",
+    title: "text-3xl font-bold text-orange-400",
+    promptText: "text-lg text-gray-300",
+    input: "w-full max-w-xs bg-black/70 border border-orange-500/50 p-3 text-center focus:outline-none focus:ring-2 focus:ring-orange-500 rounded text-orange-200",
+    submitButton: "px-8 py-3 border border-orange-500/50 hover:bg-orange-500 hover:text-white transition-all duration-200 uppercase tracking-wider rounded text-orange-400 font-bold",
+    errorText: "text-red-400 text-md animate-pulse font-medium"
+};
+
 export const OuterWilds: React.FC = () => {
     const [stage, setStage] = useState<number>(0);
 
-    // Audio should play starting from stage 1
-    const audioSrc = stage >= 1 && stage < 3 ? outerWildsTheme : null;
+    // Audio should play starting from stage 1 through 6
+    const audioSrc = stage >= 1 && stage < 7 ? outerWildsTheme : null;
     useAudio(audioSrc, { loop: true });
 
     useEffect(() => {
@@ -45,6 +55,54 @@ export const OuterWilds: React.FC = () => {
                 );
             case 1:
                 return (
+                    <TextAnswerStage
+                        title="End of the Loop"
+                        prompt="The sun explodes in how many minutes?"
+                        acceptedAnswers={["22"]}
+                        exactMatchOnly={true}
+                        onAdvance={handleAdvance}
+                        theme={SHARED_TEXT_THEME}
+                    />
+                );
+            case 2:
+                return (
+                    <TextAnswerStage
+                        title="The Reckless Traveler"
+                        prompt="Who plays the harmonica deep inside a corrupted seed?"
+                        acceptedAnswers={["feldspar"]}
+                        exactMatchOnly={false}
+                        onAdvance={handleAdvance}
+                        theme={SHARED_TEXT_THEME}
+                    />
+                );
+            case 3:
+                return (
+                    <TextAnswerStage
+                        title="The Blind Terror"
+                        prompt="F*ck this planet."
+                        acceptedAnswers={["dark bramble"]}
+                        exactMatchOnly={false}
+                        onAdvance={handleAdvance}
+                        theme={SHARED_TEXT_THEME}
+                    />
+                );
+            case 4:
+                return (
+                    <TextAnswerStage
+                        title="The Ancient Architects"
+                        prompt="They arrived on The Vessel and built the Ash Twin Project. Who are they?"
+                        acceptedAnswers={["nomai", "the nomai"]}
+                        exactMatchOnly={false}
+                        onAdvance={handleAdvance}
+                        theme={SHARED_TEXT_THEME}
+                    />
+                );
+            case 5:
+                return (
+                    <QuantumStage onAdvance={handleAdvance} />
+                );
+            case 6:
+                return (
                     <DrawSequenceStage
                         expectedDigits={[
                             [ // 2
@@ -65,25 +123,7 @@ export const OuterWilds: React.FC = () => {
                         onAdvance={handleAdvance}
                     />
                 );
-            case 2:
-                return (
-                    <TextAnswerStage
-                        title="End of the Loop"
-                        prompt="The sun explodes in how many minutes?"
-                        acceptedAnswers={["22"]}
-                        exactMatchOnly={true}
-                        onAdvance={handleAdvance}
-                        theme={{
-                            container: "text-center space-y-8 w-full max-w-lg z-10",
-                            title: "text-3xl font-bold text-orange-400",
-                            promptText: "text-lg text-gray-300",
-                            input: "w-full max-w-xs bg-black/70 border border-orange-500/50 p-3 text-center focus:outline-none focus:ring-2 focus:ring-orange-500 rounded text-orange-200",
-                            submitButton: "px-8 py-3 border border-orange-500/50 hover:bg-orange-500 hover:text-white transition-all duration-200 uppercase tracking-wider rounded text-orange-400 font-bold",
-                            errorText: "text-red-400 text-md animate-pulse font-medium"
-                        }}
-                    />
-                );
-            case 3:
+            case 7:
                 return (
                     <CongratsStage
                         title="Mission Accomplished"
@@ -116,7 +156,7 @@ export const OuterWilds: React.FC = () => {
             <main className="container mx-auto p-4 md:p-12 min-h-[100vh] flex flex-col items-center justify-center relative z-0">
                 <React.Fragment key={stage}>{renderStage()}</React.Fragment>
             </main>
-            <DevSkipButton riddleId={RIDDLE_ID} currentStage={stage} totalStages={4} onSkip={handleAdvance} />
+            <DevSkipButton riddleId={RIDDLE_ID} currentStage={stage} totalStages={8} onSkip={handleAdvance} />
         </div>
     );
 };
