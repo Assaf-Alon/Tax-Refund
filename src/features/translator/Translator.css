@@ -1,0 +1,130 @@
+.translator-feature {
+    position: fixed;
+    inset: 0;
+    background-color: #000;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Share Tech Mono', monospace;
+    z-index: 1000;
+}
+
+.translator-feature #app-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Make sure the reader fills the screen, object-fit is handled by html5-qrcode */
+.translator-feature #reader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Force video to fill container */
+.translator-feature #reader video {
+    object-fit: cover !important;
+    width: 100vw !important;
+    height: 100vh !important;
+}
+
+/* Restore the library's default scanning UI */
+.translator-feature #reader__scan_region {
+    border: none !important;
+}
+
+.translator-feature .qr-shaded-region {
+    display: block !important;
+}
+.translator-feature .qr-shaded-region > div {
+    background-color: rgba(0, 0, 0, 0.3) !important; /* Subtle shade */
+}
+
+.translator-feature #overlay-container {
+    position: absolute;
+    bottom: 0%;   /* Adjusted strictly to bottom */
+    width: 100%;  /* Full mobile width */
+    max-width: 900px;
+    /* Aspect ratio height calculation based on 1720/766 = 2.245*/
+    aspect-ratio: 1720 / 766;
+    z-index: 2;
+    pointer-events: none; /* Let any taps pass through to video if needed */
+}
+
+.translator-feature #overlay {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.translator-feature #translated-text {
+    position: absolute;
+    top: 58%; 
+    left: 28%; 
+    width: 45%;
+    height: 30%;
+    
+    color: #ccffff; /* Outer wilds text color */
+    text-shadow: 0 0 5px rgba(204, 255, 255, 0.4), 0 0 8px rgba(100, 200, 255, 0.3);
+    font-size: clamp(10px, 2.5vw, 20px); /* Scale text */
+    letter-spacing: 1px;
+    
+    /* Allow it to breathe and wrap without getting cut off immediately */
+    overflow-y: auto; 
+    word-wrap: break-word; 
+    white-space: pre-wrap;
+    text-transform: uppercase;
+    line-height: 1.4;
+}
+
+.translator-feature #translated-text .cursor {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    from, to { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.translator-feature #permission-ui {
+    color: #fff;
+    text-align: center;
+    font-family: sans-serif;
+    z-index: 10;
+}
+
+.translator-feature #permission-ui h2 {
+    color: #ccffff;
+}
+
+.translator-feature #start-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #333;
+    color: #ccffff;
+    border: 1px solid #ccffff;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.translator-feature #start-btn:hover {
+    background-color: #444;
+}
+
+.translator-feature #qr-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    pointer-events: none;
+}
