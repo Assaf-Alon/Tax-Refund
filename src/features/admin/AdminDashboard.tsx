@@ -145,6 +145,20 @@ export const AdminDashboard: React.FC = () => {
                     🗑 Reset All Progress
                 </button>
             </div>
+
+            {/* Admin Tools Section */}
+            <div className="mt-8 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Admin Tools</h3>
+                <div className="flex gap-4">
+                    {/* TODO - if we ever add more utilities, we should probably generalize this into a UTILITY_REGISTRY */}
+                    <Link
+                        to="/translator"
+                        className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    >
+                        📸 Open Outer Wilds Translator
+                    </Link>
+                </div>
+            </div>
         </div>
     );
 };
