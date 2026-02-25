@@ -58,4 +58,6 @@ netsh interface portproxy add v4tov4 listenport=9999 listenaddress=192.168.1.241
 -   **Check Proxies**: `netsh interface portproxy show all`
 -   **Reset Proxies**: `netsh interface portproxy reset` (Use if you have stale rules)
 -   **Check Listeners**: `netstat -ano | findstr :9999` (Should show `LISTENING`)
+-   **Restart IP Helper Service**: If `netstat` shows nothing but the proxy is configured, the Windows IP Helper service might be stuck. Run `Restart-Service iphlpsvc` in an Administrator PowerShell.
+-   **Generalize Proxy**: If binding to your specific IP fails, try changing the `listenaddress` in Step 2B to `0.0.0.0`.
 -   **IP Changed?**: If your computer's IP changes, delete the old proxy and run the command in Step 2B with the new IP.
