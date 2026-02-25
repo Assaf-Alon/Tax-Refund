@@ -1,15 +1,15 @@
-# Scavenger Hunt (Codenamed: Tax-Refund)
+# Tax Refund Portal
 
 ## Project Overview
-This repository hosts the source code for a Scavenger Hunt application.
-**Note:** Externally, this application masquerades as a "Tax Refund" portal to maintain the surprise for the participant.
+This repository hosts the source code for the Tax Refund client portal.
+It allows users to quickly calculate their estimated tax refund based on minimal inputs, check their refund status, and manage their tax profiles securely.
 
-The application is designed as a series of independent static pages. Each page serves as a "Riddle" or "Task" that the user must solve to progress.
+The application is designed as a series of independent static pages or forms, guiding the user through the submission process smoothly.
 
 ## Key Features
-- **Stealth Mode**: The entry point looks like a boring bureaucratic site.
-- **Distributed State**: Each riddle is independent; progress is saved locally.
-- **Mobile First**: Designed for users on the go.
+- **Secure Portal**: Designed to be a secure and straightforward entry point for tax processing.
+- **Distributed State**: Each form step is independent; progress is saved locally to prevent data loss on refresh.
+- **Mobile First**: Designed for users on the go to check their refund status anywhere.
 
 ## Tech Stack
 - **React + TypeScript** via Vite
@@ -29,8 +29,8 @@ npm run dev
 
 The app will be available at `http://localhost:5174`.
 
-- **Tax (cover) site**: `http://localhost:5174/Tax-Refund/`
-- **The Cave (pilot riddle)**: `http://localhost:5174/Tax-Refund/#/the-cave`
+- **Tax Portal**: `http://localhost:5174/Tax-Refund/`
+- **Dashboard Application**: `http://localhost:5174/Tax-Refund/#/`
 
 ## Building for Production
 
