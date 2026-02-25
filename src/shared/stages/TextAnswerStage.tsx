@@ -16,6 +16,7 @@ export interface TextAnswerStageProps {
     placeholder?: string;
     submitButtonLabel?: string;
     theme?: TextAnswerTheme;
+    exactMatchOnly?: boolean;
 }
 
 export const TextAnswerStage: React.FC<TextAnswerStageProps> = ({
@@ -31,13 +32,23 @@ export const TextAnswerStage: React.FC<TextAnswerStageProps> = ({
     placeholder = 'Answer...',
     submitButtonLabel = 'Answer',
     theme,
+    exactMatchOnly = false,
 }) => {
     const [inputValue, setInputValue] = useState('');
     const [error, setError] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (isCloseEnough(inputValue, acceptedAnswers)) {
+
+        let isCorrect = false;
+        if (exactMatchOnly) {
+            const normalizedInput = inputValue.trim().toLowerCase();
+            isCorrect = acceptedAnswers.some(ans => ans.trim().toLowerCase() === normalizedInput);
+        } else {
+            isCorrect = isCloseEnough(inputValue, acceptedAnswers);
+        }
+
+        if (isCorrect) {
             onAdvance();
         } else {
             setError(errorMessage);

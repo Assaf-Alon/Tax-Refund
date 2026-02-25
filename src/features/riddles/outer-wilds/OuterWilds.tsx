@@ -1,0 +1,122 @@
+import React, { useState, useEffect } from 'react';
+import { getRiddleProgress, updateRiddleProgress } from '../../../shared/logic/gameState';
+import { WelcomeStage } from '../../../shared/stages/WelcomeStage';
+import { DrawSequenceStage } from '../../../shared/stages/DrawSequenceStage';
+import { TextAnswerStage } from '../../../shared/stages/TextAnswerStage';
+import { CongratsStage } from '../../../shared/stages/CongratsStage';
+import { DevSkipButton } from '../../admin/DevSkipButton';
+import outerWildsLogo from './assets/OuterWildsLogo.png';
+import outerWildsTheme from './assets/Outer Wilds.mp3';
+import { useAudio } from '../../../shared/utils/useAudio';
+
+const RIDDLE_ID = 'outer-wilds';
+
+export const OuterWilds: React.FC = () => {
+    const [stage, setStage] = useState<number>(0);
+
+    // Audio should play starting from stage 1
+    const audioSrc = stage >= 1 && stage < 3 ? outerWildsTheme : null;
+    useAudio(audioSrc, { loop: true });
+
+    useEffect(() => {
+        const savedStage = getRiddleProgress(RIDDLE_ID);
+        setStage(savedStage);
+    }, []);
+
+    const handleAdvance = () => {
+        const nextStage = stage + 1;
+        setStage(nextStage);
+        updateRiddleProgress(RIDDLE_ID, nextStage);
+    };
+
+    const renderStage = () => {
+        switch (stage) {
+            case 0:
+                return (
+                    <WelcomeStage
+                        title={<img src={outerWildsLogo} alt="Outer Wilds Ventures Logo" className="mx-auto max-w-xs md:max-w-md" />}
+                        subtitle="Join the expedition"
+                        buttonText="Begin"
+                        onAdvance={handleAdvance}
+                        theme={{
+                            button: "mt-8 px-8 py-4 bg-orange-600 hover:bg-orange-500 focus:ring-orange-500/50 text-white rounded-lg font-medium transition-all duration-300 shadow-lg shadow-orange-500/25"
+                        }}
+                    />
+                );
+            case 1:
+                return (
+                    <DrawSequenceStage
+                        expectedDigits={[
+                            [ // 2
+                                ["0-1", "1-3", "2-3", "2-4", "4-5"],
+                            ],
+                            [ // 9
+                                ["0-1", "0-2", "1-3", "2-3", "3-5"],
+                                ["0-1", "0-2", "1-3", "2-3", "3-5", "4-5"], // With bottom hook
+                            ],
+                            [ // 0
+                                ["0-1", "0-2", "1-3", "2-4", "3-5", "4-5"],
+                            ],
+                            [ // 6
+                                ["0-2", "2-3", "2-4", "3-5", "4-5"],
+                                ["0-1", "0-2", "2-3", "2-4", "3-5", "4-5"], // With top bar
+                            ],
+                        ]}
+                        onAdvance={handleAdvance}
+                    />
+                );
+            case 2:
+                return (
+                    <TextAnswerStage
+                        title="End of the Loop"
+                        prompt="The sun explodes in how many minutes?"
+                        acceptedAnswers={["22"]}
+                        exactMatchOnly={true}
+                        onAdvance={handleAdvance}
+                        theme={{
+                            container: "text-center space-y-8 w-full max-w-lg z-10",
+                            title: "text-3xl font-bold text-orange-400",
+                            promptText: "text-lg text-gray-300",
+                            input: "w-full max-w-xs bg-black/70 border border-orange-500/50 p-3 text-center focus:outline-none focus:ring-2 focus:ring-orange-500 rounded text-orange-200",
+                            submitButton: "px-8 py-3 border border-orange-500/50 hover:bg-orange-500 hover:text-white transition-all duration-200 uppercase tracking-wider rounded text-orange-400 font-bold",
+                            errorText: "text-red-400 text-md animate-pulse font-medium"
+                        }}
+                    />
+                );
+            case 3:
+                return (
+                    <CongratsStage
+                        title="Mission Accomplished"
+                        subtitle="You've mapped the stars."
+                        theme={{
+                            title: "text-4xl md:text-5xl font-bold text-orange-400 tracking-tight"
+                        }}
+                    />
+                );
+            default:
+                return (
+                    <CongratsStage
+                        title="Mission Accomplished"
+                        subtitle="You've mapped the stars."
+                        theme={{
+                            title: "text-4xl md:text-5xl font-bold text-orange-400 tracking-tight"
+                        }}
+                    />
+                );
+        }
+    };
+
+    return (
+        <div
+            className="min-h-screen min-w-full overflow-x-hidden text-gray-200 font-sans selection:bg-orange-500/30 selection:text-white"
+            style={{
+                background: 'radial-gradient(circle, #0f172a 0%, #000000 100%)',
+            }}
+        >
+            <main className="container mx-auto p-4 md:p-12 min-h-[100vh] flex flex-col items-center justify-center relative z-0">
+                <React.Fragment key={stage}>{renderStage()}</React.Fragment>
+            </main>
+            <DevSkipButton riddleId={RIDDLE_ID} currentStage={stage} totalStages={4} onSkip={handleAdvance} />
+        </div>
+    );
+};

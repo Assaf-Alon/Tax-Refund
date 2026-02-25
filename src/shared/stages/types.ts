@@ -24,3 +24,16 @@ export interface FillWordsTheme {
     wordGap?: string;         // className for space between words
     trailingPunctuation?: string; // className for trailing punctuation spans
 }
+
+export interface WelcomeTheme {
+    container?: string;
+    title?: string;
+    subtitle?: string;
+    button?: string;
+}
+
+export interface CongratsTheme {
+    container?: string;
+    title?: string;
+    subtitle?: string;
+}

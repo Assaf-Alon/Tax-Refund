@@ -25,4 +25,11 @@ export const RIDDLE_REGISTRY: RiddleMeta[] = [
             'Slab', 'Mite', 'Git Gud', 'Completed',
         ],
     },
+    {
+        id: 'outer-wilds',
+        name: 'Outer Wilds',
+        path: '/outer-wilds',
+        totalStages: 4,
+        stageLabels: ['Welcome', 'Draw Sequence', 'Text Answer', 'Completed'],
+    },
 ];
