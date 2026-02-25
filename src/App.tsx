@@ -1,10 +1,13 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { TaxLayout } from './layouts/TaxLayout';
 import { RiddleLayout } from './layouts/RiddleLayout';
 import { HomePage } from './features/taxes/HomePage';
 import { TheCave } from './features/riddles/TheCave';
 import { SpiderLair } from './features/riddles/spider-lair/SpiderLair';
 import { PinGate } from './features/admin/PinGate';
+
+const Translator = lazy(() => import('./features/translator/Translator'));
 
 function App() {
   return (
@@ -21,6 +24,7 @@ function App() {
           <Route path="/the-cave" element={<TheCave />} />
         </Route>
         <Route path="/spider-lair" element={<SpiderLair />} />
+        <Route path="/translator" element={<Suspense fallback={<div>Loading...</div>}><Translator /></Suspense>} />
 
         {/* Catch-all redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
