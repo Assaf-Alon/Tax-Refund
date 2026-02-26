@@ -1,70 +1,50 @@
 # Outer Wilds Ventures - Riddle Design
 
-## 1. What is being changed/added
-We are adding a new riddle called "Outer Wilds Ventures", inspired by the indie game *Outer Wilds*. The riddle will follow the standard multi-stage structure (similar to the Spider Lair):
-- **Welcome Page**: A themed entry point requiring the player to click a button to begin.
-- **Stage 1**: A "drag to draw" riddle where the player must connect dots on a 6-dot grid to draw the numbers "2906" in order.
-- **Stage 2**: A text-based question: "The sun explodes in how many minutes?". The player must answer "22".
-- **Congratulations Page**: A completion screen.
+## 1. What This Is
 
-We will also extract some components to be reusable primitives for future riddles.
+The "Outer Wilds Ventures" riddle is an 8-stage puzzle sequence inspired by the indie game *Outer Wilds*. It tests game lore and puzzle mechanics through generalized text-answer stages, a custom "Quantum Shard" scrolling puzzle, and a canvas-based "drag to draw" stage for inputting spatial coordinates.
+
+The Riddle Flow consists of:
+0. **Welcome Stage**: A themed entry point requiring the player to click a button to begin.
+1. **Title: End of the Loop**: A text-based question. "The sun explodes in how many minutes?". (Answer: "22" strict)
+2. **Title: The Reckless Traveler**: "Who plays the harmonica deep inside a corrupted seed?" (Answer: "feldspar")
+3. **Title: The Blind Terror**: "F*ck this planet." (Answer: "dark bramble")
+4. **Title: The Ancient Architects**: "They arrived on The Vessel and built the Ash Twin Project. Who are they?" (Answer: "nomai" or "the nomai")
+5. **The Quantum Rule**: A custom stage where a shard image drops out of the viewport on scroll, triggering a state change when the player "looks away".
+6. **Coordinates Stage**: A "drag to draw" riddle where the player must connect dots on a 6-dot grid to draw "2906" in order.
+7. **Congratulations Stage**: A completion screen ("Mission Accomplished").
 
 ## 2. Why this approach was chosen
-Instead of duplicating heavily themed elements (like Spider Lair's `EntranceStage` and `CongratsPage`), we will create generic versions (`WelcomeStage`, `CongratsStage`) in `src/shared/stages` that accept theme props (e.g., colors, title, copy). This allows us to rapidly stamp out new riddles with distinct visual identities without code duplication.
 
-For the drawing stage, building on the existing proof-of-concept, we will formalize it into a `LineDrawStage` or a specific `OuterWildsDrawStage` that accepts an expected sequence of inputs. The text input stage will reuse our already established `TextAnswerStage`.
+Instead of duplicating heavily themed elements across different riddles (like the original Spider Lair's `EntranceStage` and `CongratsPage`), generalized versions (`WelcomeStage`, `CongratsStage`) in `src/shared/stages` are utilized with injected theme props. This allows for rapid iteration without code duplication.
 
-## 3. How it will be implemented
+- The `TextAnswerStage` allows for rapid addition of lore questions without complex custom UI.
+- The "Quantum Shard" mechanic brilliantly repurposes the browser's native `IntersectionObserver` API to mimic the in-game mechanic of quantum objects changing state when not observed. It achieves a memorable interaction with very little code overhead.
+- Ending the sequence with the coordinate puzzle matches the thematic pacing of the actual game (where entering coordinates into the Vessel is the final puzzle).
 
-### Generalizing Components
-1. **WelcomeStage (`src/shared/stages/WelcomeStage.tsx`)**:
-   - Accepts props: `title` (node), `subtitle` (node), `buttonText` (string), `onAdvance` (function), and styling props (e.g., text colors, button glow colors).
-2. **CongratsStage (`src/shared/stages/CongratsStage.tsx`)**:
-   - Accepts props: `title` (node), `subtitle` (node), `children` (optional custom images/text), and theme styling props.
-   - *Note on Refactoring*: We will exclusively build and use these generic components for the Outer Wilds riddle. Refactoring the `SpiderLair` to use them is explicitly **out of scope** for this change to prevent scope creep.
+## 3. How it is implemented
 
-### Implementing the Drag-to-Draw Stage
-1. **DrawSequenceStage (`src/shared/stages/DrawSequenceStage.tsx`)**:
-   - Building off the POC code (though we will delete `OuterWildsPoc.tsx` and its route afterward).
-   - Props: `expectedDigits` (an array of canonical representations or accepted valid paths for each digit), `onAdvance` (function).
-   - **Single Drawing Board**: There will be only one 6-dot drawing board on the screen. The user draws digits one after the other. 
-   - **Rendering the Lines**: Borrowing directly from the POC, render the connecting lines visually using an absolute `<svg>` element overlaid on the container, manually mapping each dot index to static `(x, y)` coordinates to draw `<line>` strokes between collected dots.
-   - **Canonical Path Representation**: A digit can be drawn in multiple ways (e.g., from top-left to bottom-right, or vice versa). To seamlessly handle any valid drawing order, the drawn path will be converted to a set of undirected edges. 
-     - *Algorithm*: When a user connects two dots, record the edge by joining the sorted dot indices (e.g., `Math.min(start, end) + '-' + Math.max(start, end)`). Accumulate these into a `Set<string>`. On `pointerUp`, convert the set to an array, sort it alphabetically, and compare it strictly against the sorted expected array. **Important**: Only accept dot connections that are adjacent neighbors based on the 2x3 grid. Also, ensure dots are only pushed to the state if they aren't the previous dot, preventing duplicate nodes and jump artifacts when swiping on touch devices.
-     - Expected edge set for `2`: `["0-1", "1-3", "2-3", "2-4", "4-5"]`
-     - Expected edge set for `9`: `["0-1", "0-2", "1-3", "2-3", "3-5"]`
-     - Expected edge set for `0`: `["0-1", "0-2", "1-3", "2-4", "3-5", "4-5"]`
-     - Expected edge set for `6`: `["0-2", "2-3", "2-4", "3-5", "4-5"]`
-   - **Touch Device Support**: Use `onPointerDown={(e) => e.currentTarget.releasePointerCapture(e.pointerId)}` on the dots, and add `style={{ touchAction: 'none' }}` to the drawing container to prevent scrolling during native touch drags (derived from the POC).
-   - **UI Feedback & State**:
-     - A React state (e.g., `currentDigitIndex`) must be maintained to track which digit in `expectedDigits` the user is currently attempting to draw. Visually convey this progress to the user (e.g., displaying placeholders or indicators for how many digits have been successfully drawn).
-     - *Success*: If the evaluated edge set matches the current expected digit, the drawn lines should briefly flash green (e.g., stroke `#22c55e`), wait `500ms`, clear the board, and increment `currentDigitIndex` to await the next digit.
-     - *Failure*: If the drawn path completes but is incorrect, flash the lines red (stroke `#ef4444`) for `400ms` and clear the board immediately to restart the current digit.
-   - When all digits (`2, 9, 0, 6`) are drawn correctly in sequence, `onAdvance` is triggered.
+### General Components
+1. **WelcomeStage (`src/shared/stages/WelcomeStage.tsx`)**: Accepts UI props and specific styling for the entry text/logo.
+2. **CongratsStage (`src/shared/stages/CongratsStage.tsx`)**: Accepts completion text props.
+3. **TextAnswerStage (`src/shared/stages/TextAnswerStage.tsx`)**: Used for steps 1-4. Utilizes a shared fuzzy matching utility (`isCloseEnough`). It accepts an `exactMatchOnly` toggle for strict numeric answers (e.g., 22).
 
-### The Outer Wilds Riddle Component
-1. **OuterWilds.tsx (`src/features/riddles/outer-wilds/OuterWilds.tsx`)**:
-   - Manages state using the `getRiddleProgress` / `updateRiddleProgress` pattern.
-   - **Theme**: Dark space blue background (`radial-gradient(circle, #0f172a 0%, #000000 100%)`), campfire orange highlights (`#f97316`). Use `OuterWildsLogo.png` in the application header or WelcomeStage.
-   - **Music**: Once the player finishes the first riddle (draw sequence), start playing background music conditionally using the `useAudio` hook based on state (e.g., `useAudio(riddleProgress >= 2 ? outerWildsTrack : null)`). Import the audio file directly from `./assets/Outer Wilds.mp3`, following the identical pattern established in Spider Lair. It should loop continuously, and `useAudio` handles playback automatically for non-null sources along with cleanup on unmount.
-   - **Stage 0**: `WelcomeStage` with "Outer Wilds Ventures", the logo, and "Join the expedition".
-   - **Stage 1**: `DrawSequenceStage` expecting `2906` using the canonical representations defined above.
-   - **Stage 2**: `TextAnswerStage` asking "The sun explodes in how many minutes?". Accepts exactly `["22"]` (strict string match after typical whitespace trimming; "22 minutes" or words are not accepted). *Implementation Note*: The underlying `TextAnswerStage` utilizes a fuzzy matching utility (`isCloseEnough`) with a 60% similarity threshold. Since "22" must be exact, add an `exactMatchOnly` boolean prop to `TextAnswerStage` (and pipe to `isCloseEnough`) to bypass fuzzy matching natively.
-   - **Stage 3**: `CongratsStage` showing mission accomplished.
+### Specific Outer Wilds Logic
+1. **QuantumStage (`src/features/riddles/outer-wilds/stages/QuantumStage.tsx`)**:
+   - Casts a container with immense vertical height (e.g., `min-h-[200vh]`), forcing scroll.
+   - Uses `IntersectionObserver` via a React hook/ref to track when the shard image completely exits the viewport.
+   - Toggles a `hasLookedAway` state when removed from view. Upon scrolling back up, the shard is gone, replaced by an `onAdvance` button.
+2. **DrawSequenceStage (`src/shared/stages/DrawSequenceStage.tsx`)**:
+   - Accepts an `expectedDigits` array containing canonical valid drawn paths for numbers (`2`, `9`, `0`, `6`) on a 2x3 grid.
+   - Renders SVG lines dynamically by translating paths into undirected edge sets (e.g., `"0-1", "1-3"`). On mouse/pointer release, the accumulated edge set is ordered and verified strictly against canonical versions.
+   - Includes color-flashing failure/success UI states. Uses `touch-action: none` and `releasePointerCapture` to block the browser's default scroll behavior during swiping.
 
-### Cleanup
-1. Delete `OuterWildsPoc.tsx` and remove its route from `App.tsx`.
-2. Delete `docs/outer-wilds-poc.md` (or consider it superseded by this document).
-
-### Routing / Wiring
-1. Update `src/App.tsx` routes. Change `/outer-wilds-poc` to `/outer-wilds` pointing to `<OuterWilds />`.
-2. Add the riddle entry to `src/features/taxes/riddleRegistry.ts` so it appears on the map (if applicable).
+### Main Orchestrator (`OuterWilds.tsx`)
+1. **State & Theming**: Orchestrates the `stage` prop mapping to components via a standard `switch(stage)` array. Mutates `localStorage` progress via `updateRiddleProgress`. Features a deep space radial gradient background (`#0f172a 0%`, `#000000 100%`) with orange focal highlights.
+2. **Dynamic Audio**: Imports `outerWildsTheme` (`assets/Outer Wilds.mp3`) passing it through the shared `useAudio` hook. It specifically ensures the music plays continuously as long as `stage >= 1 && stage < 7`, muting on the final congratulations screen to heighten dramatic effect.
 
 ## 4. Verification
-- Validate the new riddle can be accessed via routing.
-- Validate `WelcomeStage` correctly passes through to Stage 1.
-- Validate drawing `2`, `9`, `0`, `6` on the dots correctly advances the stage, and mistakes immediately flash red and reset the current digit drawing.
-- Validate touching and dragging on mobile devices correctly connects dots without scrolling the page.
-- Validate the background music begins playing after successfully passing Stage 1, and stops once navigating away.
-- Validate entering `22` in the next stage advances to the `CongratsStage`.
-- Validate error states (wrong text input, wrong drawn path) display correctly.
+- **Routing**: Ensure direct links to `/outer-wilds` render the riddle properly.
+- **Scroll Hijacking**: Assure the Quantum Shard disappearance occurs flawlessly via browser API across different device viewports, verifying `min-h` styling constraints.
+- **Touch Capabilities**: Validate that dragging strokes on the 6-dot canvas works reliably across iOS and Android browsers without triggering unintended page navigation or pinch-zoom.
+- **Continuous Flow**: Ensure `TextAnswerStage` components ignore minor casing/punctuation while the 22-minute constraint correctly enforces an exact match. Background music must sustain looping seamlessly between steps.

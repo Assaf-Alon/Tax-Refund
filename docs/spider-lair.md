@@ -8,8 +8,8 @@ The Spider Lair is a multi-stage riddle within the application. It tests the use
 
 ## Context (Why)
 
-The design has evolved over multiple iterations to ensure scalability:
-- **Modular stages**: Instead of hardcoding every stage specifically for the Spider Lair, generic, reusable stage primitive components (`TextAnswerStage`, `PinAnswerStage`, `FillWordsStage`) were created in `src/shared/stages/`.
+The design is engineered to ensure scalability:
+- **Modular stages**: Instead of hardcoding every stage specifically for the Spider Lair, generic, reusable stage primitive components (`TextAnswerStage`, `PinAnswerStage`, `FillWordsStage`) are created in `src/shared/stages/`.
 - **Theme Objects**: We use theme objects (e.g., `SPIDER_TEXT_THEME`) instead of CSS custom properties because it integrates natively with Tailwind's JIT compiler, provides type safety, and avoids mixing inline styles with Tailwind classes.
 - **Typo Tolerance**: We use a `histogramSimilarity` fuzzy matching utility (`isCloseEnough`) to allow minor typos (e.g. dyslexic players) while still enforcing strict correctness on short numeric answers.
 
@@ -18,14 +18,11 @@ The design has evolved over multiple iterations to ensure scalability:
 ### Shared Stage Primitives
 Located in `src/shared/stages/`. These accept optional `theme` props allowing UI reskinning without duplicating logical code:
 - `TextAnswerStage`: Renders a title, text input, and submit button. Uses a `isCloseEnough` fuzz-match helper (0.6 threshold fallback) to process answers.
-- `PinAnswerStage`: Renders dot-indicators and a `PinPad`. Automatically checks answers via `useEffect` tracking `pin.length === correctPin.length`.
-- `FillWordsStage`: Breaks lines into word chunks using `CharacterInput`.
-  - **Focus Algorithm**: Flattens lyrics into an array of words, each mapped to a `CharacterInputHandle` ref. An `onComplete(globalIdx)` callback sets a `completedWords` boolean flag, locks the input, and calls `.focus()` on the ref of the next incomplete word.
+- `PinAnswerStage`: Renders dot-indicators and a `PinPad`. Automatically checks answers via `useEffect`.
+- `FillWordsStage`: Breaks lines into word chunks using `CharacterInput`. Unlocks consecutive words sequentially upon input completion via refs.
 
 ### Theme Interfaces
-Themes are passed to shared primitives. Rather than using CSS variables, themes are defined via TypeScript interfaces containing Tailwind class strings (e.g., `TextAnswerTheme`, `FillWordsTheme`). 
-- Default classes act as fallbacks if no theme is provided.
-- Spider Lair specific themes (e.g., `SPIDER_TEXT_THEME` providing pink hex colors like `text-[#ff007f]`) are exported from `src/features/riddles/spider-lair/theme.ts`.
+Themes are passed to shared primitives via TypeScript interfaces containing Tailwind class strings. Spider Lair specific themes (e.g., `SPIDER_TEXT_THEME` providing pink hex colors) are exported from `src/features/riddles/spider-lair/theme.ts`.
 
 ### Spider Lair Wrappers
 Located in `src/features/riddles/spider-lair/stages/`. Thin components that bake in narrative content and themes:
@@ -34,9 +31,8 @@ Located in `src/features/riddles/spider-lair/stages/`. Thin components that bake
 - `SpiderLairLyricsStage`: Wraps `FillWordsStage` applying `SPIDER_FILL_WORDS_THEME` with Spider Dance lyrics.
 
 ### Main Orchestrator
-`SpiderLair.tsx` maintains the `stage` index state state initialized via `getRiddleProgress('spider-lair')`.
-- A `handleAdvance` callback increments the state and persists it using `updateRiddleProgress`.
-- A `switch(stage)` statement renders the specific stage wrapper or inline component.
+`SpiderLair.tsx` maintains the `stage` index state initialized via `getRiddleProgress('spider-lair')`. A `switch(stage)` statement renders the specific stage wrapper or inline component.
+- **Dynamic Audio**: The orchestrator triggers immersive audio through `useAudio.ts`. "Toby Fox - Spider Dance.mp3" begins at stage 0, and smoothly crossfades over 2 seconds into a high-intensity "Spider Dance Cover.mp3" when progressing beyond stage 2. Unmounting the feature cancels active fade intervals appropriately.
 
 ### Stage Content Reference
 
@@ -53,11 +49,11 @@ Located in `src/features/riddles/spider-lair/stages/`. Thin components that bake
 | **8** | `SpiderLairTextAnswerStage` | Slab Image | `the slab`, `slab` |
 | **9** | `SpiderLairTextAnswerStage` | Mite Image | `hitler`, `mite` |
 | **10**| `SpiderLairTextAnswerStage`| "What CLI command does Hornet often use..." | `git gud`, `git good` |
-| **11**| `CongratsPage` | Final Success Screen (git-gud.gif + carrefour) | N/A |
+| **11**| `CongratsPage` | Final Success Screen| N/A |
 
 ## Verification Plan
-1. **Automated Unit Tests**:
-   - `vitest` covering `fuzzyMatch.ts`, shared primitives (`TextAnswerStage.test.tsx`, `PinAnswerStage.test.tsx`, `FillWordsStage.test.tsx`), UI components (`CharacterInput`, `HintButton`), and `SpiderLair.test.tsx` (mocked internal stages).
+1. **Automated Unit Tests**: `vitest` covering `fuzzyMatch.ts`, shared primitives, and custom hooks (`useAudio.test.ts`).
 2. **Manual Regression Testing**: 
    - Verify focus flow in `CharacterInput`.
-   - Complete stages 1 through 11 and ensure state persists in `localStorage` appropriately across reloads.
+   - Complete stages 1 through 11 and ensure state persists dynamically in `localStorage`.
+   - Ensure audio crossfade transition applies cleanly to the active `HTMLAudioElement` seamlessly over 2 seconds upon passing stage 2.
