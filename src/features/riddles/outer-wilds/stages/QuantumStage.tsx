@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 
 // Placeholder or imported image for the shard. We'll try to import a real one if generated.
 // For now, we fallback to a stylized div if the image fails or isn't there.
-import shardImage from '../assets/quantum_shard.png';
+import shardImage from '../assets/QuantumShard1.png';
 
 interface QuantumStageProps {
     onAdvance: () => void;

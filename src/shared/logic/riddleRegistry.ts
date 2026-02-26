@@ -29,7 +29,11 @@ export const RIDDLE_REGISTRY: RiddleMeta[] = [
         id: 'outer-wilds',
         name: 'Outer Wilds',
         path: '/outer-wilds',
-        totalStages: 4,
-        stageLabels: ['Welcome', 'Draw Sequence', 'Text Answer', 'Completed'],
+        totalStages: 11,
+        stageLabels: [
+            'Welcome', 'End of the Loop', 'Reckless Traveler', 'Quantum Imaging',
+            'Ancient Architects', 'Ultimate Power', 'Ghost Matter River', 'Quantum Entanglement',
+            'Blind Terror', 'Coordinates', 'Completed'
+        ],
     },
 ];

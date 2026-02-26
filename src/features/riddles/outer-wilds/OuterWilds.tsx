@@ -6,6 +6,8 @@ import { TextAnswerStage } from '../../../shared/stages/TextAnswerStage';
 import { CongratsStage } from '../../../shared/stages/CongratsStage';
 import { DevSkipButton } from '../../admin/DevSkipButton';
 import { QuantumStage } from './stages/QuantumStage';
+import { GhostMatterRiverStage } from './stages/GhostMatterRiverStage';
+import { QuantumEntanglementStage } from './stages/QuantumEntanglementStage';
 import outerWildsLogo from './assets/OuterWildsLogo.png';
 import outerWildsTheme from './assets/Outer Wilds.mp3';
 import { useAudio } from '../../../shared/utils/useAudio';
@@ -24,8 +26,8 @@ const SHARED_TEXT_THEME = {
 export const OuterWilds: React.FC = () => {
     const [stage, setStage] = useState<number>(0);
 
-    // Audio should play starting from stage 1 through 6
-    const audioSrc = stage >= 1 && stage < 7 ? outerWildsTheme : null;
+    // Audio should play starting from stage 1 through 9
+    const audioSrc = stage >= 1 && stage < 10 ? outerWildsTheme : null;
     useAudio(audioSrc, { loop: true });
 
     useEffect(() => {
@@ -77,14 +79,7 @@ export const OuterWilds: React.FC = () => {
                 );
             case 3:
                 return (
-                    <TextAnswerStage
-                        title="The Blind Terror"
-                        prompt="F*ck this planet."
-                        acceptedAnswers={["dark bramble"]}
-                        exactMatchOnly={false}
-                        onAdvance={handleAdvance}
-                        theme={SHARED_TEXT_THEME}
-                    />
+                    <QuantumStage onAdvance={handleAdvance} />
                 );
             case 4:
                 return (
@@ -99,9 +94,35 @@ export const OuterWilds: React.FC = () => {
                 );
             case 5:
                 return (
-                    <QuantumStage onAdvance={handleAdvance} />
+                    <TextAnswerStage
+                        title="The Ultimate Power"
+                        prompt="What powers the Ash Twin Project?"
+                        acceptedAnswers={["supernova", "the sun", "the sun exploding", "sun", "a supernova"]}
+                        exactMatchOnly={false}
+                        onAdvance={handleAdvance}
+                        theme={SHARED_TEXT_THEME}
+                    />
                 );
             case 6:
+                return (
+                    <GhostMatterRiverStage onAdvance={handleAdvance} />
+                );
+            case 7:
+                return (
+                    <QuantumEntanglementStage onAdvance={handleAdvance} />
+                );
+            case 8:
+                return (
+                    <TextAnswerStage
+                        title="The Blind Terror"
+                        prompt="F*ck this planet."
+                        acceptedAnswers={["dark bramble"]}
+                        exactMatchOnly={false}
+                        onAdvance={handleAdvance}
+                        theme={SHARED_TEXT_THEME}
+                    />
+                );
+            case 9:
                 return (
                     <DrawSequenceStage
                         expectedDigits={[
@@ -123,7 +144,7 @@ export const OuterWilds: React.FC = () => {
                         onAdvance={handleAdvance}
                     />
                 );
-            case 7:
+            case 10:
                 return (
                     <CongratsStage
                         title="Mission Accomplished"
@@ -156,7 +177,7 @@ export const OuterWilds: React.FC = () => {
             <main className="container mx-auto p-4 md:p-12 min-h-[100vh] flex flex-col items-center justify-center relative z-0">
                 <React.Fragment key={stage}>{renderStage()}</React.Fragment>
             </main>
-            <DevSkipButton riddleId={RIDDLE_ID} currentStage={stage} totalStages={8} onSkip={handleAdvance} />
+            <DevSkipButton riddleId={RIDDLE_ID} currentStage={stage} totalStages={11} onSkip={handleAdvance} />
         </div>
     );
 };
