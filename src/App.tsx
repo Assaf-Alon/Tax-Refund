@@ -24,7 +24,7 @@ function App() {
           <Route path="/the-cave" element={<TheCave />} />
         </Route>
         <Route path="/spider-lair" element={<SpiderLair />} />
-        <Route path="/outer-wilds" element={<OuterWilds />} />
+        <Route path="/eye-signal-locator" element={<OuterWilds />} />
         <Route path="/translator" element={<Suspense fallback={<div>Loading...</div>}><Translator /></Suspense>} />
         {/* Catch-all redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />

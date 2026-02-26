@@ -10,7 +10,7 @@ export const SpiderLairPinStage: React.FC<SpiderLairPinStageProps> = ({ onAdvanc
     <PinAnswerStage
         correctPin="2468"
         title="The Web Lock"
-        prompt="The spider demands a code. Four numbers... always even."
+        prompt="The spider demands a code. Four numbers... always even. 🍩🕷️"
         hint="Count by twos..."
         hintCooldown={60}
         onAdvance={onAdvance}

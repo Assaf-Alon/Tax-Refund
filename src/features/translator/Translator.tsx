@@ -5,6 +5,7 @@ import translatorOverlay from './translator.png';
 
 export const Translator: React.FC = () => {
   const [hasPermission, setHasPermission] = useState(false);
+  const [hasAcknowledgedPrompt, setHasAcknowledgedPrompt] = useState(false);
   const [translatedText, setTranslatedText] = useState('Scanning for Nomai text...');
   const [isTyping, setIsTyping] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -16,21 +17,21 @@ export const Translator: React.FC = () => {
     if (text === translatedText) return;
 
     if (typewriterIntervalRef.current) {
-        clearInterval(typewriterIntervalRef.current);
+      clearInterval(typewriterIntervalRef.current);
     }
-    
+
     setTranslatedText('');
     setIsTyping(true);
-    
+
     let i = 0;
     typewriterIntervalRef.current = window.setInterval(() => {
-        if (i < text.length) {
-            setTranslatedText(prev => prev + text.charAt(i));
-            i++;
-        } else {
-            if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
-            setIsTyping(false);
-        }
+      if (i <= text.length) {
+        setTranslatedText(text.substring(0, i));
+        i++;
+      } else {
+        if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
+        setIsTyping(false);
+      }
     }, 50);
   };
 
@@ -49,9 +50,9 @@ export const Translator: React.FC = () => {
         scannerRef.current = html5QrCode;
 
         const qrSize = Math.min(window.innerWidth, window.innerHeight) * 0.5;
-        const config = { 
-            fps: 10,
-            qrbox: { width: qrSize, height: qrSize }
+        const config = {
+          fps: 10,
+          qrbox: { width: qrSize, height: qrSize }
         };
 
         await html5QrCode.start(
@@ -59,13 +60,13 @@ export const Translator: React.FC = () => {
           config,
           (decodedText) => {
             if (isScanningOnCooldownRef.current) return;
-            
+
             console.log(`Scan result: ${decodedText}`);
             setOuterWildsText(decodedText);
-            
+
             isScanningOnCooldownRef.current = true;
             setTimeout(() => {
-                isScanningOnCooldownRef.current = false;
+              isScanningOnCooldownRef.current = false;
             }, 2000);
           },
           () => {
@@ -94,7 +95,14 @@ export const Translator: React.FC = () => {
 
   return (
     <div className="translator-feature">
-      {!hasPermission ? (
+      {!hasAcknowledgedPrompt ? (
+        <div id="permission-ui">
+          <h2>Location Required</h2>
+          {/* TODO - UPDATE LOCATION */}
+          <p>Go behind the building.</p>
+          <button id="start-btn" onClick={() => setHasAcknowledgedPrompt(true)}>OK</button>
+        </div>
+      ) : !hasPermission ? (
         <div id="permission-ui">
           <h2>Camera Access Required</h2>
           <p>Please grant camera permissions to use the translator tool.</p>
@@ -103,7 +111,7 @@ export const Translator: React.FC = () => {
       ) : (
         <div id="app-container">
           <div id="reader"></div>
-          
+
           <svg id="qr-canvas" width="100%" height="100%"></svg>
 
           <div id="overlay-container">
@@ -115,7 +123,7 @@ export const Translator: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* Link to Google Fonts for Share Tech Mono */}
       <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
     </div>

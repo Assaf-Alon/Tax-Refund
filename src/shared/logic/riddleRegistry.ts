@@ -28,10 +28,10 @@ export const RIDDLE_REGISTRY: RiddleMeta[] = [
     {
         id: 'outer-wilds',
         name: 'Outer Wilds',
-        path: '/outer-wilds',
+        path: '/eye-signal-locator',
         totalStages: 11,
         stageLabels: [
-            'Welcome', 'End of the Loop', 'Reckless Traveler', 'Quantum Imaging',
+            'Entrance', 'End of the Loop', 'Reckless Traveler', 'Quantum Imaging',
             'Ancient Architects', 'Ultimate Power', 'Ghost Matter River', 'Quantum Entanglement',
             'Blind Terror', 'Coordinates', 'Completed'
         ],
