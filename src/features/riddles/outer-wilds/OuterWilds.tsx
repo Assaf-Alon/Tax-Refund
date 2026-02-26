@@ -12,6 +12,39 @@ import outerWildsLogo from './assets/OuterWildsLogo.png';
 import outerWildsTheme from './assets/Outer Wilds.mp3';
 import { useAudio } from '../../../shared/utils/useAudio';
 
+const DelayedTranslatorLink: React.FC<{ delay: number }> = ({ delay }) => {
+    const [showTranslatorLink, setShowTranslatorLink] = useState(false);
+    const [emphasizeLink, setEmphasizeLink] = useState(false);
+
+    useEffect(() => {
+        const timer1 = setTimeout(() => setShowTranslatorLink(true), delay);
+        const timer2 = setTimeout(() => setEmphasizeLink(true), delay + 7000);
+        return () => {
+            clearTimeout(timer1);
+            clearTimeout(timer2);
+        };
+    }, [delay]);
+
+    return (
+        <div className={`transition-all duration-1000 ${showTranslatorLink ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${emphasizeLink ? 'scale-125' : ''}`}>
+            <a
+                href="#/translator"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`
+                    px-6 py-2 transition-all duration-500 rounded font-mono tracking-wider uppercase inline-block
+                    ${emphasizeLink
+                        ? 'border-2 border-blue-400 bg-blue-500/30 text-white shadow-[0_0_20px_rgba(59,130,246,0.6)] font-bold text-base'
+                        : 'border border-blue-500/50 hover:bg-blue-500/20 text-blue-300 text-sm'
+                    }
+                `}
+            >
+                Open Translation Tool
+            </a>
+        </div>
+    );
+};
+
 const RIDDLE_ID = 'outer-wilds';
 
 const SHARED_TEXT_THEME = {
@@ -124,25 +157,30 @@ export const OuterWilds: React.FC = () => {
                 );
             case 9:
                 return (
-                    <DrawSequenceStage
-                        expectedDigits={[
-                            [ // 2
-                                ["0-1", "1-3", "2-3", "2-4", "4-5"],
-                            ],
-                            [ // 9
-                                ["0-1", "0-2", "1-3", "2-3", "3-5"],
-                                ["0-1", "0-2", "1-3", "2-3", "3-5", "4-5"], // With bottom hook
-                            ],
-                            [ // 0
-                                ["0-1", "0-2", "1-3", "2-4", "3-5", "4-5"],
-                            ],
-                            [ // 6
-                                ["0-2", "2-3", "2-4", "3-5", "4-5"],
-                                ["0-1", "0-2", "2-3", "2-4", "3-5", "4-5"], // With top bar
-                            ],
-                        ]}
-                        onAdvance={handleAdvance}
-                    />
+                    <div className="flex flex-col items-center gap-12 pt-8">
+                        <DrawSequenceStage
+                            expectedDigits={[
+                                [ // 2
+                                    ["0-1", "1-3", "2-3", "2-4", "4-5"],
+                                ],
+                                [ // 9
+                                    ["0-1", "0-2", "1-3", "2-3", "3-5"],
+                                    ["0-1", "0-2", "1-3", "2-3", "3-5", "4-5"], // With bottom hook
+                                ],
+                                [ // 0
+                                    ["0-1", "0-2", "1-3", "2-4", "3-5", "4-5"],
+                                ],
+                                [ // 6
+                                    ["0-2", "2-3", "2-4", "3-5", "4-5"],
+                                    ["0-1", "0-2", "2-3", "2-4", "3-5", "4-5"], // With top bar
+                                ],
+                            ]}
+                            onAdvance={handleAdvance}
+                        />
+
+                        {/* The component handles its own hook lifecycle */}
+                        <DelayedTranslatorLink delay={7000} />
+                    </div>
                 );
             case 10:
                 return (
