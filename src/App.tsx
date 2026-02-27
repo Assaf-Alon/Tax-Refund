@@ -7,6 +7,7 @@ import { PinGate } from './features/admin/PinGate';
 import { TheCave } from './features/riddles/TheCave';
 import { SpiderLair } from './features/riddles/spider-lair/SpiderLair';
 import { OuterWilds } from './features/riddles/outer-wilds/OuterWilds';
+import { Expedition33 } from './features/riddles/expedition-33/Expedition33';
 
 const Translator = lazy(() => import('./features/translator/Translator'));
 function App() {
@@ -25,6 +26,7 @@ function App() {
         </Route>
         <Route path="/spider-lair" element={<SpiderLair />} />
         <Route path="/eye-signal-locator" element={<OuterWilds />} />
+        <Route path="/xp-33" element={<Expedition33 />} />
         <Route path="/translator" element={<Suspense fallback={<div>Loading...</div>}><Translator /></Suspense>} />
         {/* Catch-all redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />

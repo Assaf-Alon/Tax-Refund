@@ -36,4 +36,14 @@ export const RIDDLE_REGISTRY: RiddleMeta[] = [
             'Blind Terror', 'Coordinates', 'Completed'
         ],
     },
+    {
+        id: 'expedition-33',
+        name: 'Expedition 33',
+        path: '/xp-33',
+        totalStages: 7,
+        stageLabels: [
+            'Entrance', 'The Engineer', 'Esquie Rest', 'Reactive Parry',
+            'Antagonist', 'Fading Memory', 'Completed'
+        ],
+    },
 ];
