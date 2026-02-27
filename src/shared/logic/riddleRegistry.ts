@@ -40,10 +40,10 @@ export const RIDDLE_REGISTRY: RiddleMeta[] = [
         id: 'expedition-33',
         name: 'Expedition 33',
         path: '/xp-33',
-        totalStages: 9,
+        totalStages: 10,
         stageLabels: [
             'Entrance', 'The Engineer', 'Esquie Rest', 'Reactive Parry',
-            'Antagonist', 'Team Builder', 'Fading Memory', 'The Final Choice', 'Completed'
+            'Antagonist', 'Team Builder', 'Fading Memory', 'Simon OST', 'The Final Choice', 'Completed'
         ],
     },
 ];

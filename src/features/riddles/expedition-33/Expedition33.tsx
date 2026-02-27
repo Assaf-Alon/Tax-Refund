@@ -12,8 +12,10 @@ import { ReactiveParryStage } from './stages/ReactiveParryStage';
 import { FadingTextStage } from './stages/FadingTextStage';
 import { TeamBuilderStage } from './stages/TeamBuilderStage';
 import { FinalChoiceStage } from './stages/FinalChoiceStage';
+import { SimonOstStage } from './stages/SimonOstStage';
 
 import lumiereOst from './assets/Lumiere.mp3';
+import weLostOst from './assets/We Lost.mp3';
 import exp33Art from './assets/exp33.png';
 
 const RIDDLE_ID = 'expedition-33';
@@ -33,7 +35,8 @@ export const Expedition33: React.FC = () => {
 
     const [stage, setStage] = useState<number>(0);
 
-    useAudio(lumiereOst, { loop: true });
+    const audioSrc = stage === 7 ? weLostOst : lumiereOst;
+    useAudio(audioSrc, { loop: true });
 
     useEffect(() => {
         const savedStage = getRiddleProgress(RIDDLE_ID);
@@ -110,9 +113,13 @@ export const Expedition33: React.FC = () => {
                 );
             case 7:
                 return (
-                    <FinalChoiceStage onAdvance={handleAdvance} />
+                    <SimonOstStage onAdvance={handleAdvance} />
                 );
             case 8:
+                return (
+                    <FinalChoiceStage onAdvance={handleAdvance} />
+                );
+            case 9:
                 return (
                     <CongratsStage
                         title="The Paintress Falls"
@@ -146,7 +153,7 @@ export const Expedition33: React.FC = () => {
             <main className="container mx-auto p-4 md:p-12 min-h-[100vh] flex flex-col items-center justify-center relative z-0">
                 <React.Fragment key={stage}>{renderStage()}</React.Fragment>
             </main>
-            <DevSkipButton riddleId={RIDDLE_ID} currentStage={stage} totalStages={9} onSkip={handleAdvance} />
+            <DevSkipButton riddleId={RIDDLE_ID} currentStage={stage} totalStages={10} onSkip={handleAdvance} />
         </div>
     );
 };
