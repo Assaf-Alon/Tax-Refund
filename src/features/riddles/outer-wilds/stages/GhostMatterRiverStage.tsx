@@ -4,7 +4,7 @@ interface GhostMatterRiverStageProps {
     onAdvance: () => void;
 }
 
-const GRID_ROWS = 10;
+const GRID_ROWS = 6;
 const GRID_COLS = 5;
 
 // 0: Hazard (Ghost Matter)
@@ -13,15 +13,11 @@ const GRID_COLS = 5;
 // 3: Goal
 const MAZE_LAYOUT = [
     [0, 0, 2, 0, 0],
-    [0, 0, 1, 1, 0],
-    [0, 0, 0, 1, 0],
-    [0, 1, 1, 1, 0],
+    [0, 0, 1, 0, 0],
+    [0, 1, 1, 0, 0],
     [0, 1, 0, 0, 0],
     [0, 1, 1, 1, 0],
-    [0, 0, 0, 1, 0],
-    [0, 0, 0, 1, 1],
-    [0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 3],
+    [0, 0, 0, 3, 0],
 ];
 
 export const GhostMatterRiverStage: React.FC<GhostMatterRiverStageProps> = ({ onAdvance }) => {
@@ -176,7 +172,7 @@ export const GhostMatterRiverStage: React.FC<GhostMatterRiverStageProps> = ({ on
                     gridTemplateColumns: `repeat(${GRID_COLS}, minmax(0, 1fr))`,
                     gridTemplateRows: `repeat(${GRID_ROWS}, minmax(0, 1fr))`,
                     width: '100%',
-                    aspectRatio: '1 / 2', // make it tall and portrait
+                    aspectRatio: '5 / 6', // make it proportional to grid (5 cols, 6 rows)
                     touchAction: 'none' // Critical for mobile dragging
                 }}
             >

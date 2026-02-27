@@ -40,7 +40,7 @@ Instead of duplicating heavily themed elements across different riddles, general
    - Uses `IntersectionObserver` via a React hook/ref to track when the shard image completely exits the viewport.
    - Toggles a `hasLookedAway` state when removed from view. Upon scrolling back up, the shard is gone, replaced by an `onAdvance` button.
 2. **GhostMatterRiverStage (`src/features/riddles/outer-wilds/stages/GhostMatterRiverStage.tsx`)**:
-   - A 10x5 HTML element grid rendering `hazard`, `safe`, `start`, and `goal` nodes.
+   - A 6x5 HTML element grid rendering `hazard`, `safe`, `start`, and `goal` nodes.
    - A `launchScout` function triggers a 2.5s timeout that conditionally changes CSS to reveal hazard tiles.
    - Dragging logic relies on `pointerdown`, `pointermove`, and `pointerup` on the container, using `document.elementFromPoint` to track the exact tile under the finger and update a `Set` to render a ripple trail.
    - *Note on mobile handling:* To prevent the browser's native "pull-to-refresh" rubber-banding which dragged the entire viewport down prematurely when ending a trace, the container uses the Tailwind `overscroll-none` class, explicitly releases the pointer capture `releasePointerCapture(e.pointerId)` on cleanup, and triggers `window.scrollTo(0, 0)` on success.
