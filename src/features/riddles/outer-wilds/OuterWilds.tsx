@@ -62,8 +62,8 @@ export const OuterWilds: React.FC = () => {
 
     const [stage, setStage] = useState<number>(0);
 
-    // Audio should play starting from stage 1 through 9
-    const audioSrc = stage >= 1 && stage < 10 ? outerWildsTheme : null;
+    // Audio should play starting from stage 0 through 10
+    const audioSrc = stage >= 0 && stage < 11 ? outerWildsTheme : null;
     useAudio(audioSrc, { loop: true });
 
     useEffect(() => {
