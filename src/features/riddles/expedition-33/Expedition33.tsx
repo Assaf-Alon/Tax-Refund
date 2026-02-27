@@ -10,6 +10,8 @@ import { useFavicon } from '../../../hooks/useFavicon';
 import { EsquieStage } from './stages/EsquieStage';
 import { ReactiveParryStage } from './stages/ReactiveParryStage';
 import { FadingTextStage } from './stages/FadingTextStage';
+import { TeamBuilderStage } from './stages/TeamBuilderStage';
+import { FinalChoiceStage } from './stages/FinalChoiceStage';
 
 import lumiereOst from './assets/Lumiere.mp3';
 import exp33Art from './assets/exp33.png';
@@ -100,9 +102,17 @@ export const Expedition33: React.FC = () => {
                 );
             case 5:
                 return (
-                    <FadingTextStage onAdvance={handleAdvance} />
+                    <TeamBuilderStage onAdvance={handleAdvance} />
                 );
             case 6:
+                return (
+                    <FadingTextStage onAdvance={handleAdvance} />
+                );
+            case 7:
+                return (
+                    <FinalChoiceStage onAdvance={handleAdvance} />
+                );
+            case 8:
                 return (
                     <CongratsStage
                         title="The Paintress Falls"
@@ -136,7 +146,7 @@ export const Expedition33: React.FC = () => {
             <main className="container mx-auto p-4 md:p-12 min-h-[100vh] flex flex-col items-center justify-center relative z-0">
                 <React.Fragment key={stage}>{renderStage()}</React.Fragment>
             </main>
-            <DevSkipButton riddleId={RIDDLE_ID} currentStage={stage} totalStages={7} onSkip={handleAdvance} />
+            <DevSkipButton riddleId={RIDDLE_ID} currentStage={stage} totalStages={9} onSkip={handleAdvance} />
         </div>
     );
 };
