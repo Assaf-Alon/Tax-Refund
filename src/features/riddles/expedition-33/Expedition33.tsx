@@ -31,7 +31,7 @@ const SHARED_TEXT_THEME = {
 
 export const Expedition33: React.FC = () => {
     // Optionally use a custom favicon if desired, else it defaults smoothly
-    useFavicon(`${import.meta.env.BASE_URL}favicon.ico`);
+    useFavicon(`${import.meta.env.BASE_URL}xp33-256.png`);
 
     const [stage, setStage] = useState<number>(0);
 

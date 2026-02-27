@@ -70,7 +70,7 @@ export const EsquieStage: React.FC<EsquieStageProps> = ({ onAdvance }) => {
                 <div className="space-y-2">
                     <h2 className="text-3xl font-bold tracking-tight text-white mb-2">Esquie's Rest</h2>
                     <p className="text-gray-300">
-                        Esquie is sleeping peacefully. We must wake him up with exactly 33 pets.
+                        Esquie is celebrating! Give him exactly 33 victory pets.
                     </p>
                 </div>
 
@@ -82,9 +82,9 @@ export const EsquieStage: React.FC<EsquieStageProps> = ({ onAdvance }) => {
                         src={esquieImg}
                         alt="Esquie"
                         className={`w-64 h-64 object-cover rounded-2xl border-4 transition-all duration-500 ${pets >= 30 ? 'border-emerald-300 shadow-[0_0_50px_rgba(52,211,153,0.8)]' :
-                                pets >= 20 ? 'border-emerald-400 shadow-[0_0_35px_rgba(52,211,153,0.5)]' :
-                                    pets >= 10 ? 'border-emerald-500/80 shadow-[0_0_20px_rgba(52,211,153,0.3)]' :
-                                        'border-slate-700/50 shadow-2xl'
+                            pets >= 20 ? 'border-emerald-400 shadow-[0_0_35px_rgba(52,211,153,0.5)]' :
+                                pets >= 10 ? 'border-emerald-500/80 shadow-[0_0_20px_rgba(52,211,153,0.3)]' :
+                                    'border-slate-700/50 shadow-2xl'
                             }`}
                         draggable={false}
                     />
@@ -104,9 +104,9 @@ export const EsquieStage: React.FC<EsquieStageProps> = ({ onAdvance }) => {
                 </div>
 
                 <div className={`mt-8 text-2xl font-mono px-6 py-3 rounded-xl border transition-all duration-500 ${pets >= 30 ? 'bg-emerald-900/40 border-emerald-300 text-emerald-300 shadow-[0_0_30px_rgba(52,211,153,0.6)]' :
-                        pets >= 20 ? 'bg-black/60 border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.4)]' :
-                            pets >= 10 ? 'bg-black/50 border-emerald-500/50 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.2)]' :
-                                'bg-black/40 border-emerald-500/20 text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.05)]'
+                    pets >= 20 ? 'bg-black/60 border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.4)]' :
+                        pets >= 10 ? 'bg-black/50 border-emerald-500/50 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.2)]' :
+                            'bg-black/40 border-emerald-500/20 text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.05)]'
                     }`}>
                     {pets} <span className={pets >= 20 ? "text-emerald-500" : "text-emerald-700"}>/</span> 33
                 </div>
