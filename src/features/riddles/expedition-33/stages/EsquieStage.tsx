@@ -68,7 +68,7 @@ export const EsquieStage: React.FC<EsquieStageProps> = ({ onAdvance }) => {
 
             <div className="flex flex-col items-center justify-center space-y-8 w-full max-w-md mx-auto relative px-4 text-center">
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-bold tracking-tight text-white mb-2">Esquie's Rest</h2>
+                    <h2 className="text-3xl font-bold tracking-tight text-white mb-2">Esquie's Dance</h2>
                     <p className="text-gray-300">
                         Esquie is celebrating! Give him exactly 33 victory pets.
                     </p>

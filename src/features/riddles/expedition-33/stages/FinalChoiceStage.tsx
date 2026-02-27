@@ -1,7 +1,8 @@
-import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 
 import versoImg from '../assets/verso.png';
 import maelleImg from '../assets/maelle.png';
+import { useLongPress } from '../../../../shared/hooks/useLongPress';
 
 export interface FinalChoiceStageProps {
     onAdvance: () => void;
@@ -10,7 +11,6 @@ export interface FinalChoiceStageProps {
 type Choice = 'verso' | 'maelle';
 
 const HOLD_DURATION_MS = 5000;
-const VIBRATION_INTERVAL_MS = 500;
 const PARTICLE_COUNT = 50;
 
 interface DustParticle {
@@ -30,10 +30,6 @@ export const FinalChoiceStage: React.FC<FinalChoiceStageProps> = ({ onAdvance })
     const [completed, setCompleted] = useState(false);
     const [finalChoice, setFinalChoice] = useState<Choice | null>(null);
 
-    const holdStartRef = useRef<number | null>(null);
-    const animFrameRef = useRef<number>(0);
-    const lastVibrationRef = useRef<number>(0);
-
     const particles = useMemo<DustParticle[]>(() =>
         Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
             id: i,
@@ -48,80 +44,53 @@ export const FinalChoiceStage: React.FC<FinalChoiceStageProps> = ({ onAdvance })
         [],
     );
 
-    const updateProgress = useCallback((time: number) => {
-        if (holdStartRef.current === null) return;
-
-        const elapsed = time - holdStartRef.current;
-        const p = Math.min(elapsed / HOLD_DURATION_MS, 1);
+    const handleProgress = useCallback((choice: Choice, p: number) => {
+        if (completed) return;
         setProgress(p);
+        setActiveChoice(prev => {
+            if (p > 0) return choice;
+            if (p === 0 && prev === choice) return null;
+            return prev;
+        });
+    }, [completed]);
 
-        // Vibrate in pulses
-        if (navigator.vibrate) {
-            const vibrationStep = Math.floor(elapsed / VIBRATION_INTERVAL_MS);
-            if (vibrationStep > lastVibrationRef.current) {
-                navigator.vibrate(50);
-                lastVibrationRef.current = vibrationStep;
-            }
-        }
+    const handleComplete = useCallback((choice: Choice) => {
+        if (completed) return;
+        setCompleted(true);
+        setFinalChoice(choice);
+        setActiveChoice(choice);
+    }, [completed]);
 
-        if (p >= 1) {
-            navigator.vibrate?.(200);
-            setCompleted(true);
-            return;
-        }
-        animFrameRef.current = requestAnimationFrame(updateProgress);
-    }, []);
+    const versoPress = useLongPress({
+        durationMs: HOLD_DURATION_MS,
+        onProgress: (p) => handleProgress('verso', p),
+        onComplete: () => handleComplete('verso')
+    });
+
+    const maellePress = useLongPress({
+        durationMs: HOLD_DURATION_MS,
+        onProgress: (p) => handleProgress('maelle', p),
+        onComplete: () => handleComplete('maelle')
+    });
 
     useEffect(() => {
         if (completed && activeChoice) {
-            setFinalChoice(activeChoice);
             const timer = setTimeout(() => onAdvance(), 1800);
             return () => clearTimeout(timer);
         }
     }, [completed, activeChoice, onAdvance]);
-
-    // Cleanup on unmount
-    useEffect(() => {
-        return () => {
-            if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-        };
-    }, []);
-
-    const handlePointerDown = (choice: Choice) => {
-        if (completed) return;
-        setActiveChoice(choice);
-        setProgress(0);
-        lastVibrationRef.current = 0;
-        holdStartRef.current = performance.now();
-        animFrameRef.current = requestAnimationFrame(updateProgress);
-    };
-
-    const handlePointerUp = () => {
-        if (completed) return;
-        setActiveChoice(null);
-        setProgress(0);
-        holdStartRef.current = null;
-        if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-    };
-
 
     const renderCard = (choice: Choice) => {
         const img = choice === 'verso' ? versoImg : maelleImg;
         const label = choice === 'verso' ? 'Verso' : 'Maëlle';
         const isActive = activeChoice === choice;
         const isDisintegrating = activeChoice !== null && activeChoice !== choice;
+        const handlers = choice === 'verso' ? versoPress.handlers : maellePress.handlers;
 
         return (
             <div
                 className="flex flex-col items-center gap-3 select-none"
-                onPointerDown={(e) => {
-                    e.preventDefault();
-                    handlePointerDown(choice);
-                }}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-                onPointerLeave={handlePointerUp}
-                onContextMenu={(e) => e.preventDefault()}
+                {...handlers}
                 style={{ touchAction: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
             >
                 <div className="relative w-36 h-48 md:w-44 md:h-56">

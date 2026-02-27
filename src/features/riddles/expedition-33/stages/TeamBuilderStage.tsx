@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import versoImg from '../assets/verso.png';
 import maelleImg from '../assets/maelle.png';
@@ -9,6 +9,8 @@ import simonImg from '../assets/simon.png';
 import luneImg from '../assets/lune.png';
 import monokoImg from '../assets/monoko.png';
 import sophieImg from '../assets/sophie.png';
+
+import { useDragAndDrop } from '../../../../shared/hooks/useDragAndDrop';
 
 // ─── Types & Constants ──────────────────────────────────────────
 
@@ -61,11 +63,6 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
     const [simonErased, setSimonErased] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
 
-    // Touch-drag state
-    const [dragClone, setDragClone] = useState<{ characterId: string; x: number; y: number } | null>(null);
-    const touchCharRef = useRef<string | null>(null);
-    const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
-
     // ─ Helpers ─
 
     const getCharacterById = (id: string): Character | undefined =>
@@ -86,91 +83,29 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
         }, 3000);
     }, []);
 
-    // ─ Drop Logic ─
+    // ─ Drag & Drop ─
 
-    const handleDropCharacter = useCallback((characterId: string, slotIndex: number) => {
-        // Simon easter egg check
-        if (characterId === 'simon') {
-            triggerSimonGommage();
-            return;
-        }
+    const { dragState, dragHandlers, dropHandlers, slotRefs } = useDragAndDrop({
+        onDrop: (characterId, slotIndex) => {
+            if (characterId === 'simon') {
+                triggerSimonGommage();
+                return;
+            }
 
-        setErrorMessage(null);
+            setErrorMessage(null);
 
-        setSlots(prev => {
-            const next = prev.map(s => ({ ...s }));
-
-            // If this character is already in another slot, remove it
-            for (let i = 0; i < next.length; i++) {
-                if (next[i].assignedCharacter === characterId) {
-                    next[i].assignedCharacter = null;
+            setSlots(prev => {
+                const next = prev.map(s => ({ ...s }));
+                for (let i = 0; i < next.length; i++) {
+                    if (next[i].assignedCharacter === characterId) {
+                        next[i].assignedCharacter = null;
+                    }
                 }
-            }
-
-            // If the target slot had a different character, that character returns to roster
-            // (just clearing the slot is enough since roster is computed from state)
-            next[slotIndex].assignedCharacter = characterId;
-
-            return next;
-        });
-    }, [triggerSimonGommage]);
-
-    // ─ HTML5 Drag & Drop (Desktop) ─
-
-    const handleDragStart = (e: React.DragEvent, characterId: string) => {
-        e.dataTransfer.setData('text/plain', characterId);
-        e.dataTransfer.effectAllowed = 'move';
-    };
-
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-    };
-
-    const handleDrop = (e: React.DragEvent, slotIndex: number) => {
-        e.preventDefault();
-        const characterId = e.dataTransfer.getData('text/plain');
-        if (characterId) {
-            handleDropCharacter(characterId, slotIndex);
+                next[slotIndex].assignedCharacter = characterId;
+                return next;
+            });
         }
-    };
-
-    // ─ Touch Drag (Mobile) ─
-
-    const handleTouchStart = (e: React.TouchEvent, characterId: string) => {
-        const touch = e.touches[0];
-        touchCharRef.current = characterId;
-        setDragClone({ characterId, x: touch.clientX, y: touch.clientY });
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-        if (!dragClone) return;
-        const touch = e.touches[0];
-        setDragClone(prev => prev ? { ...prev, x: touch.clientX, y: touch.clientY } : null);
-    };
-
-    const handleTouchEnd = (e: React.TouchEvent) => {
-        if (!touchCharRef.current || !dragClone) {
-            setDragClone(null);
-            touchCharRef.current = null;
-            return;
-        }
-
-        const touch = e.changedTouches[0];
-        const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
-
-        // Find which slot was targeted
-        for (let i = 0; i < slotRefs.current.length; i++) {
-            const slotEl = slotRefs.current[i];
-            if (slotEl && (slotEl === dropTarget || slotEl.contains(dropTarget))) {
-                handleDropCharacter(touchCharRef.current, i);
-                break;
-            }
-        }
-
-        setDragClone(null);
-        touchCharRef.current = null;
-    };
+    });
 
     // ─ Validation ─
 
@@ -185,13 +120,11 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
         });
 
         if (wrongIndices.length === 0) {
-            // All correct!
             setIsCorrect(true);
             setTimeout(() => {
                 onAdvance();
             }, 1500);
         } else {
-            // Wrong — shake + error + clear
             setShakingSlots(new Set(wrongIndices));
             setErrorMessage("That's not quite right...");
             setTimeout(() => {
@@ -203,7 +136,7 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
 
     // ─ Render ─
 
-    const dragCloneChar = dragClone ? getCharacterById(dragClone.characterId) : null;
+    const dragCloneChar = dragState ? getCharacterById(dragState.characterId) : null;
 
     return (
         <div className="w-full h-full flex items-center justify-center">
@@ -333,8 +266,8 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
                                     }
                                     ${shakingSlots.has(i) ? 'shake-anim' : ''}
                                 `}
-                                onDragOver={handleDragOver}
-                                onDrop={e => handleDrop(e, i)}
+                                onDragOver={dropHandlers.onDragOver}
+                                onDrop={e => dropHandlers.onDrop(e, i)}
                             >
                                 {assignedChar ? (
                                     <div className="flex flex-col items-center space-y-1">
@@ -343,10 +276,10 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
                                             alt={assignedChar.name}
                                             className="w-16 h-16 md:w-20 md:h-20 rounded-lg object-cover border border-emerald-500/40"
                                             draggable
-                                            onDragStart={e => handleDragStart(e, assignedChar.id)}
-                                            onTouchStart={e => handleTouchStart(e, assignedChar.id)}
-                                            onTouchMove={handleTouchMove}
-                                            onTouchEnd={handleTouchEnd}
+                                            onDragStart={e => dragHandlers.onDragStart(e, assignedChar.id)}
+                                            onTouchStart={e => dragHandlers.onTouchStart(e, assignedChar.id)}
+                                            onTouchMove={dragHandlers.onTouchMove}
+                                            onTouchEnd={dragHandlers.onTouchEnd}
                                         />
                                         <span className="text-emerald-300 text-xs font-medium">
                                             {assignedChar.name}
@@ -383,10 +316,10 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
                                         }
                                     `}
                                     draggable={!inSlot}
-                                    onDragStart={e => handleDragStart(e, char.id)}
-                                    onTouchStart={e => handleTouchStart(e, char.id)}
-                                    onTouchMove={handleTouchMove}
-                                    onTouchEnd={handleTouchEnd}
+                                    onDragStart={e => dragHandlers.onDragStart(e, char.id)}
+                                    onTouchStart={e => dragHandlers.onTouchStart(e, char.id)}
+                                    onTouchMove={dragHandlers.onTouchMove}
+                                    onTouchEnd={dragHandlers.onTouchEnd}
                                 >
                                     <img
                                         src={char.image}
@@ -436,15 +369,15 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
             </div>
 
             {/* Touch-drag clone */}
-            {dragClone && dragCloneChar && (
+            {dragState && dragCloneChar && (
                 <img
                     src={dragCloneChar.image}
                     alt="Dragging"
                     className="rounded-lg border-2 border-emerald-400 shadow-2xl"
                     style={{
                         position: 'fixed',
-                        left: dragClone.x - 40,
-                        top: dragClone.y - 40,
+                        left: dragState.x - 40,
+                        top: dragState.y - 40,
                         width: 80,
                         height: 80,
                         pointerEvents: 'none',

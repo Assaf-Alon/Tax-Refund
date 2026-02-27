@@ -10,8 +10,8 @@ The Riddle Flow consists of **9 Stages**:
 1. **The Engineer**: 
    - *Prompt:* "A brilliant engineer and inventor who lost his arm, replacing it with his own mechanical design." 
    - *Answer:* `gustave`
-2. **Esquie's Rest (Custom Stage)**: 
-   - *Concept:* The wholesome companion Esquie is sleeping. We must wake him up with exactly 33 pets.
+2. **Esquie's Dance (Custom Stage)**: 
+   - *Concept:* The wholesome companion Esquie is dancing. We must give him exactly 33 victory pets.
    - *Mechanic:* A picture of Esquie is presented. The player must click him exactly 33 times. A visual progress counter `(x/33)` is shown. Every time he is clicked, there is a 50% chance a floating CSS `❤️` spawns, and a 50% chance the text `"Whee!"` floats up from his image. 
 3. **The Reactive Parry (Custom Stage)**: 
    - *Concept:* Mimics the reactive turn-based combat of the game.
@@ -34,7 +34,7 @@ The Riddle Flow consists of **9 Stages**:
 
 ## 2. Why this approach was chosen
 
-- The **Esquie's Rest** stage was specifically designed around the "33" motif and the user's desire for a cute, wholesome breather stage with floating particles.
+- The **Esquie's Dance** stage was specifically designed around the "33" motif and the user's desire for a cute, wholesome breather stage with floating particles.
 - The **Reactive Parry** translates the game's core gameplay hook into a web-native API `requestAnimationFrame` timing game.
 - The **Fading Memory** stage is a much cleaner implementation of "The Gommage" (Erasure) compared to the canvas scratch-off, inducing panic through a `setInterval` hook without requiring complex canvas context manipulation.
 - Reusing `TextAnswerStage` and standard generic components keeps horizontal iteration fast.
@@ -67,7 +67,7 @@ The Riddle Flow consists of **9 Stages**:
    - Include the `<DevSkipButton riddleId={RIDDLE_ID} currentStage={stage} totalStages={9} onSkip={handleAdvance} />` at the root wrapper to allow for convenient testing/skipping.
 5. **App Routing & Admin Registration**
    - **`src/App.tsx`**: Add `<Route path="/expedition-33" element={<Expedition33 />} />` (placed outside of `RiddleLayout` to allow full custom screen typography/styling).
-   - **`src/shared/logic/riddleRegistry.ts`**: Add a new `RiddleMeta` entry to the `RIDDLE_REGISTRY` constant with `id: 'expedition-33'`, `totalStages: 9`, and an array of exactly 9 `stageLabels` (e.g., `['Entrance', 'The Engineer', 'Esquie Rest', 'Reactive Parry', 'Antagonist', 'Team Builder', 'Fading Memory', 'The Final Choice', 'Completed']`). *Note: This automatically adds it to the Admin Dashboard for resetting/skipping without needing to touch AdminDashboard.tsx!*
+   - **`src/shared/logic/riddleRegistry.ts`**: Add a new `RiddleMeta` entry to the `RIDDLE_REGISTRY` constant with `id: 'expedition-33'`, `totalStages: 9`, and an array of exactly 9 `stageLabels` (e.g., `['Entrance', 'The Engineer', 'Esquie Dance', 'Reactive Parry', 'Antagonist', 'Team Builder', 'Fading Memory', 'The Final Choice', 'Completed']`). *Note: This automatically adds it to the Admin Dashboard for resetting/skipping without needing to touch AdminDashboard.tsx!*
    - **Assets**: Ensure `Lumiere.mp3`, `Esquie.png`, and any other static assets are cleanly placed in `src/features/riddles/expedition-33/assets/` and explicitly imported in the React components.
 
 ## 4. Verification

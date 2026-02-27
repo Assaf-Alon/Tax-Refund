@@ -34,7 +34,7 @@ If the player somehow drags Simon into any slot, Simon's portrait triggers a "Go
 The new stage is inserted as **stage 5** (0-indexed), between "Antagonist" (currently stage 4) and "Fading Memory" (currently stage 5). This places the interactive team-building challenge before the final brain-teaser, providing a satisfying change of pace.
 
 New flow (8 stages total, 0-indexed):
-0. Welcome → 1. The Engineer → 2. Esquie's Rest → 3. Reactive Parry → 4. Antagonist → **5. Team Builder** → 6. Fading Memory → 7. Completed
+0. Welcome → 1. The Engineer → 2. Esquie's Dance→ 3. Reactive Parry → 4. Antagonist → **5. Team Builder** → 6. Fading Memory → 7. Completed
 
 ## 2. Why This Approach
 
