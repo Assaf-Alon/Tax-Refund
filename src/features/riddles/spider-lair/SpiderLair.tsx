@@ -12,10 +12,13 @@ import spiderDanceOriginal from './assets/Toby Fox - Spider Dance.mp3';
 import spiderDanceCover from './assets/Spider Dance Cover.mp3';
 import { useAudio } from '../../../shared/utils/useAudio';
 import { DevSkipButton } from '../../admin/DevSkipButton';
+import { useFavicon } from '../../../hooks/useFavicon';
 
 const RIDDLE_ID = 'spider-lair';
 
 export const SpiderLair: React.FC = () => {
+    useFavicon(`${import.meta.env.BASE_URL}sl-48.png`);
+
     const [stage, setStage] = useState<number>(0);
 
     let audioSrc: string | null = null;

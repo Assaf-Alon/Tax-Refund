@@ -11,6 +11,7 @@ import { QuantumEntanglementStage } from './stages/QuantumEntanglementStage';
 import outerWildsLogo from './assets/OuterWildsLogo.png';
 import outerWildsTheme from './assets/Outer Wilds.mp3';
 import { useAudio } from '../../../shared/utils/useAudio';
+import { useFavicon } from '../../../hooks/useFavicon';
 
 const DelayedTranslatorLink: React.FC<{ delay: number }> = ({ delay }) => {
     const [showTranslatorLink, setShowTranslatorLink] = useState(false);
@@ -57,6 +58,8 @@ const SHARED_TEXT_THEME = {
 };
 
 export const OuterWilds: React.FC = () => {
+    useFavicon(`${import.meta.env.BASE_URL}ow-48.png`);
+
     const [stage, setStage] = useState<number>(0);
 
     // Audio should play starting from stage 1 through 9
