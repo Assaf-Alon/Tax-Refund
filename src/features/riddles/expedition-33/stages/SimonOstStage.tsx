@@ -30,6 +30,7 @@ export const SimonOstStage: React.FC<SimonOstStageProps> = ({ onAdvance }) => {
             description="What's the OST that plays when we fight Simon?"
             choices={ALL_CHOICES}
             onAdvance={onAdvance}
+            successDelay={4000}
             mediaRow={
                 <>
                     <img

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
 import versoImg from '../assets/verso.png';
 import maelleImg from '../assets/maelle.png';
@@ -11,6 +11,7 @@ import monokoImg from '../assets/monoko.png';
 import sophieImg from '../assets/sophie.png';
 
 import { useDragAndDrop } from '../../../../shared/hooks/useDragAndDrop';
+import { shuffleArray } from '../../../../shared/utils/array';
 
 // ─── Types & Constants ──────────────────────────────────────────
 
@@ -56,6 +57,7 @@ export interface TeamBuilderStageProps {
 }
 
 export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance }) => {
+    const shuffledCharacters = useMemo<Character[]>(() => shuffleArray(CHARACTERS), []);
     const [slots, setSlots] = useState<SlotState[]>(INITIAL_SLOTS.map(s => ({ ...s })));
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [shakingSlots, setShakingSlots] = useState<Set<number>>(new Set());
@@ -109,7 +111,7 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
 
     // ─ Validation ─
 
-    const handleConfirm = () => {
+    useEffect(() => {
         if (!allSlotsFilled) return;
 
         const wrongIndices: number[] = [];
@@ -132,7 +134,7 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
                 setSlots(INITIAL_SLOTS.map(s => ({ ...s })));
             }, 800);
         }
-    };
+    }, [allSlotsFilled, slots, onAdvance]);
 
     // ─ Render ─
 
@@ -243,7 +245,7 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
                 </div>
 
                 {/* Slots */}
-                <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+                <div className="grid grid-cols-3 gap-2 w-full justify-items-center mb-4">
                     {slots.map((slot, i) => {
                         const assignedChar = slot.assignedCharacter
                             ? getCharacterById(slot.assignedCharacter)
@@ -256,7 +258,7 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
                                 data-slot-index={i}
                                 className={`
                                     slot-drop-zone flex flex-col items-center justify-center
-                                    w-28 h-36 md:w-32 md:h-40
+                                    w-full max-w-[112px] h-32 md:w-32 md:h-40
                                     border-2 border-dashed rounded-xl
                                     ${isCorrect
                                         ? 'success-slot border-yellow-400'
@@ -274,14 +276,14 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
                                         <img
                                             src={assignedChar.image}
                                             alt={assignedChar.name}
-                                            className="w-16 h-16 md:w-20 md:h-20 rounded-lg object-cover border border-emerald-500/40"
+                                            className="w-12 h-12 md:w-20 md:h-20 rounded-lg object-cover border border-emerald-500/40"
                                             draggable
                                             onDragStart={e => dragHandlers.onDragStart(e, assignedChar.id)}
                                             onTouchStart={e => dragHandlers.onTouchStart(e, assignedChar.id)}
                                             onTouchMove={dragHandlers.onTouchMove}
                                             onTouchEnd={dragHandlers.onTouchEnd}
                                         />
-                                        <span className="text-emerald-300 text-xs font-medium">
+                                        <span className="text-emerald-300 text-[10px] md:text-xs font-medium">
                                             {assignedChar.name}
                                         </span>
                                     </div>
@@ -304,7 +306,7 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
                         Roster
                     </p>
                     <div className="flex flex-wrap justify-center gap-3 md:gap-4">
-                        {CHARACTERS.filter(c => !(c.id === 'simon' && simonErased)).map(char => {
+                        {shuffledCharacters.filter(c => !(c.id === 'simon' && simonErased)).map(char => {
                             const inSlot = isCharacterInSlot(char.id);
                             return (
                                 <div
@@ -350,22 +352,7 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
                     </p>
                 )}
 
-                {/* Confirm Button */}
-                {!isCorrect && (
-                    <button
-                        onClick={handleConfirm}
-                        disabled={!allSlotsFilled}
-                        className={`
-                            px-8 py-3 rounded uppercase tracking-widest font-bold text-sm transition-all duration-300 border
-                            ${allSlotsFilled
-                                ? 'bg-emerald-900/40 border-emerald-500/50 text-emerald-400 hover:bg-emerald-800 hover:text-white cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.2)]'
-                                : 'bg-black/20 border-slate-700/30 text-slate-600 cursor-not-allowed'
-                            }
-                        `}
-                    >
-                        Confirm Team
-                    </button>
-                )}
+
             </div>
 
             {/* Touch-drag clone */}

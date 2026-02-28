@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { shuffleArray } from '../../utils/array';
 
 export interface Choice {
     label: string;
@@ -12,16 +13,9 @@ export interface MultipleChoiceStageProps {
     choices: Choice[];
     onAdvance: () => void;
     successMessageRenderer?: (correctLabel: string) => React.ReactNode;
+    successDelay?: number;
 }
 
-function shuffleArray<T>(arr: T[]): T[] {
-    const shuffled = [...arr];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-}
 
 export const MultipleChoiceStage: React.FC<MultipleChoiceStageProps> = ({
     title,
@@ -30,6 +24,7 @@ export const MultipleChoiceStage: React.FC<MultipleChoiceStageProps> = ({
     choices,
     onAdvance,
     successMessageRenderer,
+    successDelay = 1500,
 }) => {
     const shuffledChoices = useMemo(() => shuffleArray(choices), [choices]);
 
@@ -44,7 +39,7 @@ export const MultipleChoiceStage: React.FC<MultipleChoiceStageProps> = ({
         if (choice.correct) {
             setCorrectIndex(index);
             setCorrectLabel(choice.label);
-            setTimeout(() => onAdvance(), 1500);
+            setTimeout(() => onAdvance(), successDelay);
         } else {
             setShakingIndex(index);
             setTimeout(() => {
@@ -56,15 +51,15 @@ export const MultipleChoiceStage: React.FC<MultipleChoiceStageProps> = ({
 
     const getButtonClass = (index: number) => {
         if (correctIndex === index) {
-            return 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.4)] border rounded px-4 py-3 transition-all duration-300 font-serif';
+            return 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.4)] border rounded px-2 py-2 text-xs md:text-base md:px-4 md:py-3 transition-all duration-300 font-serif';
         }
         if (disabledIndices.has(index)) {
-            return 'bg-black/40 border border-emerald-500/30 text-emerald-100 px-4 py-3 rounded transition-all duration-300 opacity-40 pointer-events-none font-serif';
+            return 'bg-black/40 border border-emerald-500/30 text-emerald-100 px-2 py-2 text-xs md:text-base md:px-4 md:py-3 rounded transition-all duration-300 opacity-40 pointer-events-none font-serif';
         }
         if (shakingIndex === index) {
-            return 'bg-red-900/40 border border-red-500/60 text-red-300 px-4 py-3 rounded transition-all duration-300 animate-[shake_0.4s_ease-in-out] font-serif';
+            return 'bg-red-900/40 border border-red-500/60 text-red-300 px-2 py-2 text-xs md:text-base md:px-4 md:py-3 rounded transition-all duration-300 animate-[shake_0.4s_ease-in-out] font-serif';
         }
-        return 'bg-black/40 border border-emerald-500/30 text-emerald-100 px-4 py-3 rounded transition-all duration-300 hover:bg-emerald-900/40 cursor-pointer font-serif';
+        return 'bg-black/40 border border-emerald-500/30 text-emerald-100 px-2 py-2 text-xs md:text-base md:px-4 md:py-3 rounded transition-all duration-300 hover:bg-emerald-900/40 cursor-pointer font-serif';
     };
 
     return (
@@ -83,7 +78,7 @@ export const MultipleChoiceStage: React.FC<MultipleChoiceStageProps> = ({
                 {description}
             </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
                 {shuffledChoices.map((choice, index) => (
                     <button
                         key={choice.label}

@@ -15,13 +15,13 @@ export const ReactiveParryStage: React.FC<ReactiveParryStageProps> = ({ onAdvanc
 
         setTimeout(() => {
             setShowDodgeMsg(false);
-        }, 4000);
+        }, 3000);
     };
 
     return (
         <ActionRingStage
             title="Incoming Attack"
-            description="An enemy is striking! Press PARRY when the closing ring matches the center ring."
+            description="An enemy is striking! Press PARRY (or DODGE if you REALLY need it...) when the closing ring matches the center ring."
             actionLabel="Parry"
             onAdvance={onAdvance}
             isPaused={showDodgeMsg}

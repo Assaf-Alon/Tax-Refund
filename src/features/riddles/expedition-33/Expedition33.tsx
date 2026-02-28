@@ -78,9 +78,9 @@ export const Expedition33: React.FC = () => {
             case 1:
                 return (
                     <TextAnswerStage
-                        title="The Engineer"
-                        prompt="A brilliant engineer and inventor who lost his arm, replacing it with his own mechanical design."
-                        acceptedAnswers={["gustave"]}
+                        title="Lovely Feet"
+                        prompt="She has lovely feet... 🦧"
+                        acceptedAnswers={["lune"]}
                         onAdvance={handleAdvance}
                         theme={SHARED_TEXT_THEME}
                     />

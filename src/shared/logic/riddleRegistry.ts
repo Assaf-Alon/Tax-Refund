@@ -42,7 +42,7 @@ export const RIDDLE_REGISTRY: RiddleMeta[] = [
         path: '/xp-33',
         totalStages: 10,
         stageLabels: [
-            'Entrance', 'The Engineer', 'Esquie Dance', 'Reactive Parry',
+            'Entrance', 'Lovely Feet', 'Esquie Dance', 'Reactive Parry',
             'Antagonist', 'Team Builder', 'Fading Memory', 'Simon OST', 'The Final Choice', 'Completed'
         ],
     },
