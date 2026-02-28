@@ -64,17 +64,19 @@ The Riddle Flow consists of **10 Stages**:
    - A shrinking ring `div` overlaying a target ring.
    - Uses `requestAnimationFrame` to animate a `scale` CSS transform from `2.0` down to `1.0` and lower over 3 seconds.
    - When the player clicks `PARRY`, the exact `scale` at that timestamp is calculated. If the scale is within `[0.9, 1.1]`, it's a success -> `onAdvance()`. If outside, state sets to `failed = true`, triggering a red error animation, and resets the timer.
-   - Includes an optional dodging mechanic where clicking the dodge button pauses the UI and shows a joke message.
+   - Includes an optional dodging mechanic where clicking the dodge button pauses the UI and shows a joke message. Instruction text optionally mentions the existence of a dodge option, and the punishment duration for dodging is 3 seconds.
 3. **TeamBuilderStage (`src/features/riddles/expedition-33/stages/TeamBuilderStage.tsx`)**:
-   - Uses HTML5 drag and drop and custom touch event handlers (`onTouchStart`, etc) to support smooth dragging on mobile.
+   - Uses HTML5 drag and drop and custom touch event handlers (`onTouchStart`, etc) to support smooth dragging on mobile. Mobile slots are styled to fit on a single row to prevent horizontal scrolling.
    - Automatically validates the assigned characters to slots once all 3 are populated, replacing the manual confirm step.
    - Includes logic to wipe out Simon in a dramatic "Gommage" white-out effect if dropped in a slot.
+   - The character roster is natively shuffled on mount to ensure a dynamic layout.
 4. **FadingTextStage (`src/features/riddles/expedition-33/stages/FadingTextStage.tsx`)**:
    - Wraps standard `TextAnswerStage` input UI.
    - The text prompt uses a `useEffect` that runs every `100ms`, picking a random visible character and making it invisible via a `<span>` with `opacity-0` transition, until the entire string is gone.
    - Pass this specialized disappearing text block as a `ReactNode` into the `prompt` prop of `<TextAnswerStage />` (since `TextAnswerStage` supports rich-text `ReactNode` prompts out-of-the-box).
 5. **SimonOstStage (`src/features/riddles/expedition-33/stages/SimonOstStage.tsx`)**:
-   - Renders the `MultipleChoiceStage` component with 13 shuffled options.
+   - Renders the `MultipleChoiceStage` component with 13 shuffled options. Implements tight responsive padding to ensure all options fit on mobile without scrolling.
+   - Uses a success delay (e.g., 4000ms) to allow the player to read the longer success message before advancing.
    - The `useAudio` hook handles crossfading to `We Lost.mp3` and preserving the `Lumiere.mp3` playback position upon success.
 6. **FinalChoiceStage (`src/features/riddles/expedition-33/stages/FinalChoiceStage.tsx`)**:
    - Listens to `onPointerDown` and `onPointerUp` to track hold duration in a `requestAnimationFrame` loop.
