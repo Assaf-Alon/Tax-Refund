@@ -37,3 +37,22 @@ export interface CongratsTheme {
     title?: string;
     subtitle?: string;
 }
+
+export interface CrossclimbTheme {
+    container?: string;
+    title?: string;
+    description?: string;
+    hintText?: string;
+    rowContainer?: string;
+    clueText?: string;
+    inputContainer?: string;
+}
+
+export interface PinpointTheme {
+    container?: string;
+    title?: string;
+    clueList?: string;
+    clueItem?: string;
+    input?: string;
+    submitButton?: string;
+}

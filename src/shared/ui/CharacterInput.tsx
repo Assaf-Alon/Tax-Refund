@@ -13,6 +13,20 @@ interface CharacterInputProps {
     locked?: boolean;
     /** Focus first input on mount */
     autoFocus?: boolean;
+    /** Custom border color classes (e.g. 'border-blue-500') */
+    borderColor?: {
+        locked?: string;
+        unlocked?: string;
+    };
+    /** Custom text color classes (e.g. 'text-blue-300') */
+    textColor?: {
+        locked?: string;
+        unlocked?: string;
+    };
+    /** Custom background color class (e.g. 'bg-white') */
+    backgroundColor?: string;
+    /** Callback when any input in the group is focused */
+    onFocus?: () => void;
 }
 
 /**
@@ -25,6 +39,10 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
     onComplete,
     locked = false,
     autoFocus = false,
+    borderColor,
+    textColor,
+    backgroundColor,
+    onFocus,
 }, ref) => {
     const chars = expectedValue.split('');
     const [values, setValues] = useState<string[]>(() => chars.map(() => ''));
@@ -39,16 +57,19 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [expectedValue]);
 
-    // Auto-focus on mount
+    // Reactive focus when autoFocus changes to true
     useEffect(() => {
         if (autoFocus) {
             const firstIdx = chars.findIndex(ch => !isStatic(ch));
             if (firstIdx !== -1) {
-                inputRefs.current[firstIdx]?.focus();
+                // Check if already focused to avoid redundant events
+                if (document.activeElement !== inputRefs.current[firstIdx]) {
+                    inputRefs.current[firstIdx]?.focus();
+                }
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [autoFocus]);
 
     // Expose focus method via ref
     useImperativeHandle(ref, () => ({
@@ -119,12 +140,12 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
         }
     };
 
-    const borderColor = locked
-        ? 'border-green-500/70'
-        : 'border-pink-500';
-    const textColor = locked
-        ? 'text-green-300'
-        : 'text-pink-200';
+    const borderColorClass = locked
+        ? (borderColor?.locked ?? 'border-green-500/70')
+        : (borderColor?.unlocked ?? 'border-pink-500');
+    const textColorClass = locked
+        ? (textColor?.locked ?? 'text-green-300')
+        : (textColor?.unlocked ?? 'text-pink-200');
 
     return (
         <span className="inline-flex gap-0.5 whitespace-nowrap" role="group">
@@ -150,8 +171,9 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
                         value={values[i]}
                         onChange={e => handleChange(i, e.target.value)}
                         onKeyDown={e => handleKeyDown(i, e)}
+                        onFocus={onFocus}
                         readOnly={locked}
-                        className={`w-6 h-8 sm:w-8 sm:h-10 text-center bg-black ${borderColor} border ${textColor} rounded-sm font-mono text-sm sm:text-lg focus:outline-none focus:ring-1 focus:ring-[#ff007f] focus:border-[#ff007f] transition-colors`}
+                        className={`w-6 h-8 sm:w-8 sm:h-10 text-center ${backgroundColor ?? 'bg-black'} ${borderColorClass} border ${textColorClass} rounded-sm font-mono text-sm sm:text-lg focus:outline-none focus:ring-1 focus:ring-[#ff007f] focus:border-[#ff007f] transition-colors`}
                         placeholder={'_'}
                         aria-label={`Character ${i + 1}`}
                         data-testid={`input-${i}`}
@@ -160,6 +182,6 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
             })}
         </span>
     );
-});
+})
 
 CharacterInput.displayName = 'CharacterInput';
