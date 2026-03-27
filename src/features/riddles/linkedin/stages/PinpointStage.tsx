@@ -87,7 +87,7 @@ export const PinpointStage: React.FC<PinpointStageProps> = ({
                     </form>
                 </div>
 
-                {/* Success Indicator (Optional, but good for UX) */}
+                {/* Success Indicator */}
                 {success && (
                     <div className="w-full bg-green-500 py-2 text-center text-white text-xs font-bold uppercase tracking-widest animate-in slide-in-from-bottom-full duration-500">
                         Correct!

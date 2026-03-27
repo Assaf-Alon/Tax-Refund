@@ -5,6 +5,7 @@ import { CongratsStage } from '../../../shared/stages/CongratsStage';
 import { DevSkipButton } from '../../admin/DevSkipButton';
 import { CrossclimbStage } from './stages/CrossclimbStage';
 import { PinpointStage } from './stages/PinpointStage';
+import { LINKEDIN_WELCOME_THEME, LINKEDIN_CONGRATS_THEME } from './theme';
 import { useFavicon } from '../../../hooks/useFavicon';
 
 const RIDDLE_ID = 'linkedin-games';
@@ -34,12 +35,7 @@ export const LinkedInGames: React.FC = () => {
                         subtitle="Master the LinkedIn Games"
                         buttonText="Start Playing"
                         onAdvance={handleAdvance}
-                        theme={{
-                            container: "text-center space-y-8 animate-in fade-in zoom-in duration-1000",
-                            title: "text-5xl font-extrabold text-blue-500 tracking-tight",
-                            subtitle: "text-xl text-blue-200/60 font-medium",
-                            button: "px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold transition-all duration-300 shadow-[0_0_20px_rgba(37,99,235,0.4)] uppercase tracking-widest text-sm"
-                        }}
+                        theme={LINKEDIN_WELCOME_THEME}
                     />
                 );
             case 1:
@@ -67,11 +63,7 @@ export const LinkedInGames: React.FC = () => {
                     <CongratsStage
                         title="Executive Performance"
                         subtitle="You've mastered the professional arena."
-                        theme={{
-                            container: "text-center space-y-6 animate-in fade-in slide-in-from-top-10 duration-1000",
-                            title: "text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600",
-                            subtitle: "text-blue-200/80 text-lg"
-                        }}
+                        theme={LINKEDIN_CONGRATS_THEME}
                     />
                 );
             default:

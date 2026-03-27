@@ -46,16 +46,9 @@ const DelayedTranslatorLink: React.FC<{ delay: number }> = ({ delay }) => {
     );
 };
 
-const RIDDLE_ID = 'outer-wilds';
+import { SHARED_TEXT_THEME, WELCOME_THEME, CONGRATS_THEME } from './theme';
 
-const SHARED_TEXT_THEME = {
-    container: "text-center space-y-8 w-full max-w-lg z-10",
-    title: "text-3xl font-bold text-orange-400",
-    promptText: "text-lg text-gray-300",
-    input: "w-full max-w-xs bg-black/70 border border-orange-500/50 p-3 text-center focus:outline-none focus:ring-2 focus:ring-orange-500 rounded text-orange-200",
-    submitButton: "px-8 py-3 border border-orange-500/50 hover:bg-orange-500 hover:text-white transition-all duration-200 uppercase tracking-wider rounded text-orange-400 font-bold",
-    errorText: "text-red-400 text-md animate-pulse font-medium"
-};
+const RIDDLE_ID = 'outer-wilds';
 
 export const OuterWilds: React.FC = () => {
     useFavicon(`${import.meta.env.BASE_URL}ow-48.png`);
@@ -86,9 +79,7 @@ export const OuterWilds: React.FC = () => {
                         subtitle="Join the expedition"
                         buttonText="Begin"
                         onAdvance={handleAdvance}
-                        theme={{
-                            button: "mt-8 px-8 py-4 bg-orange-600 hover:bg-orange-500 focus:ring-orange-500/50 text-white rounded-lg font-medium transition-all duration-300 shadow-lg shadow-orange-500/25"
-                        }}
+                        theme={WELCOME_THEME}
                     />
                 );
             case 1:
@@ -190,9 +181,7 @@ export const OuterWilds: React.FC = () => {
                     <CongratsStage
                         title="Mission Accomplished"
                         subtitle="You've mapped the stars."
-                        theme={{
-                            title: "text-4xl md:text-5xl font-bold text-orange-400 tracking-tight"
-                        }}
+                        theme={CONGRATS_THEME}
                     />
                 );
             default:
@@ -200,9 +189,7 @@ export const OuterWilds: React.FC = () => {
                     <CongratsStage
                         title="Mission Accomplished"
                         subtitle="You've mapped the stars."
-                        theme={{
-                            title: "text-4xl md:text-5xl font-bold text-orange-400 tracking-tight"
-                        }}
+                        theme={CONGRATS_THEME}
                     />
                 );
         }
