@@ -126,7 +126,6 @@ const SortableRow: React.FC<SortableRowProps> = ({
                 onClick={() => !isLockedRow && setActiveIndex(idx)}
                 className={`
                     relative w-full h-14 rounded-lg border-2 flex items-center justify-center
-                    ${!isDragging ? 'transition-all duration-300' : ''}
                     ${bgColor} ${borderColor} ${active ? 'scale-[1.02] shadow-md z-10' : 'scale-100 shadow-sm'}
                     ${isMiddleRow && phase === 'REORDER' ? 'cursor-grab active:cursor-grabbing hover:border-blue-300 dark:hover:border-blue-700 touch-none' : ''}
                     ${isLockedRow ? 'opacity-80' : ''}
@@ -301,7 +300,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     }, [phase, activeIndex, rows]);
 
     return (
-        <div className="flex flex-col items-center w-full font-sans p-4 animate-in fade-in duration-700">
+        <div className="flex flex-col items-center w-full font-sans p-4 animate-in fade-in duration-700 pb-40">
             <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center">
                 <div className="w-full p-6 text-center">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">CrossClimb</h2>
@@ -322,6 +321,17 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                             collisionDetection={closestCenter}
                             onDragEnd={handleDragEnd}
                             modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+                            accessibility={{
+                                announcements: {
+                                    onDragStart: () => '',
+                                    onDragOver: () => '',
+                                    onDragEnd: () => '',
+                                    onDragCancel: () => '',
+                                },
+                                screenReaderInstructions: {
+                                    draggable: '',
+                                },
+                            }}
                         >
                             <SortableContext 
                                 items={rows.map(r => r.id)}
