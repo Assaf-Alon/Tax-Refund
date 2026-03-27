@@ -30,6 +30,7 @@ export const PinpointStage: React.FC<PinpointStageProps> = ({
             if (revealedCount < 5) {
                 setRevealedCount(prev => prev + 1);
             }
+            setGuess('');
             setTimeout(() => setError(false), 500);
         }
     };

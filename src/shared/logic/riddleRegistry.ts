@@ -50,7 +50,7 @@ export const RIDDLE_REGISTRY: RiddleMeta[] = [
         id: 'linkedin-games',
         name: 'LinkedIn Games',
         path: '/linkedin-games',
-        totalStages: 4,
-        stageLabels: ['Welcome', 'Crossclimb', 'Pinpoint', 'Completed'],
+        totalStages: 5,
+        stageLabels: ['Welcome', 'Crossclimb', 'Pinpoint', 'Queens', 'Completed'],
     },
 ];

@@ -5,6 +5,7 @@ import { CongratsStage } from '../../../shared/stages/CongratsStage';
 import { DevSkipButton } from '../../admin/DevSkipButton';
 import { CrossclimbStage } from './stages/CrossclimbStage';
 import { PinpointStage } from './stages/PinpointStage';
+import { QueensStage } from './stages/QueensStage';
 import { LINKEDIN_WELCOME_THEME, LINKEDIN_CONGRATS_THEME } from './theme';
 import { useFavicon } from '../../../hooks/useFavicon';
 
@@ -60,6 +61,12 @@ export const LinkedInGames: React.FC = () => {
                 );
             case 3:
                 return (
+                    <QueensStage
+                        onAdvance={handleAdvance}
+                    />
+                );
+            case 4:
+                return (
                     <CongratsStage
                         title="Executive Performance"
                         subtitle="You've mastered the professional arena."
@@ -87,7 +94,7 @@ export const LinkedInGames: React.FC = () => {
             <DevSkipButton 
                 riddleId={RIDDLE_ID} 
                 currentStage={stage} 
-                totalStages={4} 
+                totalStages={5} 
                 onSkip={handleAdvance} 
             />
         </div>
