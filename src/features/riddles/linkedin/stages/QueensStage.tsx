@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Crown, Heart, RotateCcw, X } from 'lucide-react';
+import { Crown, Heart, RotateCcw, X, Info } from 'lucide-react';
 
 interface QueensStageProps {
     onAdvance: () => void;
@@ -33,7 +33,6 @@ const BORDER_COLORS: Record<number, string> = {
 
 const STARTING_QUEENS: Position[] = [{ r: 4, c: 7 }];
 
-
 interface Position {
     r: number;
     c: number;
@@ -43,8 +42,8 @@ export const QueensStage: React.FC<QueensStageProps> = ({ onAdvance }) => {
     const [queens, setQueens] = useState<Position[]>(STARTING_QUEENS);
     const [manualMarks, setManualMarks] = useState<Position[]>([]);
     const [solved, setSolved] = useState(false);
+    const [showRules, setShowRules] = useState(false);
 
-    // Auto-calculated illegal cells based on placed queens
     const autoMarks = useMemo(() => {
         const marks = Array(SIZE).fill(0).map(() => Array(SIZE).fill(false));
         queens.forEach(q => {
@@ -61,7 +60,6 @@ export const QueensStage: React.FC<QueensStageProps> = ({ onAdvance }) => {
         return marks;
     }, [queens]);
 
-    // Conflict detection
     const errors = useMemo(() => {
         const errorCells: Position[] = [];
         queens.forEach((q, i) => {
@@ -75,7 +73,6 @@ export const QueensStage: React.FC<QueensStageProps> = ({ onAdvance }) => {
         return errorCells;
     }, [queens]);
 
-    // Click cycle: Empty -> Queen -> Manual X -> Empty
     const toggleCell = (r: number, c: number) => {
         if (solved) return;
         
@@ -84,15 +81,12 @@ export const QueensStage: React.FC<QueensStageProps> = ({ onAdvance }) => {
         const isStarting = STARTING_QUEENS.some(q => q.r === r && q.c === c);
 
         if (queenIndex > -1) {
-            if (isStarting) return; // Cannot remove starting queen
-            // Transition from Queen to Manual X
+            if (isStarting) return;
             setQueens(queens.filter((_, i) => i !== queenIndex));
             setManualMarks([...manualMarks, { r, c }]);
         } else if (markIndex > -1) {
-            // Transition from Manual X to Empty
             setManualMarks(manualMarks.filter((_, i) => i !== markIndex));
         } else {
-            // Transition from Empty to Queen
             if (queens.length < SIZE) {
                 setQueens([...queens, { r, c }]);
             }
@@ -121,17 +115,31 @@ export const QueensStage: React.FC<QueensStageProps> = ({ onAdvance }) => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center w-full min-h-screen font-sans p-4 animate-in fade-in duration-700">
+        <div className="flex flex-col items-center w-full font-sans p-4 animate-in fade-in duration-700">
             <div className="w-full max-w-md bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center">
                 
-                <div className="w-full bg-white dark:bg-[#282f36] border-b border-gray-200 dark:border-gray-700 h-14 flex items-center justify-center px-4 relative">
+                <div className="w-full bg-white dark:bg-[#282f36] border-b border-gray-200 dark:border-gray-700 h-14 flex items-center justify-between px-4 relative">
+                    <button 
+                        type="button"
+                        onClick={() => setShowRules(true)}
+                        className="text-gray-400 hover:text-[#0a66c2] transition-colors p-1"
+                        title="Game Rules"
+                    >
+                        <Info size={20} />
+                    </button>
+
                     <div className="flex items-center gap-2">
                         <div className="bg-[#0a66c2] p-1 rounded text-white font-bold text-lg leading-none">Q</div>
                         <span className="font-semibold text-sm dark:text-gray-200">Queens</span>
                     </div>
-                    <button onClick={resetGame} className="absolute right-4 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white flex flex-col items-center text-[10px] active:scale-95 transition-all">
+
+                    <button 
+                        type="button"
+                        onClick={resetGame} 
+                        className="text-gray-400 hover:text-[#0a66c2] dark:text-gray-400 dark:hover:text-[#378fe9] flex flex-col items-center text-[10px] active:scale-95 transition-all"
+                    >
                         <RotateCcw size={18} />
-                        <span className="mt-0.5">Reset</span>
+                        <span className="mt-0.5 font-bold">Reset</span>
                     </button>
                 </div>
 
@@ -219,6 +227,49 @@ export const QueensStage: React.FC<QueensStageProps> = ({ onAdvance }) => {
                             <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 font-medium animate-pulse">
                                 Advancing automatically...
                             </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showRules && (
+                <div id="queens-rules-overlay" className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-6 z-[60] animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-[#1b1f23] rounded-xl max-w-sm w-full shadow-2xl animate-in zoom-in-95 overflow-hidden">
+                        <div className="bg-[#0a66c2] p-4 text-white flex justify-between items-center">
+                            <h3 className="font-bold flex items-center gap-2">
+                                <Info size={18} /> How to Play Queens
+                            </h3>
+                            <button 
+                                type="button"
+                                onClick={() => setShowRules(false)}
+                                className="hover:bg-white/20 p-1 rounded-full transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+                            <div className="flex gap-3">
+                                <div className="text-[#0a66c2] mt-1 shrink-0"><Crown size={18} fill="currentColor" /></div>
+                                <p>Place exactly <strong>9 Queens</strong> on the grid.</p>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="text-slate-400 mt-1 shrink-0"><X size={18} /></div>
+                                <p>Exactly one queen per <strong>row</strong>, <strong>column</strong>, and <strong>color region</strong>.</p>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="text-red-500 mt-1 shrink-0">⚠️</div>
+                                <p>No two queens may be **adjacent**, including diagonally (they cannot touch).</p>
+                            </div>
+                            <div className="pt-2 border-t dark:border-gray-800">
+                                <p className="text-xs text-gray-500 italic">Click a cell once for a Queen, twice for an X, and a third time to clear.</p>
+                            </div>
+                            <button 
+                                type="button"
+                                onClick={() => setShowRules(false)}
+                                className="w-full py-2 bg-[#0a66c2] text-white rounded-lg font-bold mt-2 hover:bg-[#084e96] transition-colors"
+                            >
+                                Got it!
+                            </button>
                         </div>
                     </div>
                 </div>

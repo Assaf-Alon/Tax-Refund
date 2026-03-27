@@ -301,7 +301,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     }, [phase, activeIndex, rows]);
 
     return (
-        <div className="flex flex-col items-center justify-center w-full min-h-screen font-sans p-4 animate-in fade-in duration-700 bg-[#f3f2ef] dark:bg-[#121212]">
+        <div className="flex flex-col items-center w-full font-sans p-4 animate-in fade-in duration-700">
             <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center">
                 <div className="w-full p-6 text-center">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">CrossClimb</h2>
