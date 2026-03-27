@@ -46,4 +46,11 @@ export const RIDDLE_REGISTRY: RiddleMeta[] = [
             'Antagonist', 'Team Builder', 'Fading Memory', 'Simon OST', 'The Final Choice', 'Completed'
         ],
     },
+    {
+        id: 'linkedin-games',
+        name: 'LinkedIn Games',
+        path: '/linkedin-games',
+        totalStages: 5,
+        stageLabels: ['Welcome', 'Crossclimb', 'Pinpoint', 'Queens', 'Completed'],
+    },
 ];
