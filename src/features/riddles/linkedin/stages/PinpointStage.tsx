@@ -36,8 +36,8 @@ export const PinpointStage: React.FC<PinpointStageProps> = ({
     };
 
     return (
-        <div className="flex flex-col items-center w-full font-sans p-4 animate-in fade-in duration-700">
-            <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center">
+        <div className="flex flex-col items-center w-full font-sans p-4 animate-in fade-in duration-700 min-h-[100dvh] overflow-y-auto">
+            <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center max-h-fit sm:max-h-[calc(100dvh-2rem)]">
                 
                 {/* Header */}
                 <div className="w-full p-6 text-center">
@@ -45,14 +45,14 @@ export const PinpointStage: React.FC<PinpointStageProps> = ({
                 </div>
 
                 {/* Clue Grid */}
-                <div className="w-full">
+                <div className="w-full flex-1 flex flex-col min-h-0">
                     {[0, 1, 2, 3, 4].map((idx) => {
                         const isRevealed = idx < revealedCount;
                         return (
                             <div
                                 key={idx}
                                 style={{ backgroundColor: CLUE_COLORS[idx] }}
-                                className={`w-full h-14 flex items-center justify-center text-blue-950 font-bold transition-all duration-500 uppercase tracking-wider ${isRevealed ? 'animate-in fade-in slide-in-from-bottom-2' : ''}`}
+                                className={`w-full min-h-[3rem] h-14 flex-1 flex items-center justify-center text-blue-950 font-bold transition-all duration-500 uppercase tracking-wider ${isRevealed ? 'animate-in fade-in slide-in-from-bottom-2' : ''}`}
                             >
                                 {isRevealed ? clues[idx] : `CLUE ${idx + 1}`}
                             </div>
@@ -70,7 +70,7 @@ export const PinpointStage: React.FC<PinpointStageProps> = ({
                 </div>
 
                 {/* Input Area */}
-                <div className="w-full px-6 pb-8 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <div className="w-full px-6 pb-8 pt-4 border-t border-gray-100 dark:border-gray-800 shrink-0">
                     <form onSubmit={handleGuess} className="relative flex items-center w-full">
                         <input
                             type="text"

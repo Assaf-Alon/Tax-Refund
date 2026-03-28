@@ -54,10 +54,11 @@ interface SortableRowProps {
     checkDistance: (word1: string, word2: string) => number;
     prevRow?: WordData;
     prevRowSolved?: boolean;
+    isJustCorrect?: boolean;
 }
 
 const SortableRow: React.FC<SortableRowProps> = ({
-    row, idx, phase, active, isSolved, isMiddleRow, handleWordComplete, setActiveIndex, checkDistance, prevRow, prevRowSolved
+    row, idx, phase, active, isSolved, isMiddleRow, handleWordComplete, setActiveIndex, checkDistance, prevRow, prevRowSolved, isJustCorrect
 }) => {
     const isLockedRow = row.isLockedInitially && phase !== 'FINAL' && phase !== 'COMPLETE';
     
@@ -130,6 +131,8 @@ const SortableRow: React.FC<SortableRowProps> = ({
                     ${isMiddleRow && phase === 'REORDER' ? 'cursor-grab active:cursor-grabbing hover:border-blue-300 dark:hover:border-blue-700 touch-none' : ''}
                     ${isLockedRow ? 'opacity-80' : ''}
                     ${isDragging ? 'shadow-2xl opacity-90 scale-105 border-blue-400 dark:border-blue-500' : ''}
+                    ${isJustCorrect ? 'animate-bounce !border-green-400 !bg-green-100 dark:!bg-green-900/30' : ''}
+                    transition-all duration-300
                 `}
                 {...attributes}
                 {...listeners}
@@ -183,6 +186,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
 
     const [solvedWords, setSolvedWords] = useState<Record<string, string>>({});
     const [activeIndex, setActiveIndex] = useState<number>(1);
+    const [justCorrectId, setJustCorrectId] = useState<string | null>(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -266,7 +270,17 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
             if (isLocked) return false;
             return !nextSolved[row.id] && row.id !== rowId;
         });
-        if (nextIdx !== -1) setActiveIndex(nextIdx);
+
+        if (nextIdx !== -1) {
+            // Delay focus move to let user see the "Correct" state
+            setTimeout(() => {
+                setActiveIndex(nextIdx);
+            }, 400);
+        }
+
+        // Show animation
+        setJustCorrectId(rowId);
+        setTimeout(() => setJustCorrectId(null), 800);
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -300,8 +314,8 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     }, [phase, activeIndex, rows]);
 
     return (
-        <div className="flex flex-col items-center w-full font-sans p-4 animate-in fade-in duration-700 pb-40">
-            <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center">
+        <div className="flex flex-col items-center w-full font-sans p-4 animate-in fade-in duration-700 pb-40 min-h-[100dvh] overflow-y-auto">
+            <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center max-h-[calc(100dvh-180px)] overflow-y-auto shrink-0 mb-4">
                 <div className="w-full p-6 text-center">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">CrossClimb</h2>
                 </div>
@@ -351,6 +365,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                                         checkDistance={checkDistance}
                                         prevRow={idx > 0 ? rows[idx - 1] : undefined}
                                         prevRowSolved={idx > 0 ? solvedWords[rows[idx-1].id]?.toLowerCase() === rows[idx-1].answer.toLowerCase() : false}
+                                        isJustCorrect={justCorrectId === row.id}
                                     />
                                 ))}
                             </SortableContext>

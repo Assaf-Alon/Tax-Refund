@@ -192,10 +192,10 @@ export const QueensStage: React.FC<QueensStageProps> = ({ onAdvance }) => {
                                                 ) : (
                                                     <div className={`
                                                         flex items-center justify-center transition-all animate-in zoom-in-75 duration-100
-                                                        ${isManualMark ? 'opacity-60 font-bold scale-110' : 'opacity-20'} 
-                                                        ${isHeart ? 'text-white' : 'text-slate-800'}
+                                                        ${isManualMark ? 'opacity-80 font-bold scale-110' : 'opacity-40'} 
+                                                        ${(isHeart || regionId === 1 || regionId === 2 || regionId === 8) ? 'text-white' : 'text-slate-900'}
                                                     `}>
-                                                        <X size="50%" />
+                                                        <X size="50%" strokeWidth={3} />
                                                     </div>
                                                 )}
                                             </div>
