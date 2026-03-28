@@ -25,7 +25,7 @@ describe('CharacterInput', () => {
         expect(screen.getByTestId('input-3')).toBeTruthy();
     });
 
-    it('auto-focuses next input on typing, skipping static chars', () => {
+    it('auto-focuses next input on typing, skipping static chars', async () => {
         render(<CharacterInput expectedValue="it's" onComplete={onComplete} />);
 
         const inputI = screen.getByTestId('input-0') as HTMLInputElement;
@@ -33,12 +33,12 @@ describe('CharacterInput', () => {
 
         inputI.focus();
         fireEvent.change(inputI, { target: { value: 'i' } });
-        expect(document.activeElement).toBe(inputT);
+        await vi.waitUntil(() => document.activeElement === inputT);
 
         // typing 't' should skip the apostrophe and focus 's'
         fireEvent.change(inputT, { target: { value: 't' } });
         const inputS = screen.getByTestId('input-3') as HTMLInputElement;
-        expect(document.activeElement).toBe(inputS);
+        await vi.waitUntil(() => document.activeElement === inputS);
     });
 
     it('moves focus back on backspace from empty input', () => {

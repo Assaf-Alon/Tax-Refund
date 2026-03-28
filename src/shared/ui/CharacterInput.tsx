@@ -107,15 +107,39 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
     const handleChange = (index: number, value: string) => {
         if (locked || isStatic(chars[index])) return;
 
-        const char = value.slice(-1);
         const newValues = [...values];
+        
+        // Handle fast typing: if multiple characters are received and the current box was empty,
+        // distribute the first to the current box and the second to the next box.
+        if (!values[index] && value.length > 1) {
+            const first = value[0];
+            const second = value[1];
+            newValues[index] = first;
+            
+            const nextIdx = findNextInput(index);
+            if (nextIdx !== -1) {
+                newValues[nextIdx] = second;
+                setValues(newValues);
+                const nextNextIdx = findNextInput(nextIdx);
+                // Use requestAnimationFrame to ensure focus happens after DOM update
+                requestAnimationFrame(() => {
+                    inputRefs.current[nextNextIdx !== -1 ? nextNextIdx : nextIdx]?.focus();
+                });
+                return;
+            }
+        }
+
+        const char = value.slice(-1);
         newValues[index] = char;
         setValues(newValues);
 
         if (char) {
             const nextIdx = findNextInput(index);
             if (nextIdx !== -1) {
-                inputRefs.current[nextIdx]?.focus();
+                // Use requestAnimationFrame for smoother focus transition
+                requestAnimationFrame(() => {
+                    inputRefs.current[nextIdx]?.focus();
+                });
             }
         }
     };
@@ -173,7 +197,11 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
                         onKeyDown={e => handleKeyDown(i, e)}
                         onFocus={onFocus}
                         readOnly={locked}
-                        className={`w-6 h-8 sm:w-8 sm:h-10 text-center ${backgroundColor ?? 'bg-black'} ${borderColorClass} border ${textColorClass} rounded-sm font-mono text-sm sm:text-lg focus:outline-none focus:ring-1 focus:ring-[#ff007f] focus:border-[#ff007f] transition-colors`}
+                        autoComplete="off"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        inputMode="text"
+                        className={`w-6 h-8 sm:w-8 sm:h-10 text-center ${backgroundColor ?? 'bg-black'} ${borderColorClass} border ${textColorClass} rounded-sm font-mono text-sm sm:text-lg focus:outline-none focus:ring-1 focus:ring-[#ff007f] focus:border-[#ff007f] transition-colors cursor-pointer`}
                         placeholder={'_'}
                         aria-label={`Character ${i + 1}`}
                         data-testid={`input-${i}`}
