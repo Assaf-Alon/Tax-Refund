@@ -17,7 +17,7 @@ const ProgressHUD: React.FC<{ currentStage: number }> = ({ currentStage }) => {
     const activeLabels = ["Crossclimb", "Pinpoint", "Queens"];
 
     return (
-        <div id="linkedin-progress-hud" className="flex flex-col items-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div id="linkedin-progress-hud" className="flex flex-col items-center mb-2 md:mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
             <div className="flex items-center gap-2">
                 {[1, 2, 3].map((s) => (
                     <div key={s} className="flex items-center">
@@ -92,7 +92,7 @@ export const LinkedInGames: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen min-w-full overflow-x-hidden text-gray-900 dark:text-gray-200 font-sans selection:bg-blue-500/30 selection:text-white flex flex-col items-center justify-start pt-16 md:pt-24 p-4 md:p-12 relative bg-[#f3f2ef] dark:bg-[#1d2226]">
+        <div className="min-h-screen min-w-full overflow-x-hidden text-gray-900 dark:text-gray-200 font-sans selection:bg-blue-500/30 selection:text-white flex flex-col items-center justify-start pt-4 md:pt-24 p-4 md:p-12 relative bg-[#f3f2ef] dark:bg-[#1d2226]">
             <div className="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none" 
                  style={{ backgroundImage: 'radial-gradient(#0a66c2 1px, transparent 1px)', backgroundSize: '40px 40px' }} 
             />

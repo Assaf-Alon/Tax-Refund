@@ -49,7 +49,6 @@ interface SortableRowProps {
     phase: string;
     active: boolean;
     isSolved: boolean;
-    isMiddleRow: boolean;
     handleWordComplete: (rowId: string, value: string) => void;
     setActiveIndex: (idx: number) => void;
     checkDistance: (word1: string, word2: string) => number;
@@ -63,10 +62,10 @@ interface SortableRowProps {
 }
 
 const SortableRow: React.FC<SortableRowProps> = ({
-    row, idx, phase, active, isSolved, isMiddleRow, handleWordComplete, setActiveIndex, checkDistance, prevRow, prevRowSolved, isJustCorrect,
+    row, idx, phase, active, isSolved, handleWordComplete, setActiveIndex, checkDistance, prevRow, prevRowSolved, isJustCorrect,
     draftValue, activeCharIndex, setActiveCharIndex
 }) => {
-    const isLockedRow = row.isLockedInitially && phase !== 'FINAL' && phase !== 'COMPLETE';
+    const isLockedRow = row.isLockedInitially && phase !== 'REORDER' && phase !== 'FINAL' && phase !== 'COMPLETE';
     
     const {
         attributes,
@@ -77,7 +76,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
         isDragging
     } = useSortable({ 
         id: row.id,
-        disabled: !isMiddleRow || phase !== 'REORDER'
+        disabled: phase !== 'REORDER'
     });
 
     const style = {
@@ -120,10 +119,15 @@ const SortableRow: React.FC<SortableRowProps> = ({
     return (
         <React.Fragment>
             {showDistanceEqual && (
-                <div className="flex justify-between items-center px-4 w-full h-3">
-                    {[0, 1].map(i => (
-                        <div key={i} className={`text-[10px] font-bold transition-colors duration-500 ${isDistanceOne ? 'text-green-500' : 'text-gray-300 dark:text-gray-700'}`}>=</div>
-                    ))}
+                <div className="flex justify-between items-center px-4 w-full h-0 relative">
+                    <div className="absolute left-0 right-0 flex justify-between items-center px-[22px] -top-1.5 bottom-0 pointer-events-none">
+                        {[0, 1].map(i => (
+                            <div key={i} className="flex flex-col items-center">
+                                <div className={`w-0.5 h-3 md:h-4 transition-all duration-500 ${isDistanceOne ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-transparent'}`} />
+                                <div className={`text-[10px] font-bold transition-colors duration-500 -mt-1 ${isDistanceOne ? 'text-green-500' : 'text-gray-300 dark:text-gray-700'}`}>=</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
             <div 
@@ -135,9 +139,9 @@ const SortableRow: React.FC<SortableRowProps> = ({
                     }
                 }}
                 className={`
-                    relative w-full h-14 rounded-lg border-2 flex items-center justify-center
+                    relative w-full h-11 rounded-lg border-2 flex items-center justify-center
                     ${bgColor} ${borderColor} ${active ? 'scale-[1.02] shadow-md z-10' : 'scale-100 shadow-sm'}
-                    ${isMiddleRow && phase === 'REORDER' ? 'cursor-grab active:cursor-grabbing hover:border-blue-300 dark:hover:border-blue-700 touch-none' : ''}
+                    ${phase === 'REORDER' ? 'cursor-grab active:cursor-grabbing hover:border-blue-300 dark:hover:border-blue-700 touch-none' : ''}
                     ${isLockedRow ? 'opacity-80' : ''}
                     ${isDragging ? 'shadow-2xl opacity-90 scale-105 border-blue-400 dark:border-blue-500' : ''}
                     ${isJustCorrect ? 'animate-bounce !border-green-400 !bg-green-100 dark:!bg-green-900/30' : ''}
@@ -176,7 +180,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
                     </div>
                 )}
 
-                {isMiddleRow && phase === 'REORDER' && (
+                {phase === 'REORDER' && (
                     <div className="absolute right-4 opacity-20 text-gray-400 cursor-grab active:cursor-grabbing">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                             <path d="M4 8h16M4 16h16" />
@@ -390,10 +394,6 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                 const oldIndex = items.findIndex((i) => i.id === active.id);
                 const newIndex = items.findIndex((i) => i.id === over.id);
                 
-                if (newIndex === 0 || newIndex === items.length - 1 || oldIndex === 0 || oldIndex === items.length - 1) {
-                    return items;
-                }
-                
                 const newItems = arrayMove(items, oldIndex, newIndex);
                 setActiveIndex(newIndex);
                 return newItems;
@@ -421,19 +421,19 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     }, [phase, activeIndex, rows]);
 
     return (
-        <div className="flex flex-col items-center w-full font-sans p-4 animate-in fade-in duration-700 pb-[360px] min-h-[100dvh] overflow-y-auto">
-            <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center max-h-[calc(100dvh-400px)] overflow-y-auto shrink-0 mb-4">
-                <div className="w-full p-6 text-center">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">CrossClimb</h2>
-                </div>
+        <div className="flex flex-col items-center w-full font-sans p-2 animate-in fade-in duration-700 pb-[300px] h-[100dvh] overflow-hidden">
+            <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center max-h-[calc(100dvh-300px)] shrink-0 mb-4">
+            <div className="w-full p-3 text-center">
+                <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">CrossClimb</h2>
+            </div>
 
-                <div className="p-6 pt-0 w-full flex flex-col items-center space-y-4">
+            <div className="p-4 pt-0 w-full flex flex-col items-center space-y-1">
                     <div className="w-full flex justify-between items-center mb-2">
                         <div className="h-4 w-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
                         <div className="h-4 w-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
                     </div>
 
-                    <div className="w-full flex flex-col gap-2 relative">
+                    <div className="w-full flex flex-col gap-1 relative">
                         <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-100 dark:bg-gray-800 -z-10" />
                         <div className="absolute right-4 top-0 bottom-0 w-0.5 bg-gray-100 dark:bg-gray-800 -z-10" />
 
@@ -455,7 +455,6 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                                         phase={phase}
                                         active={activeIndex === idx}
                                         isSolved={solvedWords[row.id]?.toLowerCase() === row.answer.toLowerCase()}
-                                        isMiddleRow={idx > 0 && idx < rows.length - 1}
                                         handleWordComplete={handleWordComplete}
                                         setActiveIndex={setActiveIndex}
                                         checkDistance={checkDistance}
@@ -472,7 +471,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                     </div>
                 </div>
 
-                <div className="w-full px-6 py-4 mt-2">
+                <div className="w-full px-6 py-2 mt-0">
                     <div className="p-3 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 text-center border border-gray-100/50 dark:border-gray-800/50">
                         <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium leading-relaxed italic">
                             {phase === 'COMPLETE' 
