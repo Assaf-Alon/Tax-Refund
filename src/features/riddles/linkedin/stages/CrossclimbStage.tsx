@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     DndContext,
     closestCenter,
@@ -21,6 +21,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { CharacterInput } from '../../../../shared/ui/CharacterInput';
+import { VirtualKeyboard } from '../components/VirtualKeyboard';
 
 interface WordData {
     id: string;
@@ -55,10 +56,15 @@ interface SortableRowProps {
     prevRow?: WordData;
     prevRowSolved?: boolean;
     isJustCorrect?: boolean;
+    // New controlled props
+    draftValue: string[];
+    activeCharIndex: number;
+    setActiveCharIndex: (charIdx: number) => void;
 }
 
 const SortableRow: React.FC<SortableRowProps> = ({
-    row, idx, phase, active, isSolved, isMiddleRow, handleWordComplete, setActiveIndex, checkDistance, prevRow, prevRowSolved, isJustCorrect
+    row, idx, phase, active, isSolved, isMiddleRow, handleWordComplete, setActiveIndex, checkDistance, prevRow, prevRowSolved, isJustCorrect,
+    draftValue, activeCharIndex, setActiveCharIndex
 }) => {
     const isLockedRow = row.isLockedInitially && phase !== 'FINAL' && phase !== 'COMPLETE';
     
@@ -93,7 +99,6 @@ const SortableRow: React.FC<SortableRowProps> = ({
         borderColor = 'border-green-100 dark:border-green-900/20';
     }
 
-    // Phase 3 styling for end-caps
     if (phase === 'FINAL' || phase === 'COMPLETE') {
         if (row.isLockedInitially) {
             if (active) {
@@ -124,7 +129,11 @@ const SortableRow: React.FC<SortableRowProps> = ({
             <div 
                 ref={setNodeRef}
                 style={style}
-                onClick={() => !isLockedRow && setActiveIndex(idx)}
+                onClick={() => {
+                    if (!isLockedRow) {
+                        setActiveIndex(idx);
+                    }
+                }}
                 className={`
                     relative w-full h-14 rounded-lg border-2 flex items-center justify-center
                     ${bgColor} ${borderColor} ${active ? 'scale-[1.02] shadow-md z-10' : 'scale-100 shadow-sm'}
@@ -150,6 +159,13 @@ const SortableRow: React.FC<SortableRowProps> = ({
                         <CharacterInput
                             expectedValue={row.answer}
                             onComplete={() => handleWordComplete(row.id, row.answer)}
+                            value={draftValue}
+                            activeIndex={active ? activeCharIndex : undefined}
+                            onCharFocus={(charIdx) => {
+                                setActiveIndex(idx);
+                                setActiveCharIndex(charIdx);
+                            }}
+                            readOnlyMode={true}
                             onFocus={() => setActiveIndex(idx)}
                             autoFocus={active}
                             locked={false}
@@ -187,6 +203,10 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     const [solvedWords, setSolvedWords] = useState<Record<string, string>>({});
     const [activeIndex, setActiveIndex] = useState<number>(1);
     const [justCorrectId, setJustCorrectId] = useState<string | null>(null);
+    
+    // Controlled keyboard state
+    const [draftValues, setDraftValues] = useState<Record<string, string[]>>({});
+    const [activeCharIndex, setActiveCharIndex] = useState<number>(0);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -250,6 +270,13 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
         const nextSolved = { ...solvedWords, [rowId]: value };
         setSolvedWords(nextSolved);
         
+        // Clear draft
+        setDraftValues(prev => {
+            const next = { ...prev };
+            delete next[rowId];
+            return next;
+        });
+
         const nextMiddleSolved = rows.slice(1, rows.length - 1).every(row => 
             nextSolved[row.id]?.toLowerCase() === row.answer.toLowerCase()
         );
@@ -272,16 +299,88 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
         });
 
         if (nextIdx !== -1) {
-            // Delay focus move to let user see the "Correct" state
             setTimeout(() => {
                 setActiveIndex(nextIdx);
+                setActiveCharIndex(0);
             }, 400);
         }
 
-        // Show animation
         setJustCorrectId(rowId);
         setTimeout(() => setJustCorrectId(null), 800);
     };
+
+    const handleKey = useCallback((key: string) => {
+        if (phase === 'REORDER' || phase === 'COMPLETE') return;
+
+        const currentRow = rows[activeIndex];
+        if (!currentRow || solvedWords[currentRow.id]) return;
+
+        setDraftValues(prev => {
+            const currentDraft = prev[currentRow.id] || currentRow.answer.split('').map(() => '');
+            const nextDraft = [...currentDraft];
+            nextDraft[activeCharIndex] = key.toLowerCase();
+            return { ...prev, [currentRow.id]: nextDraft };
+        });
+
+        setActiveCharIndex(prev => Math.min(prev + 1, currentRow.answer.length - 1));
+    }, [phase, activeIndex, activeCharIndex, rows, solvedWords]);
+
+    const handleBackspace = useCallback(() => {
+        if (phase === 'REORDER' || phase === 'COMPLETE') return;
+
+        const currentRow = rows[activeIndex];
+        if (!currentRow || solvedWords[currentRow.id]) return;
+
+        const currentDraft = draftValues[currentRow.id] || currentRow.answer.split('').map(() => '');
+        const nextDraft = [...currentDraft];
+
+        if (nextDraft[activeCharIndex]) {
+            // Clear current char if exists
+            nextDraft[activeCharIndex] = '';
+            setDraftValues(prev => ({ ...prev, [currentRow.id]: nextDraft }));
+        } else {
+            // Move back and clear
+            const prevIdx = Math.max(0, activeCharIndex - 1);
+            nextDraft[prevIdx] = '';
+            setDraftValues(prev => ({ ...prev, [currentRow.id]: nextDraft }));
+            setActiveCharIndex(prevIdx);
+        }
+    }, [phase, activeIndex, activeCharIndex, rows, solvedWords, draftValues]);
+
+    const handleEnter = useCallback(() => {
+        if (phase === 'REORDER' || phase === 'COMPLETE') return;
+
+        const currentRow = rows[activeIndex];
+        if (!currentRow || solvedWords[currentRow.id]) return;
+
+        const currentDraft = draftValues[currentRow.id] || [];
+        const combined = currentDraft.join('').toLowerCase();
+
+        if (combined === currentRow.answer.toLowerCase()) {
+            handleWordComplete(currentRow.id, currentRow.answer);
+        }
+    }, [phase, activeIndex, rows, solvedWords, draftValues]);
+
+    // Physical keyboard support
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Backspace') {
+                handleBackspace();
+            } else if (e.key === 'Enter') {
+                handleEnter();
+            } else if (/^[a-zA-Z]$/.test(e.key)) {
+                handleKey(e.key.toUpperCase());
+            } else if (e.key === 'ArrowLeft') {
+                setActiveCharIndex(prev => Math.max(0, prev - 1));
+            } else if (e.key === 'ArrowRight') {
+                const max = rows[activeIndex]?.answer.length - 1 || 0;
+                setActiveCharIndex(prev => Math.min(max, prev + 1));
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [handleKey, handleBackspace, handleEnter, activeIndex, rows]);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -302,8 +401,16 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
         }
     };
 
-    const nextClue = () => setActiveIndex(prev => (prev + 1) % rows.length);
-    const prevClue = () => setActiveIndex(prev => (prev - 1 + rows.length) % rows.length);
+    const nextClue = () => {
+        const nextIdx = (activeIndex + 1) % rows.length;
+        setActiveIndex(nextIdx);
+        setActiveCharIndex(0);
+    };
+    const prevClue = () => {
+        const prevIdx = (activeIndex - 1 + rows.length) % rows.length;
+        setActiveIndex(prevIdx);
+        setActiveCharIndex(0);
+    };
 
     const currentHint = useMemo(() => {
         if (phase === 'FINAL' || phase === 'COMPLETE') {
@@ -314,8 +421,8 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     }, [phase, activeIndex, rows]);
 
     return (
-        <div className="flex flex-col items-center w-full font-sans p-4 animate-in fade-in duration-700 pb-40 min-h-[100dvh] overflow-y-auto">
-            <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center max-h-[calc(100dvh-180px)] overflow-y-auto shrink-0 mb-4">
+        <div className="flex flex-col items-center w-full font-sans p-4 animate-in fade-in duration-700 pb-[360px] min-h-[100dvh] overflow-y-auto">
+            <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center max-h-[calc(100dvh-400px)] overflow-y-auto shrink-0 mb-4">
                 <div className="w-full p-6 text-center">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">CrossClimb</h2>
                 </div>
@@ -335,17 +442,6 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                             collisionDetection={closestCenter}
                             onDragEnd={handleDragEnd}
                             modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
-                            accessibility={{
-                                announcements: {
-                                    onDragStart: () => '',
-                                    onDragOver: () => '',
-                                    onDragEnd: () => '',
-                                    onDragCancel: () => '',
-                                },
-                                screenReaderInstructions: {
-                                    draggable: '',
-                                },
-                            }}
                         >
                             <SortableContext 
                                 items={rows.map(r => r.id)}
@@ -366,6 +462,9 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                                         prevRow={idx > 0 ? rows[idx - 1] : undefined}
                                         prevRowSolved={idx > 0 ? solvedWords[rows[idx-1].id]?.toLowerCase() === rows[idx-1].answer.toLowerCase() : false}
                                         isJustCorrect={justCorrectId === row.id}
+                                        draftValue={draftValues[row.id] || []}
+                                        activeCharIndex={activeCharIndex}
+                                        setActiveCharIndex={setActiveCharIndex}
                                     />
                                 ))}
                             </SortableContext>
@@ -388,36 +487,45 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                 </div>
             </div>
 
-            <div className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-[#1b1f23]/80 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 p-4 md:p-6 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex items-center justify-center z-50">
-                <div className="w-full max-w-xl flex items-center gap-6">
-                    {phase !== 'FINAL' && phase !== 'COMPLETE' ? (
-                        <button onClick={prevClue} className="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all active:scale-95 text-gray-400 hover:text-blue-500">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                    ) : (
-                        <div className="w-12 h-12" />
-                    )}
+            {/* Fixed Bottom Keyboard & Hint Area */}
+            <div className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-500 ${phase === 'REORDER' ? 'translate-y-full' : 'translate-y-0'}`}>
+                <div className="bg-white/90 dark:bg-[#1b1f23]/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 p-2 pt-4 pb-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col items-center gap-4">
                     
-                    <div className="flex-1 text-center">
-                        <p className="text-blue-500 dark:text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2 opacity-80">
-                            {phase === 'FINAL' || phase === 'COMPLETE' ? 'UNIVERSAL HINT' : `ROW ${activeIndex + 1} HINT`}
-                        </p>
-                        <div className="text-gray-800 dark:text-gray-100 font-semibold text-base md:text-lg min-h-[1.5em] flex items-center justify-center leading-tight">
-                            "{currentHint}"
+                    {/* Compact Hint Bar */}
+                    <div className="w-full max-w-xl flex items-center gap-4 px-4">
+                        {phase !== 'FINAL' && phase !== 'COMPLETE' ? (
+                            <button onClick={prevClue} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all active:scale-90 text-gray-400">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                        ) : <div className="w-9" />}
+                        
+                        <div className="flex-1 text-center">
+                            <p className="text-blue-500 dark:text-blue-400 text-[9px] font-black uppercase tracking-[0.2em] mb-0.5 opacity-80">
+                                {phase === 'FINAL' || phase === 'COMPLETE' ? 'UNIVERSAL HINT' : `ROW ${activeIndex + 1} HINT`}
+                            </p>
+                            <div className="text-gray-800 dark:text-gray-100 font-semibold text-sm md:text-base min-h-[1.25em] flex items-center justify-center leading-tight">
+                                "{currentHint}"
+                            </div>
                         </div>
+
+                        {phase !== 'FINAL' && phase !== 'COMPLETE' ? (
+                            <button onClick={nextClue} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all active:scale-90 text-gray-400">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        ) : <div className="w-9" />}
                     </div>
 
-                    {phase !== 'FINAL' && phase !== 'COMPLETE' ? (
-                        <button onClick={nextClue} className="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all active:scale-95 text-gray-400 hover:text-blue-500">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-                    ) : (
-                        <div className="w-12 h-12" />
-                    )}
+                    {/* Virtual Keyboard */}
+                    <VirtualKeyboard 
+                        onKey={handleKey}
+                        onBackspace={handleBackspace}
+                        onEnter={handleEnter}
+                        className="pb-2"
+                    />
                 </div>
             </div>
         </div>

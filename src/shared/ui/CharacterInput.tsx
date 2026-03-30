@@ -9,6 +9,14 @@ interface CharacterInputProps {
     /** A single word (no spaces). All alpha/numeric chars are editable; apostrophes are static. */
     expectedValue: string;
     onComplete: () => void;
+    /** Controlled value: if provided, CharacterInput uses this array for display. */
+    value?: string[];
+    /** Controlled active index: highlight the character box at this index. */
+    activeIndex?: number;
+    /** Callback when a specific character box is clicked/focused. */
+    onCharFocus?: (index: number) => void;
+    /** If true, uses inputMode="none" to prevent OS keyboard but maintains focus. */
+    readOnlyMode?: boolean;
     /** When true, all inputs become read-only with a green border */
     locked?: boolean;
     /** Focus first input on mount */
@@ -37,6 +45,10 @@ interface CharacterInputProps {
 export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputProps>(({
     expectedValue,
     onComplete,
+    value: controlledValues,
+    activeIndex,
+    onCharFocus,
+    readOnlyMode = false,
     locked = false,
     autoFocus = false,
     borderColor,
@@ -45,31 +57,34 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
     onFocus,
 }, ref) => {
     const chars = expectedValue.split('');
-    const [values, setValues] = useState<string[]>(() => chars.map(() => ''));
+    const [internalValues, setInternalValues] = useState<string[]>(() => chars.map(() => ''));
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+    // Use controlled values if provided, otherwise internal values
+    const effectiveValues = controlledValues || internalValues;
+    const isControlled = !!controlledValues;
 
     // A character is static (non-editable) if it's not alphanumeric
     const isStatic = (ch: string) => /[^a-zA-Z0-9]/.test(ch);
 
-    // Pre-fill static chars
+    // Pre-fill static chars in internal state if not controlled
     useEffect(() => {
-        setValues(chars.map(ch => (isStatic(ch) ? ch : '')));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [expectedValue]);
+        if (!isControlled) {
+            setInternalValues(chars.map(ch => (isStatic(ch) ? ch : '')));
+        }
+    }, [expectedValue, isControlled]);
 
     // Reactive focus when autoFocus changes to true
     useEffect(() => {
-        if (autoFocus) {
+        if (autoFocus && !readOnlyMode) {
             const firstIdx = chars.findIndex(ch => !isStatic(ch));
             if (firstIdx !== -1) {
-                // Check if already focused to avoid redundant events
                 if (document.activeElement !== inputRefs.current[firstIdx]) {
                     inputRefs.current[firstIdx]?.focus();
                 }
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [autoFocus]);
+    }, [autoFocus, readOnlyMode]);
 
     // Expose focus method via ref
     useImperativeHandle(ref, () => ({
@@ -83,12 +98,11 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
 
     // Check completion whenever values change
     useEffect(() => {
-        const joined = values.join('').toLowerCase();
+        const joined = effectiveValues.join('').toLowerCase();
         if (joined.length > 0 && joined === expectedValue.toLowerCase()) {
             onComplete();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [values]);
+    }, [effectiveValues, expectedValue, onComplete]);
 
     const findNextInput = (fromIndex: number): number => {
         for (let i = fromIndex + 1; i < chars.length; i++) {
@@ -105,13 +119,11 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
     };
 
     const handleChange = (index: number, value: string) => {
-        if (locked || isStatic(chars[index])) return;
+        if (locked || isStatic(chars[index]) || isControlled) return;
 
-        const newValues = [...values];
+        const newValues = [...internalValues];
         
-        // Handle fast typing: if multiple characters are received and the current box was empty,
-        // distribute the first to the current box and the second to the next box.
-        if (!values[index] && value.length > 1) {
+        if (!internalValues[index] && value.length > 1) {
             const first = value[0];
             const second = value[1];
             newValues[index] = first;
@@ -119,9 +131,8 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
             const nextIdx = findNextInput(index);
             if (nextIdx !== -1) {
                 newValues[nextIdx] = second;
-                setValues(newValues);
+                setInternalValues(newValues);
                 const nextNextIdx = findNextInput(nextIdx);
-                // Use requestAnimationFrame to ensure focus happens after DOM update
                 requestAnimationFrame(() => {
                     inputRefs.current[nextNextIdx !== -1 ? nextNextIdx : nextIdx]?.focus();
                 });
@@ -131,12 +142,11 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
 
         const char = value.slice(-1);
         newValues[index] = char;
-        setValues(newValues);
+        setInternalValues(newValues);
 
         if (char) {
             const nextIdx = findNextInput(index);
             if (nextIdx !== -1) {
-                // Use requestAnimationFrame for smoother focus transition
                 requestAnimationFrame(() => {
                     inputRefs.current[nextIdx]?.focus();
                 });
@@ -145,18 +155,18 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
     };
 
     const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (locked) return;
+        if (locked || isControlled) return;
         if (e.key === ' ') {
             e.preventDefault();
             return;
         }
         if (e.key === 'Backspace') {
-            if (!values[index]) {
+            if (!internalValues[index]) {
                 const prevIdx = findPrevInput(index);
                 if (prevIdx !== -1) {
-                    const newValues = [...values];
+                    const newValues = [...internalValues];
                     newValues[prevIdx] = '';
-                    setValues(newValues);
+                    setInternalValues(newValues);
                     inputRefs.current[prevIdx]?.focus();
                 }
                 e.preventDefault();
@@ -178,7 +188,7 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
                     return (
                         <span
                             key={i}
-                            className={`w-6 h-8 sm:w-8 sm:h-10 flex items-center justify-center text-[#ff007f]/60 text-sm sm:text-lg font-mono`}
+                            className="w-6 h-8 sm:w-8 sm:h-10 flex items-center justify-center text-[#ff007f]/60 text-sm sm:text-lg font-mono"
                             data-testid={`static-${i}`}
                         >
                             {ch}
@@ -186,30 +196,49 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
                     );
                 }
 
+                const isActive = activeIndex === i;
+
                 return (
                     <input
                         key={i}
                         ref={el => { inputRefs.current[i] = el; }}
                         type="text"
                         maxLength={2}
-                        value={values[i]}
+                        value={effectiveValues[i] || ''}
                         onChange={e => handleChange(i, e.target.value)}
                         onKeyDown={e => handleKeyDown(i, e)}
-                        onFocus={onFocus}
-                        readOnly={locked}
+                        onFocus={() => {
+                            onFocus?.();
+                            onCharFocus?.(i);
+                        }}
+                        readOnly={locked || readOnlyMode}
                         autoComplete="off"
                         autoCorrect="off"
                         spellCheck={false}
-                        inputMode="text"
-                        className={`w-6 h-8 sm:w-8 sm:h-10 text-center ${backgroundColor ?? 'bg-black'} ${borderColorClass} border ${textColorClass} rounded-sm font-mono text-sm sm:text-lg focus:outline-none focus:ring-1 focus:ring-[#ff007f] focus:border-[#ff007f] transition-colors cursor-pointer`}
-                        placeholder={'_'}
+                        inputMode={readOnlyMode ? 'none' : 'text'}
+                        className={`
+                            w-6 h-8 sm:w-8 sm:h-10 text-center ${backgroundColor ?? 'bg-black'} ${borderColorClass} border ${textColorClass} rounded-sm font-mono text-sm sm:text-lg focus:outline-none focus:ring-1 focus:ring-[#ff007f] focus:border-[#ff007f] transition-all cursor-pointer
+                            ${isActive ? 'border-b-2 !border-pink-500 ring-1 ring-pink-500/50 scale-105' : ''}
+                        `}
+                        placeholder={isActive ? '' : '_'}
                         aria-label={`Character ${i + 1}`}
                         data-testid={`input-${i}`}
-                    />
+                    >
+                    </input>
                 );
             })}
+            <style>{`
+                @keyframes pulse-border {
+                    0%, 100% { border-bottom-color: rgba(236, 72, 153, 1); }
+                    50% { border-bottom-color: rgba(236, 72, 153, 0.3); }
+                }
+                .animate-pulse-border {
+                    animation: pulse-border 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+                }
+            `}</style>
         </span>
     );
 })
+
 
 CharacterInput.displayName = 'CharacterInput';
