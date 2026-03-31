@@ -4,6 +4,7 @@ import {
     closestCenter,
     KeyboardSensor,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     type DragEndEvent
@@ -81,7 +82,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
 
     const style = {
         transform: CSS.Transform.toString(transform),
-        transition,
+        transition: isDragging ? 'none' : transition,
         zIndex: isDragging ? 50 : 1,
     };
 
@@ -215,7 +216,13 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
-                distance: 5,
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250,
+                tolerance: 5,
             },
         }),
         useSensor(KeyboardSensor, {
@@ -262,13 +269,40 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                   isMiddleOrdered ? 'FINAL' :
                   isMiddleSolved ? 'REORDER' : 'FILL';
 
+    // Dynamic terminal row swap logic
+    useEffect(() => {
+        if (isMiddleOrdered) {
+            const firstMiddle = rows[1];
+            const topRow = rows[0];
+            // If top row (stark/store) doesn't connect to the first middle row, swap terminal constants
+            if (checkDistance(topRow.answer, firstMiddle.answer) !== 1) {
+                setRows(prev => {
+                    const next = [...prev];
+                    [next[0], next[next.length - 1]] = [next[next.length - 1], next[0]];
+                    return next;
+                });
+            }
+        }
+    }, [isMiddleOrdered, rows, checkDistance]);
+
     useEffect(() => {
         if (phase === 'COMPLETE') {
             setTimeout(onAdvance, 3000);
-        } else if (phase === 'FINAL' && activeIndex !== 0 && activeIndex !== rows.length - 1) {
-            setActiveIndex(0);
+        } else if (phase === 'FINAL') {
+            const topId = rows[0].id;
+            const bottomId = rows[rows.length - 1].id;
+            const isTopSolved = solvedWords[topId]?.toLowerCase() === rows[0].answer.toLowerCase();
+            const isBottomSolved = solvedWords[bottomId]?.toLowerCase() === rows[rows.length - 1].answer.toLowerCase();
+
+            if (!isTopSolved && activeIndex !== 0) {
+                setActiveIndex(0);
+                setActiveCharIndex(0);
+            } else if (isTopSolved && !isBottomSolved && activeIndex !== rows.length - 1) {
+                setActiveIndex(rows.length - 1);
+                setActiveCharIndex(0);
+            }
         }
-    }, [phase, activeIndex, rows.length, onAdvance]);
+    }, [phase, activeIndex, rows, solvedWords, onAdvance]);
 
     const handleWordComplete = (rowId: string, value: string) => {
         const nextSolved = { ...solvedWords, [rowId]: value };
@@ -396,6 +430,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                 
                 const newItems = arrayMove(items, oldIndex, newIndex);
                 setActiveIndex(newIndex);
+                setActiveCharIndex(0);
                 return newItems;
             });
         }

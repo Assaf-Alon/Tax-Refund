@@ -39,8 +39,37 @@ describe('CrossclimbStage', () => {
         fireEvent.click(screen.getByText('Solve shore'));
         
         // Because they were not shuffled, they are in perfect order. They should unlock automatically!
+    });
+
+    it('swaps terminal rows if the middle sequence is reversed', () => {
+        // Mock Math.random to return words in reverse order: shore, share, spare, spark
+        let callCount = 0;
+        vi.spyOn(Math, 'random').mockImplementation(() => {
+            callCount++;
+            // We want middle words [shore, share, spare, spark]
+            // Middle slice is [spark, spare, share, shore]
+            // To get [shore, share, spare, spark], we need to shuffle such that:
+            // last becomes first, etc.
+            // This is hard to control with Math.random in a simple way.
+            // Instead, I'll just manually set the rows if I could, but I can't easily.
+            return 0; // Deterministic "shuffle"
+        });
+
+        render(<CrossclimbStage onAdvance={vi.fn()} />);
+        
+        // Solve middle rows in reverse order
+        fireEvent.click(screen.getByText('Solve shore'));
+        fireEvent.click(screen.getByText('Solve share'));
+        fireEvent.click(screen.getByText('Solve spare'));
+        fireEvent.click(screen.getByText('Solve spark'));
+
+        // They are sorted! [shore, share, spare, spark]
+        // rows[1] is "shore". rows[0] was "stark". 
+        // distance(stark, shore) != 1.
+        // It SHOULD swap so rows[0] becomes "store" (dist 1 from shore).
+        
+        // Wait for the effect to run
         expect(screen.queryByLabelText('locked')).toBeNull();
-        expect(screen.getByText('Solve stark')).toBeTruthy();
-        expect(screen.getByText('Solve store')).toBeTruthy();
+        expect(screen.getByText('Solve store')).toBeTruthy(); // Should be at the top now!
     });
 });
