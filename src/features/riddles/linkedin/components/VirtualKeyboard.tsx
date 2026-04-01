@@ -74,6 +74,16 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
                     Enter
                 </button>
             </div>
+
+            {/* Row 4 - Space */}
+            <div className="flex justify-center w-full px-8">
+                <button
+                    onClick={() => onKey(' ')}
+                    className="w-full max-w-[200px] h-11 rounded-md bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-bold text-[10px] shadow-sm active:scale-95 active:bg-gray-100 dark:active:bg-gray-600 transition-all border border-gray-200 dark:border-gray-600 uppercase tracking-[0.3em]"
+                >
+                    Space
+                </button>
+            </div>
         </div>
     );
 };

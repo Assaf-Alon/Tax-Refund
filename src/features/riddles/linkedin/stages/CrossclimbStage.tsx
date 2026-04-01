@@ -23,6 +23,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { CharacterInput } from '../../../../shared/ui/CharacterInput';
 import { VirtualKeyboard } from '../components/VirtualKeyboard';
+import { useKeyboardInput } from '../hooks/useKeyboardInput';
 
 interface WordData {
     id: string;
@@ -399,26 +400,23 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
         }
     }, [phase, activeIndex, rows, solvedWords, draftValues]);
 
-    // Physical keyboard support
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Backspace') {
-                handleBackspace();
-            } else if (e.key === 'Enter') {
-                handleEnter();
-            } else if (/^[a-zA-Z]$/.test(e.key)) {
-                handleKey(e.key.toUpperCase());
-            } else if (e.key === 'ArrowLeft') {
+    // Handle keyboard input (both physical and virtual)
+    useKeyboardInput({
+        onKey: handleKey,
+        onBackspace: handleBackspace,
+        onEnter: handleEnter,
+        onMove: (direction) => {
+            if (phase === 'REORDER' || phase === 'COMPLETE') return;
+            const currentRow = rows[activeIndex];
+            if (!currentRow) return;
+            const max = currentRow.answer.length - 1;
+            if (direction === 'left') {
                 setActiveCharIndex(prev => Math.max(0, prev - 1));
-            } else if (e.key === 'ArrowRight') {
-                const max = rows[activeIndex]?.answer.length - 1 || 0;
+            } else {
                 setActiveCharIndex(prev => Math.min(max, prev + 1));
             }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [handleKey, handleBackspace, handleEnter, activeIndex, rows]);
+        },
+    });
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
