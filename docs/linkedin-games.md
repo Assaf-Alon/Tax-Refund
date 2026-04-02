@@ -1,92 +1,101 @@
-# LinkedIn Games Design Document
+# LinkedIn Games: Comprehensive Design & Technical Specification
 
-This document provides a comprehensive overview of the LinkedIn-inspired riddles: **Crossclimb**, **Pinpoint**, and **Queens**. It centralizes information from previously separate design files to provide a single, consistent reference for the feature.
-
----
-
-## 1. Overview & Vision
-
-The LinkedIn Games riddle is a sequence of puzzles that mimic the professional, clean aesthetic and mechanics of LinkedIn's native casual games. It transition from word logic (Crossclimb) to category logic (Pinpoint) to spatial logic (Queens).
-
-### Visual Identity (Global)
-- **Background**: Light gray (`#f3f2ef`) for that professional feel.
-- **Card**: White with subtle drop shadow and rounded corners.
-- **Typography**: Clean, bold, and professional.
-- **Centralized Theme**: Colors and styles are managed in `src/features/riddles/linkedin/theme.ts`.
+This document serves as the single source of truth for the LinkedIn-inspired riddles suite, including **Crossclimb**, **Pinpoint**, and **Queens**, as well as the shared **Leaderboard** and **Virtual Keyboard** components.
 
 ---
 
-## 2. Crossclimb
+## 1. Global Identity & UX Vision
 
-A word-ladder puzzle game where each step differs by exactly one character (Hamming distance of 1).
+The LinkedIn Games riddle mimics the professional, high-fidelity aesthetic of LinkedIn's native casual games. It provides a seamless transition from word logic to category logic and finally spatial logic.
 
-### Game Mechanics & 3-Phase Progression
+### 1.1 Visual Design System
+- **Background**: Light gray (`#f3f2ef`) for a professional "native app" feel.
+- **Card UI**: White cards with subtle borders (`#e0e0e0`), rounded corners (`rounded-xl`), and soft drop shadows.
+- **Typography**: Clean, bold sans-serif (Inter/System) with high contrast for readability.
+- **Theme Management**: Centralized in `src/features/riddles/linkedin/theme.ts`.
+- **Responsive Layout**: Uses `dvh` (Dynamic Viewport Height) to ensure the UI fits within the visible area even when the mobile browser bar or OS keyboard is active.
 
-#### Phase 1: Fill & Drag (Middle Rows)
-- **Initial State**: Middle rows are unlocked and interactable. Top and bottom "end cap" rows are locked.
-- **Action**: Users solve clues by typing and can rearrange middle rows using drag-and-drop handles.
-
-#### Phase 2: Solve & Sort (Validation)
-- **Requirement**: All middle words must be correctly typed and rearranged so that every adjacent middle word has a Hamming distance of 1.
-- **Trigger**: Once `isMiddleSorted` is true, Phase 3 activates.
-
-#### Phase 3: Unlocking the End Caps
-- **Action**: Middle rows permanently **LOCK** (no edit, no drag). Top and bottom rows **UNLOCK**.
-- **Clue Bar**: Switches to a single, shared clue for the final two words.
-
-### Technical Details
-- uses `@dnd-kit` with `restrictToVerticalAxis` and `restrictToWindowEdges` modifiers for smooth, constrained interaction.
-- `checkDistance(word1, word2)` validates the Hamming distance.
+### 1.2 Performance & Feedback
+- **Transitions**: Staggered animations for list entries (e.g., Leaderboard).
+- **Success Feedback**: Momentary animations (glows, pulses) when a word or stage is completed.
+- **Micro-delays**: A 400ms delay is implemented in stage transitions (e.g., moving between rows in Crossclimb) to avoid "abrupt" jumps and give users a sense of accomplishment.
 
 ---
 
-## 3. Pinpoint
+## 2. Shared Technical Components
 
-A category guessing game where 5 clues are revealed one by one.
+### 2.1 Virtual Keyboard (`VirtualKeyboard.tsx`)
+To prevent the native OS keyboard from obscuring the game board, a custom virtual keyboard is used for all text-input games.
+- **Layout**: Staggered 3-row QWERTY layout.
+  - Row 1: Q, W, E, R, T, Y, U, I, O, P
+  - Row 2: A, S, D, F, G, H, J, K, L
+  - Row 3: [Backspace], Z, X, C, V, B, N, M, [Enter]
+- **Key Styling**: ~8-10% width, ~45px height. Visual feedback on active (`scale-95`).
+- **Hook (`useKeyboardInput.ts`)**: Orchestrates physical keyboard events (`A-Z`, `Backspace`, `Enter`, `Space`) to match virtual keyboard actions, ensuring a consistent experience across desktop and mobile.
 
-### UI Structure
-- **5 Clue Slots**: Always rendered with a fixed top-to-bottom blue gradient (`#a8caff` to `#3e87e6`).
-- **State Logic**: 
-  - Unrevealed: Shows "CLUE X" in centered, bold uppercase.
-  - Revealed: Shows the actual clue text.
-- **Input Area**: Pill-shaped "X of 5" counter on the far right.
-- **Failure Logic**: An incorrect guess reveals the next clue (increments `revealedCount`).
-- **Success Logic**: All 5 clues reveal immediately.
-
----
-
-## 4. Queens
-
-A 9x9 spatial grid puzzle where players must place exactly 9 queens.
-
-### Rules
-1. Exactly one queen per row, column, and colored region.
-2. No two queens may be adjacent (including diagonally).
-3. The grid uses a 9-region map, including a central "heart" region.
-
-### UI & Interaction
-- **Auto-marking**: The grid automatically greys out or places semi-transparent 'X's on eliminated cells.
-- **Region Colors**: Uses discrete shades of slate/blue/gray, with a vibrant red/purple (`bg-[#be123c]`) for the heart region.
-- **Icons**: Uses `lucide-react` icons (Crown, X, RotateCcw).
-- **Completion**: A 2-3 second delay occurs upon the 9th valid placement before advancing.
+### 2.2 Metrics & Timing
+- **Measurement**: Each stage tracks `startTime` on mount and calculates `elapsedSeconds` upon completion.
+- **Persistence**: Metrics are stored in the global `GameState` under `riddleMetrics: Record<string, Record<string, number>>` (riddleId -> gameKey -> seconds).
 
 ---
 
-## 5. Implementation & Routing
+## 3. Crossclimb Deep Dive
 
-- **Directory**: `src/features/riddles/linkedin/`
-- **Main Stage Registry**: `LinkedInGames.tsx`
-- **Theme File**: `theme.ts` (Centralizes colors for Welcome and Congrats screens).
+A word-ladder puzzle where each adjacent word differs by exactly one character (Hamming distance of 1).
 
-## 6. Verification Plan
+### 3.1 Three-Phase Mechanics
+1. **Phase 1: Fill & Drag**: Middle 4 rows are interactable. Users solve clues and can immediately start reordering rows.
+2. **Phase 2: Solve & Sort**: Triggered once middle words are solved. Users must arrange them into a valid ladder. Valid connections are highlighted with green `=` icons and a "connection glow".
+3. **Phase 3: The End Caps**: Middle rows **LOCK** (no edit/drag). Top and bottom rows **UNLOCK**. A shared hint is displayed for both terminal words.
 
-### Automated
-- `npm test` checks for phase transition lock states in Crossclimb.
-- `PinpointStage` tests verify the guess reset on failure.
-- Queens logic tests assert correct constraint validation (row, col, region, adjacency).
+### 3.2 Mobile & Logic Optimizations
+- **Dynamic Terminal Rows**: If the user sorts the middle ladder in reverse, the top and bottom words ("stark" vs "store") swap identities automatically to maintain valid connections.
+- **Touch Sensors**: Uses `@dnd-kit/core` with `TouchSensor` (250ms press delay, 5px tolerance) to prevent drag interference with page scrolling.
+- **Layout Compactness**: Reduced header padding (`pt-4` on mobile) and row margins to ensure the entire 6-word grid fits on smaller screens.
+- **Performance**: Sensors are memoized to prevent re-initialization on every keystroke. CSS transitions are disabled during active dragging for smoothness.
 
-### Manual
-- **Crossclimb**: Verify vertical drag constraints and mid-game locking.
-- **Pinpoint**: Test the "reveal on error" flow and input reset.
-- **Queens**: Ensure auto-marking assists the player effectively.
-- **Global**: Toggle light/dark mode and verify subtitle contrast on the Congrats screen.
+---
+
+## 4. Pinpoint Deep Dive
+
+A category guessing game where 5 clues are revealed sequentially.
+
+### 4.1 UI & Mechanics
+- **Clue Reveal**: Clue slots use a fixed blue gradient (`#a8caff` to `#3e87e6`). Incorrect guesses reveal the next clue.
+- **Input Area**: Replaces standard HTML `input` with a stylized `div` showing a blinking caret to prevent the native keyboard from appearing.
+- **Progress**: A pill-shaped "X of 5" counter tracks the number of clues revealed.
+
+---
+
+## 5. Queens Deep Dive
+
+A 9x9 spatial grid puzzle where players place 9 queens following non-adjacency and region constraints.
+
+### 5.1 Mechanics
+- **Constraints**: Exactly one queen per row, column, and colored region. No diagonal or orthogonal adjacency with other queens.
+- **Auto-marking**: Automatically grays out or places 'X's on cells where queens cannot be placed based on current placements.
+- **Visibility Polish**: High-contrast "X" marks (`text-white/40`) on dark blue/slate tiles to ensure visibility on mobile screens.
+
+---
+
+## 6. Leaderboard & Progression
+
+### 6.1 Design Rationale
+- **"Silver Medal" Placement**: The user is always placed in **2nd place** to provide a challenging but rewarding "Executive" experience.
+- **Mock Competitors**: 1st place is calculated at 85% of the user's time; 3rd at 120%.
+- **Completion States**: After the final game (Queens), the `isLastGame` prop triggers the button text to change from "Play Next" to "View Final Results" or "Complete Challenge".
+
+---
+
+## 7. Verification Plan
+
+### 7.1 Automated Testing
+- **Logic**: Verify Hamming distance calculations and 9x9 grid constraint validation.
+- **Transitions**: Assert that Crossclimb middle rows lock and terminal rows unlock at the correct state.
+- **Event Handling**: Verify `useKeyboardInput` correctly triggers generic callbacks for both physical and virtual keys.
+
+### 7.2 Manual Verification (Mobile focus)
+- **Compactness**: Verify the entire Crossclimb grid is visible on 320px/375px widths.
+- **Touch**: Confirm long-press (250ms) initiates drag in Crossclimb.
+- **Visuals**: Check "X" mark visibility on Queens blue/heart tiles.
+- **Flow**: Complete the suite and verify the final leaderboard button text.
