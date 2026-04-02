@@ -91,6 +91,7 @@ export const LinkedInGames: React.FC = () => {
                     gameName={gameNames[stage]} 
                     userTime={lastGameTime} 
                     onNext={handleNextFromLeaderboard} 
+                    isLastGame={stage === 3}
                 />
             );
         }

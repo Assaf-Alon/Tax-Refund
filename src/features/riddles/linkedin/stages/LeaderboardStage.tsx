@@ -5,6 +5,7 @@ interface LeaderboardStageProps {
     gameName: string;
     userTime: number;
     onNext: () => void;
+    isLastGame?: boolean;
 }
 
 interface Competitor {
@@ -22,7 +23,7 @@ const AvatarSilhouette: React.FC<{ size?: number; className?: string }> = ({ siz
     </div>
 );
 
-export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, userTime, onNext }) => {
+export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, userTime, onNext, isLastGame }) => {
     const formatTime = (seconds: number) => {
         if (isNaN(seconds) || seconds <= 0) return "--s";
         const mins = Math.floor(seconds / 60);
@@ -97,7 +98,7 @@ export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, us
                         onClick={onNext}
                         className="flex items-center gap-2 bg-[#0a66c2] hover:bg-[#004182] text-white px-6 py-2.5 rounded-full font-bold transition-all transform hover:scale-105 active:scale-95 shadow-md"
                     >
-                        Play Next <ChevronRight className="w-4 h-4" />
+                        {isLastGame ? 'Complete Challenge' : 'Play Next'} <ChevronRight className="w-4 h-4" />
                     </button>
                 </div>
             </div>
