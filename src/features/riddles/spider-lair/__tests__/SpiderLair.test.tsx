@@ -8,7 +8,12 @@ import { MemoryRouter } from 'react-router-dom';
 vi.mock('../../../../shared/logic/gameState', () => ({
     getRiddleProgress: vi.fn(),
     updateRiddleProgress: vi.fn(),
-    loadState: vi.fn(() => ({ adminSettings: { devToolsEnabled: false } })),
+    loadState: vi.fn(() => ({ 
+        riddleProgress: {}, 
+        riddleMetrics: {}, 
+        inventory: [], 
+        adminSettings: { bypassPinOnLocalhost: true, devToolsEnabled: false } 
+    })),
 }));
 
 // Mock child components that import static assets.
@@ -84,6 +89,7 @@ describe('SpiderLair', () => {
         vi.mocked(gameState.getRiddleProgress).mockReturnValue(0);
         vi.mocked(gameState.updateRiddleProgress).mockReturnValue({
             riddleProgress: { 'spider-lair': 1 },
+            riddleMetrics: {},
             inventory: [],
             adminSettings: { bypassPinOnLocalhost: true, devToolsEnabled: false },
         });

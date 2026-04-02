@@ -1,10 +1,15 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { PinpointStage } from '../PinpointStage';
 
 describe('PinpointStage', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+    });
+
     afterEach(() => {
+        vi.useRealTimers();
         cleanup();
     });
 
@@ -45,9 +50,13 @@ describe('PinpointStage', () => {
             />
         );
         
-        const input = screen.getByPlaceholderText(/Guess the category/);
-        fireEvent.change(input, { target: { value: 'wrong guess' } });
-        fireEvent.submit(input); // Form submission
+        // Type "WRONG"
+        fireEvent.click(screen.getByText('W'));
+        fireEvent.click(screen.getByText('R'));
+        fireEvent.click(screen.getByText('O'));
+        fireEvent.click(screen.getByText('N'));
+        fireEvent.click(screen.getByText('G'));
+        fireEvent.click(screen.getByText('ENTER'));
 
         expect(screen.getByText('spy')).toBeTruthy();
         expect(screen.getByText('2 of 5')).toBeTruthy();
@@ -63,11 +72,17 @@ describe('PinpointStage', () => {
             />
         );
 
-        const input = screen.getByPlaceholderText(/Guess the category/);
-        fireEvent.change(input, { target: { value: 'museum' } });
-        fireEvent.submit(input);
+        // Type "MUSEUM"
+        ['M', 'U', 'S', 'E', 'U', 'M', 'ENTER'].forEach(k => {
+            fireEvent.click(screen.getByText(k));
+        });
 
         expect(screen.getByText('Correct!')).toBeTruthy();
+        
+        // Wait for onAdvance delay
+        vi.advanceTimersByTime(2000);
+        expect(onAdvance).toHaveBeenCalled();
+        
         expect(screen.getByText('5 of 5')).toBeTruthy();
         
         // All clues should be visible
@@ -86,11 +101,15 @@ describe('PinpointStage', () => {
             />
         );
 
-        const input = screen.getByPlaceholderText(/Guess the category/);
-        fireEvent.change(input, { target: { value: 'museums' } }); // Fuzzy match for 'Museum'
-        fireEvent.submit(input);
+        // Type "MUSEUMS"
+        ['M', 'U', 'S', 'E', 'U', 'M', 'S', 'ENTER'].forEach(k => {
+            fireEvent.click(screen.getByText(k));
+        });
 
         expect(screen.getByText('Correct!')).toBeTruthy();
+        
+        vi.advanceTimersByTime(2000);
+        expect(onAdvance).toHaveBeenCalled();
         expect(screen.getByText('5 of 5')).toBeTruthy();
     });
 });
