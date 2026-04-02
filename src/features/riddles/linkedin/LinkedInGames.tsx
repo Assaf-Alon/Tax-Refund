@@ -58,7 +58,7 @@ export const LinkedInGames: React.FC = () => {
     }, []);
 
     const handleAdvance = (time?: number) => {
-        if (time !== undefined && !isShowingLeaderboard) {
+        if (typeof time === 'number' && !isShowingLeaderboard) {
             setLastGameTime(time);
             setIsShowingLeaderboard(true);
             

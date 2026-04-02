@@ -24,6 +24,7 @@ const AvatarSilhouette: React.FC<{ size?: number; className?: string }> = ({ siz
 
 export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, userTime, onNext }) => {
     const formatTime = (seconds: number) => {
+        if (isNaN(seconds) || seconds <= 0) return "--s";
         const mins = Math.floor(seconds / 60);
         const secs = (seconds % 60).toFixed(1);
         return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
@@ -38,12 +39,15 @@ export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, us
         // Shuffle names partially for some variety
         const shuffled = [...names].sort(() => Math.random() - 0.5);
 
+        // If userTime is 0 or NaN (welcome screen bug), use a default set of values for flavor
+        const displayTime = (isNaN(userTime) || userTime <= 0) ? 60 : userTime;
+
         return [
-            { name: shuffled[0], time: userTime * 0.88, rank: 1 },
+            { name: shuffled[0], time: displayTime * 0.88, rank: 1 },
             { name: "You", time: userTime, rank: 2, isUser: true },
-            { name: shuffled[1], time: userTime * 1.15, rank: 3 },
-            { name: shuffled[2], time: userTime * 1.42, rank: 4 },
-            { name: shuffled[3], time: userTime * 1.68, rank: 5 },
+            { name: shuffled[1], time: displayTime * 1.15, rank: 3 },
+            { name: shuffled[2], time: displayTime * 1.42, rank: 4 },
+            { name: shuffled[3], time: displayTime * 1.68, rank: 5 },
         ];
     }, [userTime]);
 
