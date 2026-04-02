@@ -55,14 +55,21 @@ export const PinpointStage: React.FC<PinpointStageProps> = ({
     });
 
     return (
-        <div className="flex flex-col w-full font-sans animate-in fade-in duration-700 h-[100dvh] overflow-hidden bg-white dark:bg-[#1b1f23]">
+        <div className="flex flex-col w-full font-sans animate-in fade-in duration-700 h-[100dvh] md:h-[min(700px,calc(100dvh-120px))] overflow-hidden bg-white dark:bg-[#1b1f23] md:rounded-2xl md:shadow-2xl md:border md:border-gray-200 md:dark:border-gray-800">
             {/* Main Content Area - Scrollable */}
             <div className="flex-1 overflow-y-auto flex flex-col items-center p-4">
-                <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center">
+                <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 flex flex-col items-center">
                     
                     {/* Header */}
                     <div className="w-full p-4 text-center border-b border-gray-50 dark:border-gray-800/50">
                         <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Pinpoint</h2>
+                    </div>
+
+                    {/* Instruction Box - Now at the Top to avoid overlap */}
+                    <div className="w-full px-6 py-2 bg-gray-50/50 dark:bg-gray-900/30 text-center border-b border-gray-50 dark:border-gray-800/10">
+                        <p className="text-[9px] text-gray-500 dark:text-gray-400 font-bold leading-relaxed uppercase tracking-[0.15em]">
+                            All clues belong to a category. Guess in as few as possible.
+                        </p>
                     </div>
 
                     {/* Clue Grid */}
@@ -80,20 +87,11 @@ export const PinpointStage: React.FC<PinpointStageProps> = ({
                             );
                         })}
                     </div>
-
-                    {/* Instruction Box */}
-                    <div className="w-full px-6 py-4">
-                        <div className="p-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30 text-center">
-                            <p className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold leading-relaxed uppercase tracking-wider">
-                                All clues belong to a category. Guess in as few reveals as possible.
-                            </p>
-                        </div>
-                    </div>
                 </div>
             </div>
 
             {/* Bottom Interaction Area - Fixed */}
-            <div className="w-full bg-white dark:bg-[#1b1f23] border-t border-gray-200 dark:border-gray-800 flex flex-col items-center pt-4 pb-8 px-4 gap-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+            <div className="w-full bg-white dark:bg-[#1b1f23] border-t border-gray-200 dark:border-gray-800 flex flex-col items-center pt-4 pb-8 px-4 gap-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] shrink-0">
                 {/* Custom Input Display */}
                 <div className="w-full max-w-md relative flex flex-col gap-2">
                     <div 

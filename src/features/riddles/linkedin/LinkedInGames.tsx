@@ -92,7 +92,7 @@ export const LinkedInGames: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen min-w-full overflow-x-hidden text-gray-900 dark:text-gray-200 font-sans selection:bg-blue-500/30 selection:text-white flex flex-col items-center justify-start pt-4 md:pt-24 p-4 md:p-12 relative bg-[#f3f2ef] dark:bg-[#1d2226]">
+        <div className="min-h-screen min-w-full overflow-x-hidden text-gray-900 dark:text-gray-200 font-sans selection:bg-blue-500/30 selection:text-white flex flex-col items-center justify-start pt-4 md:pt-12 p-4 md:p-8 relative bg-[#f3f2ef] dark:bg-[#1d2226]">
             <div className="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none" 
                  style={{ backgroundImage: 'radial-gradient(#0a66c2 1px, transparent 1px)', backgroundSize: '40px 40px' }} 
             />
