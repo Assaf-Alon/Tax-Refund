@@ -43,4 +43,21 @@ describe('LeaderboardStage', () => {
         expect(label).toBeInTheDocument();
         expect(label).toHaveTextContent(/Performance/i);
     });
+
+    it('renders the assigned easter egg for a specific level', () => {
+        render(<LeaderboardStage {...defaultProps} gameName="Crossclimb" />);
+        
+        expect(screen.getByText(/Insight for you/i)).toBeInTheDocument();
+        // Crossclimb is explicitly mapped to the CEOs quote
+        expect(screen.getByText(/You solved it faster then/i)).toBeInTheDocument();
+        expect(screen.getByText(/of CEOs/i)).toBeInTheDocument();
+    });
+
+    it('renders a default easter egg for an unknown level', () => {
+        render(<LeaderboardStage {...defaultProps} gameName="Unknown Game" />);
+        
+        expect(screen.getByText(/Insight for you/i)).toBeInTheDocument();
+        // Fallback should be used
+        expect(screen.getByText(/You solved it faster than/i)).toBeInTheDocument();
+    });
 });

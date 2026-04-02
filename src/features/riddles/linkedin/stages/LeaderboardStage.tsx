@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { Trophy, Medal, ChevronRight } from 'lucide-react';
+import { Trophy, Medal, ChevronRight, Lightbulb } from 'lucide-react';
+import { getEasterEgg } from '../data/easterEggs';
 
 interface LeaderboardStageProps {
     gameName: string;
@@ -52,6 +53,10 @@ export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, us
         ];
     }, [userTime]);
 
+    const easterEgg = useMemo(() => {
+        return getEasterEgg(gameName, userTime);
+    }, [gameName, userTime]);
+
     return (
         <div className="w-full max-w-md mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="bg-white dark:bg-[#1d2226] border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden">
@@ -91,6 +96,18 @@ export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, us
                             </div>
                         </div>
                     ))}
+                </div>
+
+                <div className="bg-[#f8f9fa] dark:bg-gray-800/40 p-4 mx-4 mb-4 rounded-lg border border-gray-100 dark:border-gray-700 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2 duration-1000 delay-300" role="status">
+                    <Lightbulb className="w-5 h-5 text-yellow-600 dark:text-yellow-500 shrink-0 mt-0.5" aria-hidden="true" />
+                    <div>
+                        <p className="text-[10px] font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-1 opacity-60">
+                            Insight for you
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic">
+                            "{easterEgg}"
+                        </p>
+                    </div>
                 </div>
 
                 <div className="p-4 bg-gray-50 dark:bg-gray-800/20 flex justify-end">

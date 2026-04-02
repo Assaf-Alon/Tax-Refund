@@ -80,22 +80,35 @@ A 9x9 spatial grid puzzle where players place 9 queens following non-adjacency a
 
 ## 6. Leaderboard & Progression
 
-### 6.1 Design Rationale
+### 6.1 Design Rationale & Mechanics
 - **"Silver Medal" Placement**: The user is always placed in **2nd place** to provide a challenging but rewarding "Executive" experience.
 - **Mock Competitors**: 1st place is calculated at 85% of the user's time; 3rd at 120%.
 - **Completion States**: After the final game (Queens), the `isLastGame` prop triggers the button text to change from "Play Next" to "View Final Results" or "Complete Challenge".
+
+### 6.2 Easter Eggs & Satirical Insights
+To enhance the satire of professional culture, humorous "Insight for you" cards are displayed on the leaderboard after each stage.
+
+- **Goal**: Maintain the "professional" parody theme by providing corporate-style feedback.
+- **Technical Implementation**:
+    - **Data Source**: Quotes are centralized in [easterEggs.ts](file:///home/cowclaw/Tax-Refund/src/features/riddles/linkedin/data/easterEggs.ts).
+    - **Mapping**: Uses a `GAME_SPECIFIC_EGGS` Record to explicitly assign unique quotes to each game (Crossclimb, Pinpoint, Queens).
+    - **Selection Utility**: A `getEasterEgg` helper manages lookup and fallback logic (using a list of `DEFAULT_EASTER_EGGS`).
+- **UI/UX Design**:
+    - **Style**: "LinkedIn Insight" aesthetic using a light gray background (`#f8f9fa`) and a `Lightbulb` icon.
+    - **Motion**: Utilizes tailwind-inspired `animate-in fade-in slide-in-from-bottom-2` with a `delay-300` to appear smoothly after the rankings.
 
 ---
 
 ## 7. Verification Plan
 
 ### 7.1 Automated Testing
-- **Logic**: Verify Hamming distance calculations and 9x9 grid constraint validation.
-- **Transitions**: Assert that Crossclimb middle rows lock and terminal rows unlock at the correct state.
-- **Event Handling**: Verify `useKeyboardInput` correctly triggers generic callbacks for both physical and virtual keys.
+- **Logic**: Verify Hamming distance, 9x9 grid constraints, and stage transition delays.
+- **Easter Eggs**: Assert that each game stage renders its specifically assigned satirical insight on the leaderboard via `LeaderboardStage.test.tsx`.
+- **Flow**: Verify `useKeyboardInput` correctly handles both virtual and physical inputs across different game stages.
 
 ### 7.2 Manual Verification (Mobile focus)
-- **Compactness**: Verify the entire Crossclimb grid is visible on 320px/375px widths.
-- **Touch**: Confirm long-press (250ms) initiates drag in Crossclimb.
-- **Visuals**: Check "X" mark visibility on Queens blue/heart tiles.
-- **Flow**: Complete the suite and verify the final leaderboard button text.
+- **Compactness**: Ensure all game boards and the custom virtual keyboard fit within small mobile viewports (320px+).
+- **Interactions**: Confirm touch-sensor delays (250ms) and queens auto-marking behavior.
+- **Aesthetics**: Verify that the "Insight for you" card responds to dark mode and matches the LinkedIn palette.
+
+
