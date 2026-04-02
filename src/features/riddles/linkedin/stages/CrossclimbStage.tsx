@@ -33,7 +33,7 @@ interface WordData {
 }
 
 interface CrossclimbStageProps {
-    onAdvance: () => void;
+    onAdvance: (time?: number) => void;
 }
 
 const WORDS: WordData[] = [
@@ -213,6 +213,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     // Controlled keyboard state
     const [draftValues, setDraftValues] = useState<Record<string, string[]>>({});
     const [activeCharIndex, setActiveCharIndex] = useState<number>(0);
+    const [startTime] = useState(Date.now());
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -288,7 +289,8 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
 
     useEffect(() => {
         if (phase === 'COMPLETE') {
-            setTimeout(onAdvance, 3000);
+            const elapsed = (Date.now() - startTime) / 1000;
+            setTimeout(() => onAdvance(elapsed), 3000);
         } else if (phase === 'FINAL') {
             const topId = rows[0].id;
             const bottomId = rows[rows.length - 1].id;

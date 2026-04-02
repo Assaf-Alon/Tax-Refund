@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Crown, Heart, RotateCcw, X, Info } from 'lucide-react';
 
 interface QueensStageProps {
-    onAdvance: () => void;
+    onAdvance: (time?: number) => void;
 }
 
 const GRID_MAP = [
@@ -43,6 +43,7 @@ export const QueensStage: React.FC<QueensStageProps> = ({ onAdvance }) => {
     const [manualMarks, setManualMarks] = useState<Position[]>([]);
     const [solved, setSolved] = useState(false);
     const [showRules, setShowRules] = useState(false);
+    const [startTime] = useState(Date.now());
 
     const autoMarks = useMemo(() => {
         const marks = Array(SIZE).fill(0).map(() => Array(SIZE).fill(false));
@@ -101,12 +102,13 @@ export const QueensStage: React.FC<QueensStageProps> = ({ onAdvance }) => {
 
     useEffect(() => {
         if (solved) {
+            const elapsed = (Date.now() - startTime) / 1000;
             const timer = setTimeout(() => {
-                onAdvance();
+                onAdvance(elapsed);
             }, 3000);
             return () => clearTimeout(timer);
         }
-    }, [solved, onAdvance]);
+    }, [solved, onAdvance, startTime]);
 
     const resetGame = () => {
         setQueens(STARTING_QUEENS);

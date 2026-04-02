@@ -6,7 +6,7 @@ import { useKeyboardInput } from '../hooks/useKeyboardInput';
 interface PinpointStageProps {
     clues: string[];
     acceptedAnswers: string[];
-    onAdvance: () => void;
+    onAdvance: (time?: number) => void;
 }
 
 const CLUE_COLORS = ['#a8caff', '#90baff', '#78aaff', '#5c99f2', '#3e87e6'];
@@ -20,6 +20,7 @@ export const PinpointStage: React.FC<PinpointStageProps> = ({
     const [guess, setGuess] = useState('');
     const [error, setError] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [startTime] = useState(Date.now());
 
     const submitGuess = () => {
         if (!guess.trim() || success) return;
@@ -27,7 +28,8 @@ export const PinpointStage: React.FC<PinpointStageProps> = ({
         if (isCloseEnough(guess, acceptedAnswers)) {
             setSuccess(true);
             setRevealedCount(5);
-            setTimeout(onAdvance, 2000);
+            const elapsed = (Date.now() - startTime) / 1000;
+            setTimeout(() => onAdvance(elapsed), 2000);
         } else {
             setError(true);
             if (revealedCount < 5) {

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { getRiddleProgress, updateRiddleProgress } from '../../../shared/logic/gameState';
 import { WelcomeStage } from '../../../shared/stages/WelcomeStage';
 import { CongratsStage } from '../../../shared/stages/CongratsStage';
 import { DevSkipButton } from '../../admin/DevSkipButton';
 import { CrossclimbStage } from './stages/CrossclimbStage';
 import { PinpointStage } from './stages/PinpointStage';
 import { QueensStage } from './stages/QueensStage';
+import { LeaderboardStage } from './stages/LeaderboardStage';
 import { LINKEDIN_WELCOME_THEME, LINKEDIN_CONGRATS_THEME } from './theme';
 import { useFavicon } from '../../../hooks/useFavicon';
+import { updateRiddleMetrics, getRiddleProgress, updateRiddleProgress } from '../../../shared/logic/gameState';
 
 const RIDDLE_ID = 'linkedin-games';
 
@@ -48,19 +49,52 @@ export const LinkedInGames: React.FC = () => {
     useFavicon('/li-48.png');
 
     const [stage, setStage] = useState<number>(0);
+    const [isShowingLeaderboard, setIsShowingLeaderboard] = useState(false);
+    const [lastGameTime, setLastGameTime] = useState(0);
 
     useEffect(() => {
         const savedStage = getRiddleProgress(RIDDLE_ID);
         setStage(savedStage);
     }, []);
 
-    const handleAdvance = () => {
+    const handleAdvance = (time?: number) => {
+        if (time !== undefined && !isShowingLeaderboard) {
+            setLastGameTime(time);
+            setIsShowingLeaderboard(true);
+            
+            // Map stage index to game key
+            const gameKeys = ["", "crossclimb", "pinpoint", "queens"];
+            if (stage >= 1 && stage <= 3) {
+                updateRiddleMetrics(RIDDLE_ID, gameKeys[stage], time);
+            }
+            return;
+        }
+
         const nextStage = stage + 1;
         setStage(nextStage);
+        setIsShowingLeaderboard(false);
+        updateRiddleProgress(RIDDLE_ID, nextStage);
+    };
+
+    const handleNextFromLeaderboard = () => {
+        const nextStage = stage + 1;
+        setStage(nextStage);
+        setIsShowingLeaderboard(false);
         updateRiddleProgress(RIDDLE_ID, nextStage);
     };
 
     const renderStage = () => {
+        if (isShowingLeaderboard) {
+            const gameNames = ["", "Crossclimb", "Pinpoint", "Queens"];
+            return (
+                <LeaderboardStage 
+                    gameName={gameNames[stage]} 
+                    userTime={lastGameTime} 
+                    onNext={handleNextFromLeaderboard} 
+                />
+            );
+        }
+
         switch (stage) {
             case 0:
                 return <WelcomeStage 

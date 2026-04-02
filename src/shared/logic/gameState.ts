@@ -1,6 +1,7 @@
 
 export interface GameState {
     riddleProgress: Record<string, number>;
+    riddleMetrics: Record<string, Record<string, number>>; // riddleId -> gameKey -> seconds
     inventory: string[];
     adminSettings: {
         bypassPinOnLocalhost: boolean;
@@ -12,6 +13,7 @@ const STORAGE_KEY = 'tr_gamestate';
 
 const defaultState: GameState = {
     riddleProgress: {},
+    riddleMetrics: {},
     inventory: [],
     adminSettings: {
         bypassPinOnLocalhost: true,
@@ -54,6 +56,23 @@ export const updateRiddleProgress = (riddleId: string, stage: number): GameState
 export const getRiddleProgress = (riddleId: string): number => {
     const state = loadState();
     return state.riddleProgress[riddleId] || 0;
+};
+
+export const updateRiddleMetrics = (riddleId: string, gameKey: string, seconds: number): GameState => {
+    const current = loadState();
+    const riddleMetrics = current.riddleMetrics || {};
+    const newState = {
+        ...current,
+        riddleMetrics: {
+            ...riddleMetrics,
+            [riddleId]: {
+                ...(riddleMetrics[riddleId] || {}),
+                [gameKey]: seconds
+            }
+        }
+    };
+    saveState(newState);
+    return newState;
 };
 
 /** Reset a single riddle to stage 0 */
