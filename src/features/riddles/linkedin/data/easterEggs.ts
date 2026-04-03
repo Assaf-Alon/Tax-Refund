@@ -6,7 +6,7 @@ export type EasterEggFn = (context: { gameName: string, userTime: number }) => s
  */
 export const GAME_SPECIFIC_EGGS: Record<string, EasterEggFn> = {
     "Crossclimb": () => `You solved it faster then ${50 + Math.floor(Math.random() * 9) * 5}% of CEOs`,
-    "Pinpoint": () => "While you were solving this someone from HUJI that you don't know sent you a connection request",
+    "Pinpoint": () => "While you were solving this, you got a connection request from a HUJI student that you don't know! 😝",
     "Queens": () => "You solved it faster than Roy for a change"
 };
 
@@ -15,7 +15,7 @@ export const GAME_SPECIFIC_EGGS: Record<string, EasterEggFn> = {
  */
 export const DEFAULT_EASTER_EGGS: EasterEggFn[] = [
     () => `You solved it faster than ${50 + Math.floor(Math.random() * 9) * 5}% of CEOs`,
-    () => "While you were solving this someone from HUJI that you don't know sent you a connection request"
+    () => "While you were solving this, you got a connection request from a HUJI student that you don't know! 😝"
 ];
 
 /**

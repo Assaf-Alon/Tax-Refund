@@ -43,16 +43,33 @@ To prevent the native OS keyboard from obscuring the game board, a custom virtua
 
 A word-ladder puzzle where each adjacent word differs by exactly one character (Hamming distance of 1).
 
-### 3.1 Three-Phase Mechanics
+### 3.1 Word Set & Theming
+The ladder uses a developer-focused, crypto-themed word set to engage the professional audience:
+- **Terminal 1**: `stark` (crypto protocol)
+- **Middle 1**: `stack` (full-stack developer)
+- **Middle 2**: `snack`
+- **Middle 3**: `slack` (communication app)
+- **Middle 4**: `black` (python formatter)
+- **Terminal 2**: `block` (blockchain unit)
+
+Both terminal words share the hint: *"The structural foundations of a decentralized network"*.
+
+### 3.2 Three-Phase Mechanics
 1. **Phase 1: Fill & Drag**: Middle 4 rows are interactable. Users solve clues and can immediately start reordering rows.
 2. **Phase 2: Solve & Sort**: Triggered once middle words are solved. Users must arrange them into a valid ladder. Valid connections are highlighted with green `=` icons and a "connection glow".
 3. **Phase 3: The End Caps**: Middle rows **LOCK** (no edit/drag). Top and bottom rows **UNLOCK**. A shared hint is displayed for both terminal words.
 
-### 3.2 Mobile & Logic Optimizations
-- **Dynamic Terminal Rows**: If the user sorts the middle ladder in reverse, the top and bottom words ("stark" vs "store") swap identities automatically to maintain valid connections.
+### 3.3 Mobile & Logic Optimizations
+- **Dynamic Terminal Rows**: If the user sorts the middle ladder in reverse, the top and bottom words ("stark" vs "block") swap identities automatically to maintain valid connections.
 - **Touch Sensors**: Uses `@dnd-kit/core` with `TouchSensor` (250ms press delay, 5px tolerance) to prevent drag interference with page scrolling.
 - **Layout Compactness**: Reduced header padding (`pt-4` on mobile) and row margins to ensure the entire 6-word grid fits on smaller screens.
 - **Performance**: Sensors are memoized to prevent re-initialization on every keystroke. CSS transitions are disabled during active dragging for smoothness.
+
+### 3.4 Deterministic Initialization & Complexity
+To ensure a consistent challenge and maximize user movement during the "drag-and-drop" phase, the initial middle word order is fixed rather than randomized.
+- **Ordering Strategy**: A specific non-chaining permutation `[black, snack, stack, slack]` (indices 4, 2, 1, 3) is used.
+- **Complexity**: This configuration requires exactly **3 drag operations** to reach the target sequence, maximizing the sorting effort for a 4-word set.
+- **Phase Control**: By avoiding a valid 1-distance chain in the initial state, the game guarantees that the "REORDER" phase is presented to the user and not skipped.
 
 ---
 

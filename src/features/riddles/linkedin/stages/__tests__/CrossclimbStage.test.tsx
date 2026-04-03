@@ -19,57 +19,38 @@ describe('CrossclimbStage', () => {
     it('requires typing (solving) words before they are revealed', () => {
         render(<CrossclimbStage onAdvance={vi.fn()} />);
         // Words should NOT be revealed initially (they are in CharacterInput)
-        expect(screen.queryByText('SPARK')).toBeNull();
-        expect(screen.getByText('Solve spark')).toBeTruthy();
+        expect(screen.queryByText('STACK')).toBeNull();
+        expect(screen.getByText('Solve stack')).toBeTruthy();
     });
 
-    it('locks end caps until middle rows are solved and correctly ordered', () => {
-        // Mock Math.random to prevent shuffling so they are already in the correct order
-        vi.spyOn(Math, 'random').mockReturnValue(0.99);
-
+    it('locks end caps until middle rows are solved', () => {
         render(<CrossclimbStage onAdvance={vi.fn()} />);
         
         // Both end caps are locked initially
         expect(screen.getAllByLabelText('locked')).toHaveLength(2);
         
-        // Solve middle rows
-        fireEvent.click(screen.getByText('Solve spark'));
-        fireEvent.click(screen.getByText('Solve spare'));
-        fireEvent.click(screen.getByText('Solve share'));
-        fireEvent.click(screen.getByText('Solve shore'));
+        // Solve middle rows (in their deterministic order)
+        fireEvent.click(screen.getByText('Solve black'));
+        fireEvent.click(screen.getByText('Solve snack'));
+        fireEvent.click(screen.getByText('Solve stack'));
+        fireEvent.click(screen.getByText('Solve slack'));
         
-        // Because they were not shuffled, they are in perfect order. They should unlock automatically!
+        // Now it enters REORDER phase, so lock icons disappear
+        expect(screen.queryByLabelText('locked')).toBeNull();
     });
 
-    it('swaps terminal rows if the middle sequence is reversed', () => {
-        // Mock Math.random to return words in reverse order: shore, share, spare, spark
-        let callCount = 0;
-        vi.spyOn(Math, 'random').mockImplementation(() => {
-            callCount++;
-            // We want middle words [shore, share, spare, spark]
-            // Middle slice is [spark, spare, share, shore]
-            // To get [shore, share, spare, spark], we need to shuffle such that:
-            // last becomes first, etc.
-            // This is hard to control with Math.random in a simple way.
-            // Instead, I'll just manually set the rows if I could, but I can't easily.
-            return 0; // Deterministic "shuffle"
-        });
-
+    it('shows terminal inputs in REORDER phase even if unordered', () => {
         render(<CrossclimbStage onAdvance={vi.fn()} />);
         
-        // Solve middle rows in reverse order
-        fireEvent.click(screen.getByText('Solve shore'));
-        fireEvent.click(screen.getByText('Solve share'));
-        fireEvent.click(screen.getByText('Solve spare'));
-        fireEvent.click(screen.getByText('Solve spark'));
+        // Solve middle rows
+        fireEvent.click(screen.getByText('Solve black'));
+        fireEvent.click(screen.getByText('Solve snack'));
+        fireEvent.click(screen.getByText('Solve stack'));
+        fireEvent.click(screen.getByText('Solve slack'));
 
-        // They are sorted! [shore, share, spare, spark]
-        // rows[1] is "shore". rows[0] was "stark". 
-        // distance(stark, shore) != 1.
-        // It SHOULD swap so rows[0] becomes "store" (dist 1 from shore).
-        
-        // Wait for the effect to run
+        // It should be in REORDER phase
         expect(screen.queryByLabelText('locked')).toBeNull();
-        expect(screen.getByText('Solve store')).toBeTruthy(); // Should be at the top now!
+        expect(screen.queryByText('Solve block')).toBeTruthy();
+        expect(screen.queryByText('Solve stark')).toBeTruthy();
     });
 });

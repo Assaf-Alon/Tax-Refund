@@ -37,12 +37,12 @@ interface CrossclimbStageProps {
 }
 
 const WORDS: WordData[] = [
-    { id: '1', answer: 'stark', clue: 'To keep value secure (as a ZK-rollup pioneer or a shop)', isLockedInitially: true },
-    { id: '2', answer: 'spark', clue: 'Aimer has a song named \'_____ Again\'' },
-    { id: '3', answer: 'spare', clue: 'An extra tire or bowling\'s second-best' },
-    { id: '4', answer: 'share', clue: 'To distribute equity or social media action' },
-    { id: '5', answer: 'shore', clue: 'A coastal boundary or to prop things up' },
-    { id: '6', answer: 'store', clue: 'To keep value secure (as a ZK-rollup pioneer or a shop)', isLockedInitially: true },
+    { id: '1', answer: 'stark', clue: 'The structural foundations of a decentralized network', isLockedInitially: true },
+    { id: '2', answer: 'stack', clue: 'Full _____ Developer' },
+    { id: '3', answer: 'snack', clue: 'light bite between meetings' },
+    { id: '4', answer: 'slack', clue: 'It does frog noises on your phone' },
+    { id: '5', answer: 'black', clue: 'Your Favorite Python Formatter' },
+    { id: '6', answer: 'block', clue: 'The structural foundations of a decentralized network', isLockedInitially: true },
 ];
 
 interface SortableRowProps {
@@ -102,12 +102,12 @@ const SortableRow: React.FC<SortableRowProps> = ({
 
     if (phase === 'FINAL' || phase === 'COMPLETE') {
         if (row.isLockedInitially) {
-            if (active) {
-                bgColor = 'bg-orange-100 dark:bg-orange-900/30';
-                borderColor = 'border-orange-300 dark:border-orange-700';
-            } else if (isSolved) {
+            if (isSolved) {
                 bgColor = 'bg-green-50 dark:bg-green-900/10';
                 borderColor = 'border-green-200 dark:border-green-800';
+            } else if (active) {
+                bgColor = 'bg-orange-100 dark:bg-orange-900/30';
+                borderColor = 'border-orange-300 dark:border-orange-700';
             } else {
                 bgColor = 'bg-[#ffe7d9] dark:bg-orange-950/40';
                 borderColor = 'border-orange-200 dark:border-orange-900/50';
@@ -198,11 +198,11 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     onAdvance,
 }) => {
     const [rows, setRows] = useState<WordData[]>(() => {
-        const middle = [...WORDS.slice(1, WORDS.length - 1)];
-        for (let i = middle.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [middle[i], middle[j]] = [middle[j], middle[i]];
-        }
+        // We use a specific deterministic order that requires multiple moves (3)
+        // and ensures the REORDER phase is not skipped (no adjacent distance-1 neighbors for all middle words).
+        // Indices 1, 2, 3, 4 refer to stack, snack, slack, black.
+        // Order: black (4), snack (2), stack (1), slack (3)
+        const middle = [WORDS[4], WORDS[2], WORDS[1], WORDS[3]];
         return [WORDS[0], ...middle, WORDS[WORDS.length - 1]];
     });
 
@@ -290,6 +290,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     useEffect(() => {
         if (phase === 'COMPLETE') {
             const elapsed = (Date.now() - startTime) / 1000;
+            setActiveIndex(-1); // Clear focus on completion
             setTimeout(() => onAdvance(elapsed), 3000);
         } else if (phase === 'FINAL') {
             const topId = rows[0].id;
