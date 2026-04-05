@@ -46,7 +46,7 @@ const ProgressHUD: React.FC<{ currentStage: number }> = ({ currentStage }) => {
 };
 
 export const LinkedInGames: React.FC = () => {
-    useFavicon('/li-48.png');
+    useFavicon(`${import.meta.env.BASE_URL}li-48.png`);
 
     const [stage, setStage] = useState<number>(0);
     const [isShowingLeaderboard, setIsShowingLeaderboard] = useState(false);
@@ -116,11 +116,44 @@ export const LinkedInGames: React.FC = () => {
             case 3:
                 return <QueensStage onAdvance={handleAdvance} />;
             case 4:
-                return <CongratsStage 
-                            title="Executive Performance" 
-                            subtitle="You've mastered the professional arena." 
-                            theme={LINKEDIN_CONGRATS_THEME} 
-                        />;
+                return (
+                    <CongratsStage 
+                        title="Executive Performance" 
+                        subtitle="You've mastered the professional arena." 
+                        theme={LINKEDIN_CONGRATS_THEME}
+                    >
+                        <div className="space-y-12">
+                            {/* Next Destination Hint Card */}
+                            <div className="mt-12 p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm max-w-lg mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
+                                <h3 className="text-xs font-bold text-[#0a66c2] uppercase tracking-wider mb-4 text-left border-b border-gray-100 dark:border-gray-700 pb-2">
+                                    Professional Milestone: Next Location
+                                </h3>
+                                <div className="flex flex-col sm:flex-row items-center gap-6">
+                                    <img 
+                                        src={`${import.meta.env.BASE_URL}images/eli-cohen.png`} 
+                                        alt="Eli Cohen" 
+                                        className="w-28 h-28 object-cover rounded-full border-4 border-white dark:border-gray-700 shadow-lg"
+                                    />
+                                    <div className="text-left">
+                                        <p className="text-gray-700 dark:text-gray-200 font-medium text-lg leading-snug">
+                                            "The location was an answer of one of the LinkedIn games."
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Exit Button */}
+                            <div className="animate-in fade-in duration-1000 delay-1000">
+                                <button 
+                                    onClick={() => window.location.href = '#/'}
+                                    className="px-8 py-3 bg-[#0a66c2] hover:bg-[#004182] text-white rounded-full font-bold transition-all duration-300 shadow-md"
+                                >
+                                    Return to Personal Dashboard
+                                </button>
+                            </div>
+                        </div>
+                    </CongratsStage>
+                );
             default:
                 return <div>Unknown Stage: {stage}</div>;
         }
