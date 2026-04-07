@@ -4,6 +4,7 @@ import { TaxLayout } from './layouts/TaxLayout';
 import { RiddleLayout } from './layouts/RiddleLayout';
 import { HomePage } from './features/taxes/HomePage';
 import { PinGate } from './features/admin/PinGate';
+import { QuizClipTrimmer } from './features/admin/QuizClipTrimmer';
 import { TheCave } from './features/riddles/TheCave';
 import { SpiderLair } from './features/riddles/spider-lair/SpiderLair';
 import { OuterWilds } from './features/riddles/outer-wilds/OuterWilds';
@@ -30,6 +31,7 @@ function App() {
         <Route path="/xp-33" element={<Expedition33 />} />
         <Route path="/linkedin-games" element={<LinkedInGames />} />
         <Route path="/translator" element={<Suspense fallback={<div>Loading...</div>}><Translator /></Suspense>} />
+        <Route path="/admin/trimmer" element={<QuizClipTrimmer />} />
         {/* Catch-all redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

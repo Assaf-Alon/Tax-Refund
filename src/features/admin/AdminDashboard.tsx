@@ -157,6 +157,12 @@ export const AdminDashboard: React.FC = () => {
                     >
                         📸 Open Outer Wilds Translator
                     </Link>
+                    <Link
+                        to="/admin/trimmer"
+                        className="bg-indigo-600 text-white px-4 py-2 rounded font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                    >
+                        ✂️ Open Quiz Clip Trimmer
+                    </Link>
                 </div>
             </div>
         </div>
