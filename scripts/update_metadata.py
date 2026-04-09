@@ -10,17 +10,22 @@ def get_release_year(youtube_id):
         return ""
     
     try:
-        # Use yt-dlp to get the upload date
-        # --print upload_date returns YYYYMMDD
+        # Fetch copyright, platform release date, and upload date
         result = subprocess.run(
-            ["yt-dlp", "--get-filename", "-o", "%(upload_date)s", "--", youtube_id],
+            ["yt-dlp", "--print", "release_year,release_date,upload_date", "--", youtube_id],
             capture_output=True,
             text=True,
             check=True
         )
-        date_str = result.stdout.strip()
-        if date_str and len(date_str) >= 4:
-            return date_str[:4]
+        lines = result.stdout.strip().split('\n')
+        
+        years = []
+        for line in lines:
+            if line != "NA" and len(line) >= 4:
+                years.append(int(line[:4]))
+
+        if years:
+            return str(min(years))
     except subprocess.CalledProcessError:
         print(f"Failed to fetch metadata for {youtube_id}")
     except FileNotFoundError:

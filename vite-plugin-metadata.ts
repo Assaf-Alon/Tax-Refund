@@ -21,13 +21,26 @@ export default function metadataPlugin(): Plugin {
           }
 
           try {
-            // Run yt-dlp to get the year
-            const { stdout } = await execAsync(`yt-dlp --get-filename -o "%(upload_date)s" -- ${id}`);
-            const dateStr = stdout.trim();
-            const year = dateStr.substring(0, 4);
+            // Run yt-dlp to get multiple year-related fields
+            const { stdout } = await execAsync(`yt-dlp --print "release_year,release_date,upload_date" -- ${id}`);
+            const lines = stdout.trim().split('\n');
+            
+            const copyright = lines[0] !== 'NA' ? lines[0] : null;
+            const platform = lines[1] !== 'NA' ? lines[1].substring(0, 4) : null;
+            const upload = lines[2] !== 'NA' ? lines[2].substring(0, 4) : null;
+
+            const years = [copyright, platform, upload].filter(Boolean) as string[];
+            const bestYear = years.length > 0 ? Math.min(...years.map(y => parseInt(y))).toString() : null;
+
+            // Confidence is low if copyright and platform differ by more than 1 year
+            const confidence = (copyright && platform && Math.abs(parseInt(copyright) - parseInt(platform)) > 1) ? 'low' : 'high';
 
             res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ year }));
+            res.end(JSON.stringify({ 
+              year: bestYear, 
+              details: { copyright, platform, upload },
+              confidence 
+            }));
           } catch (error) {
             console.error('Metadata fetch error:', error);
             res.statusCode = 500;
