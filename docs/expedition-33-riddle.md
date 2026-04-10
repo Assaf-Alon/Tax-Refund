@@ -20,13 +20,13 @@ The Riddle Flow consists of **10 Stages**:
    - *Prompt:* "I stand in your way, cane in hand, guarding the Paintress to protect my own. Who am I?" 
    - *Answers:* `['reunuar', 'renoir']`
 5. **Team Builder (Custom Stage)**:
-   - *Concept:* A drag-and-drop "Create the Perfect Team!" stage. The player is shown 5 character portraits from Act 2 and must drag the correct 3 into labelled team slots.
-   - *Mechanic:* 5 characters are shown in a roster. 3 slots labelled "Free Aim Spammer", "Offense / Damage", "Support" must be filled correctly. Supports both drag-and-drop and touch events. Includes a defensive Simon "Gommage" easter egg if Simon is dragged to a slot.
+   - *Concept:* A drag-and-drop "Create the Perfect Team!" stage. The player is shown 9 character portraits and must drag the correct 3 into labelled team slots.
+   - *Mechanic:* 9 characters are shown in a roster. 3 slots labelled "Free Aim Spammer", "Offense / Damage", "Support" must be filled correctly. Supports both drag-and-drop and touch events. Includes a defensive Simon "Gommage" easter egg if Simon is dragged to a slot.
 6. **The Fading Memory (Custom Stage)**: 
    - *Concept:* A replacement for the Canvas Gommage idea. This represents "The Erasure" mechanics. 
    - *Mechanic:* A lore question is presented, but the text itself is actively "erasing". The player must quickly read the prompt before it completely disappears and guess the answer.
-   - *Prompt Before Fading:* "A cheerful farmer turned teacher who fights using 'Foretell' stacks." 
-   - *Answer:* `sciel`
+   - *Prompt Before Fading:* "Assaf doesn't understand the mechanics of this 'Foretell' card lady." 
+   - *Answer:* `['sciel', 'scile']`
 7. **Simon's Melody (Custom Stage)**:
    - *Concept:* A multiple-choice audio stage about the Simon boss fight OST.
    - *Mechanic:* The background music crossfades from `Lumiere.mp3` to `We Lost.mp3`. A looping video of Simon's attack plays alongside the prompt. The player chooses from 13 options. Both "We Lost" and "Don't Cry" are accepted (referencing an inside joke). After success, the music crossfades back exactly where it paused.
@@ -62,7 +62,7 @@ The Riddle Flow consists of **10 Stages**:
    - Once `pets === 33`, `onAdvance()` is called.
 2. **ReactiveParryStage (`src/features/riddles/expedition-33/stages/ReactiveParryStage.tsx`)**:
    - A shrinking ring `div` overlaying a target ring.
-   - Uses `requestAnimationFrame` to animate a `scale` CSS transform from `2.0` down to `1.0` and lower over 3 seconds.
+   - Uses `requestAnimationFrame` to animate a `scale` CSS transform from `2.5` down to `0.5` over 2.5 seconds.
    - When the player clicks `PARRY`, the exact `scale` at that timestamp is calculated. If the scale is within `[0.9, 1.1]`, it's a success -> `onAdvance()`. If outside, state sets to `failed = true`, triggering a red error animation, and resets the timer.
    - Includes an optional dodging mechanic where clicking the dodge button pauses the UI and shows a joke message. Instruction text optionally mentions the existence of a dodge option, and the punishment duration for dodging is 3 seconds.
 3. **TeamBuilderStage (`src/features/riddles/expedition-33/stages/TeamBuilderStage.tsx`)**:
@@ -72,7 +72,7 @@ The Riddle Flow consists of **10 Stages**:
    - The character roster is natively shuffled on mount to ensure a dynamic layout.
 4. **FadingTextStage (`src/features/riddles/expedition-33/stages/FadingTextStage.tsx`)**:
    - Wraps standard `TextAnswerStage` input UI.
-   - The text prompt uses a `useEffect` that runs every `100ms`, picking a random visible character and making it invisible via a `<span>` with `opacity-0` transition, until the entire string is gone.
+   - The text prompt uses a varied pacing `setTimeout` loop that starts at a 600ms delay and accelerates to 15ms per character, picking a random visible character and making it invisible via a `<span>` with `opacity-0` transition, until the entire string is gone. It also includes a "Try again" button that smoothly fades in once all text is gone, providing a recovery mechanism.
    - Pass this specialized disappearing text block as a `ReactNode` into the `prompt` prop of `<TextAnswerStage />` (since `TextAnswerStage` supports rich-text `ReactNode` prompts out-of-the-box).
 5. **SimonOstStage (`src/features/riddles/expedition-33/stages/SimonOstStage.tsx`)**:
    - Renders the `MultipleChoiceStage` component with 13 shuffled options. Implements tight responsive padding to ensure all options fit on mobile without scrolling.

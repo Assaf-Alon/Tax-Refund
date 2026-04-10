@@ -18,14 +18,14 @@ export interface UseLongPressReturn {
     isActive: boolean;
 }
 
-const VIBRATION_INTERVAL_MS = 500;
+
 
 export const useLongPress = ({ durationMs, onComplete, onProgress, vibrate = true }: UseLongPressOptions): UseLongPressReturn => {
     const [isActive, setIsActive] = useState(false);
 
     const holdStartRef = useRef<number | null>(null);
     const animFrameRef = useRef<number>(0);
-    const lastVibrationRef = useRef<number>(0);
+
 
     const onCompleteRef = useRef(onComplete);
     const onProgressRef = useRef(onProgress);
@@ -43,17 +43,10 @@ export const useLongPress = ({ durationMs, onComplete, onProgress, vibrate = tru
 
         onProgressRef.current?.(p);
 
-        // Vibrate in pulses
-        if (vibrate && navigator.vibrate) {
-            const vibrationStep = Math.floor(elapsed / VIBRATION_INTERVAL_MS);
-            if (vibrationStep > lastVibrationRef.current) {
-                navigator.vibrate(50);
-                lastVibrationRef.current = vibrationStep;
-            }
-        }
-
         if (p >= 1) {
-            if (vibrate) navigator.vibrate?.(200);
+            if (vibrate && typeof navigator !== 'undefined' && navigator.vibrate) {
+                navigator.vibrate([50, 100, 50]);
+            }
             setIsActive(false);
             holdStartRef.current = null;
             onCompleteRef.current();
@@ -73,18 +66,30 @@ export const useLongPress = ({ durationMs, onComplete, onProgress, vibrate = tru
         e.preventDefault();
         setIsActive(true);
         onProgressRef.current?.(0);
-        lastVibrationRef.current = 0;
+
+
+        // Vibrate for the entire duration synchronously to bypass mobile browser restrictions
+        if (vibrate && typeof navigator !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate(durationMs);
+        }
+
         holdStartRef.current = performance.now();
         if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
         animFrameRef.current = requestAnimationFrame(updateProgress);
-    }, [updateProgress]);
+    }, [updateProgress, durationMs, vibrate]);
 
     const handlePointerCancelOrUp = useCallback(() => {
         setIsActive(false);
         onProgressRef.current?.(0);
         holdStartRef.current = null;
+
+        // Cancel vibration if they lift early
+        if (vibrate && typeof navigator !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate(0);
+        }
+
         if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-    }, []);
+    }, [vibrate]);
 
     const handleContextMenu = useCallback((e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();

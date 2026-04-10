@@ -6,7 +6,7 @@ export interface FadingTextStageProps {
 }
 
 const INITIAL_TEXT = "Assaf doesn't understand the mechanics of this 'Foretell' card lady.";
-const ACCEPTED_ANSWERS = ['sciel'];
+const ACCEPTED_ANSWERS = ['sciel', 'scile'];
 
 // Delay (ms) before the Nth character disappears (0-indexed).
 // Drops 0-9 follow the user-specified schedule. Drop 10+ spread over 500ms.
