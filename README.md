@@ -20,10 +20,20 @@ The application is designed as a series of independent static pages or forms, gu
 ## Running Locally
 
 ```bash
-# 1. Install dependencies
+# 1. Install system dependencies (optional, for trimmer year fetcher)
+# Standard way (requires sudo):
+# sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+# sudo chmod a+rx /usr/local/bin/yt-dlp
+#
+# Alternatively (no sudo):
+# pip install yt-dlp (requires pip to be installed)
+#
+# IMPORTANT: Keep it updated to avoid fetch errors: yt-dlp -U
+
+# 2. Install node dependencies
 npm install
 
-# 2. Start the development server
+# 3. Start the development server
 npm run dev
 ```
 

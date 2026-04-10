@@ -24,7 +24,7 @@ export default function metadataPlugin(): Plugin {
             // Run yt-dlp to get multiple year-related fields
             const { stdout } = await execAsync(`yt-dlp --print "release_year,release_date,upload_date" -- ${id}`);
             const lines = stdout.trim().split('\n');
-            
+
             const copyright = lines[0] !== 'NA' ? lines[0] : null;
             const platform = lines[1] !== 'NA' ? lines[1].substring(0, 4) : null;
             const upload = lines[2] !== 'NA' ? lines[2].substring(0, 4) : null;
@@ -36,15 +36,20 @@ export default function metadataPlugin(): Plugin {
             const confidence = (copyright && platform && Math.abs(parseInt(copyright) - parseInt(platform)) > 1) ? 'low' : 'high';
 
             res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ 
-              year: bestYear, 
+            res.end(JSON.stringify({
+              year: bestYear,
               details: { copyright, platform, upload },
-              confidence 
+              confidence
             }));
-          } catch (error) {
-            console.error('Metadata fetch error:', error);
+          } catch (error: any) {
+            const isMissing = error.message.includes('not found') || error.code === 127;
+            console.error('Metadata fetch error:', isMissing ? 'yt-dlp not found in PATH' : error.message);
+
             res.statusCode = 500;
-            res.end(JSON.stringify({ error: 'Failed to fetch metadata' }));
+            res.end(JSON.stringify({
+              error: isMissing ? 'yt-dlp_missing' : 'yt-dlp_error',
+              message: isMissing ? 'yt-dlp is not installed on the server' : error.message
+            }));
           }
           return;
         }

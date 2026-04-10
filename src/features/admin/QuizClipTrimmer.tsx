@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Scissors, RotateCcw, MonitorPlay, ChevronLeft, ChevronRight, List, Download, CheckCircle, Search, Loader2, AlertTriangle, ExternalLink, Trash2, Edit2, X } from 'lucide-react';
+import { Play, Pause, Scissors, RotateCcw, MonitorPlay, ChevronLeft, ChevronRight, List, Download, CheckCircle, Search, Loader2, AlertTriangle, ExternalLink, Trash2, Edit2, X, Upload } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -38,12 +38,13 @@ export const QuizClipTrimmer: React.FC = () => {
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isFetchingYear, setIsFetchingYear] = useState(false);
-  const [yearMetadata, setYearMetadata] = useState<{ details?: any, confidence?: string }>({});
+  const [yearMetadata, setYearMetadata] = useState<{ details?: any, confidence?: string, error?: string, message?: string }>({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState('');
   const [editInfo, setEditInfo] = useState('');
-  
+
   const previewIntervalRef = useRef<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load initial data
   useEffect(() => {
@@ -91,7 +92,7 @@ export const QuizClipTrimmer: React.FC = () => {
       setYear(song.year || '');
       localStorage.setItem('trimmer_current_index', currentIndex.toString());
       setActiveTab('main');
-      
+
       // Auto-load if we have a youtubeId
       if (song.youtubeId) {
         setTimeout(() => loadVideo(song.youtubeId), 500);
@@ -186,9 +187,16 @@ export const QuizClipTrimmer: React.FC = () => {
         const data = await response.json();
         if (data.year) setYear(data.year);
         setYearMetadata({ details: data.details, confidence: data.confidence });
+      } else {
+        const errorData = await response.json();
+        setYearMetadata({
+          error: errorData.error,
+          message: errorData.message
+        });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to fetch year:", err);
+      setYearMetadata({ error: 'fetch_error', message: err.message });
     } finally {
       setIsFetchingYear(false);
     }
@@ -265,32 +273,75 @@ export const QuizClipTrimmer: React.FC = () => {
   const exportData = (e?: React.MouseEvent) => {
     e?.preventDefault();
     saveCurrentProgress();
-    
+
     // Get fresh data from localStorage
     const currentSongs = JSON.parse(localStorage.getItem('trimmer_songs') || '[]');
     const blob = new Blob([JSON.stringify(currentSongs, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    
+
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", url);
     downloadAnchorNode.setAttribute("download", `trimmed_songs_${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchorNode);
-    
+
     downloadAnchorNode.click();
-    
+
     // Clean up
     setTimeout(() => {
-        downloadAnchorNode.remove();
-        // Use a longer timeout for revocation to ensure the browser has finished the download
-        window.URL.revokeObjectURL(url);
+      downloadAnchorNode.remove();
+      // Use a longer timeout for revocation to ensure the browser has finished the download
+      window.URL.revokeObjectURL(url);
     }, 60000);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const importData = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        const importedSongs = JSON.parse(content);
+
+        if (!Array.isArray(importedSongs)) {
+          throw new Error("Invalid file format: root should be an array.");
+        }
+
+        // Basic validation of the first item
+        if (importedSongs.length > 0) {
+          const first = importedSongs[0];
+          if (typeof first.name !== 'string' || typeof first.query !== 'string') {
+            throw new Error("Invalid file format: items missing required fields.");
+          }
+        }
+
+        if (window.confirm(`Importing ${importedSongs.length} songs will overwrite your current progress. Continue?`)) {
+          setSongs(importedSongs);
+          setCurrentIndex(0);
+          localStorage.setItem('trimmer_songs', JSON.stringify(importedSongs));
+          localStorage.setItem('trimmer_current_index', '0');
+          alert("Import successful!");
+        }
+      } catch (err: any) {
+        alert("Failed to import data: " + err.message);
+      }
+
+      // Reset input so the same file can be imported again if needed
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsText(file);
   };
 
   const currentSong = songs[currentIndex];
 
   const handleSearch = () => {
-      const query = currentSong.query;
-      window.open(`https://music.youtube.com/search?q=${encodeURIComponent(query)}`, '_blank');
+    const query = currentSong.query;
+    window.open(`https://music.youtube.com/search?q=${encodeURIComponent(query)}`, '_blank');
   };
 
   const openEditModal = () => {
@@ -318,15 +369,15 @@ export const QuizClipTrimmer: React.FC = () => {
     const videoId = extractVideoId(videoUrl);
     const hasYear = !!currentSong?.year;
     const isNewVideo = videoId !== currentSong?.youtubeId;
-    
+
     if (videoId && (!hasYear || isNewVideo)) {
       fetchYear(videoId);
     }
   };
 
   const handleVerifyYear = () => {
-      const query = `${currentSong.name} original release year`;
-      window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+    const query = `${currentSong.name} original release year`;
+    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
   };
 
   const deleteSong = (indexToDelete: number) => {
@@ -348,7 +399,7 @@ export const QuizClipTrimmer: React.FC = () => {
 
     setSongs(newSongs);
     setCurrentIndex(newIndex);
-    
+
     // Sync to localStorage
     localStorage.setItem('trimmer_songs', JSON.stringify(newSongs));
     localStorage.setItem('trimmer_current_index', newIndex.toString());
@@ -372,9 +423,8 @@ export const QuizClipTrimmer: React.FC = () => {
             <div
               key={song.id}
               onClick={() => { saveCurrentProgress(); setCurrentIndex(idx); }}
-              className={`group cursor-pointer w-full text-left p-3 rounded-xl transition-all flex items-center gap-3 ${
-                currentIndex === idx ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' : 'hover:bg-slate-800/50 text-slate-400'
-              }`}
+              className={`group cursor-pointer w-full text-left p-3 rounded-xl transition-all flex items-center gap-3 ${currentIndex === idx ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' : 'hover:bg-slate-800/50 text-slate-400'
+                }`}
             >
               <div className="min-w-[1.5rem] text-xs font-mono opacity-50">{idx + 1}</div>
               <div className="flex-1 truncate">
@@ -382,8 +432,8 @@ export const QuizClipTrimmer: React.FC = () => {
                 <div className="text-[10px] opacity-60 truncate">{song.info}</div>
               </div>
               {song.status === 'completed' && <CheckCircle size={14} className="text-emerald-500 shrink-0" />}
-              
-              <button 
+
+              <button
                 onClick={(e) => { e.stopPropagation(); deleteSong(idx); }}
                 className="p-2 text-slate-500 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all active:scale-90"
                 title="Delete song"
@@ -393,8 +443,22 @@ export const QuizClipTrimmer: React.FC = () => {
             </div>
           ))}
         </div>
-        <div className="p-4 border-t border-slate-800">
-          <button 
+        <div className="p-4 border-t border-slate-800 space-y-3">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={importData}
+            accept=".json"
+            className="hidden"
+          />
+          <button
+            onClick={handleImportClick}
+            className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 py-3 rounded-xl font-bold transition-all border border-slate-700"
+          >
+            <Upload size={18} />
+            Import from File
+          </button>
+          <button
             onClick={(e) => exportData(e)}
             className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold transition-all"
           >
@@ -424,10 +488,10 @@ export const QuizClipTrimmer: React.FC = () => {
               <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl shadow-xl space-y-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="space-y-1">
-                      <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">{currentSong.info}</span>
-                      <h2 className="text-2xl font-black text-white">{currentSong.name}</h2>
+                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">{currentSong.info}</span>
+                    <h2 className="text-2xl font-black text-white">{currentSong.name}</h2>
                   </div>
-                  <button 
+                  <button
                     onClick={openEditModal}
                     className="p-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-400 hover:text-white hover:border-slate-700 transition-all shadow-lg active:scale-95"
                     title="Edit Metadata"
@@ -435,23 +499,23 @@ export const QuizClipTrimmer: React.FC = () => {
                     <Edit2 size={20} />
                   </button>
                 </div>
-                
+
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="relative flex-1">
-                      <input
-                        type="text"
-                        placeholder="Paste YouTube URL or ID"
-                        value={videoUrl}
-                        onChange={(e) => setVideoUrl(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-2xl px-5 py-3 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-600"
-                      />
-                      <button 
-                        onClick={handleSearch}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-white transition-colors"
-                        title="Search on YouTube"
-                      >
-                        <Search size={20} />
-                      </button>
+                    <input
+                      type="text"
+                      placeholder="Paste YouTube URL or ID"
+                      value={videoUrl}
+                      onChange={(e) => setVideoUrl(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-2xl px-5 py-3 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-600"
+                    />
+                    <button
+                      onClick={handleSearch}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-white transition-colors"
+                      title="Search on YouTube"
+                    >
+                      <Search size={20} />
+                    </button>
                   </div>
                   <button
                     onClick={() => loadVideo()}
@@ -472,11 +536,35 @@ export const QuizClipTrimmer: React.FC = () => {
                         onChange={(e) => setYear(e.target.value)}
                         className="bg-transparent border-none text-indigo-300 font-mono focus:ring-0 outline-none w-20 px-2"
                       />
-                      
+
                       <div className="flex items-center gap-1">
                         {isFetchingYear && <Loader2 size={14} className="animate-spin text-indigo-400" />}
-                        
-                        {yearMetadata.confidence === 'low' && !isFetchingYear && (
+
+                        {(yearMetadata.error === 'yt-dlp_missing' || yearMetadata.error === 'yt-dlp_error') && !isFetchingYear && (
+                          <div className="group relative">
+                            <AlertTriangle size={14} className="text-rose-500 cursor-help" />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none shadow-2xl">
+                              <div className="font-bold text-rose-400 mb-1">
+                                {yearMetadata.error === 'yt-dlp_missing' ? 'yt-dlp Missing' : 'yt-dlp Error'}
+                              </div>
+                              <p className="mb-2">
+                                {yearMetadata.error === 'yt-dlp_missing'
+                                  ? 'Automatic year fetching requires yt-dlp to be installed.'
+                                  : 'Failed to extract metadata. Your yt-dlp might be outdated.'}
+                              </p>
+                              <div className="p-2 bg-black/50 rounded font-mono text-[10px] break-words overflow-hidden">
+                                {yearMetadata.error === 'yt-dlp_missing' ? 'sudo apt install yt-dlp' : (yearMetadata.message || 'Unknown error')}
+                              </div>
+                              {yearMetadata.error === 'yt-dlp_error' && (
+                                <div className="mt-2 text-[10px] text-indigo-400 font-bold uppercase tracking-wider">
+                                  Try: yt-dlp -U
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {yearMetadata.confidence === 'low' && !isFetchingYear && !yearMetadata.error && (
                           <div className="group relative">
                             <AlertTriangle size={14} className="text-amber-500 cursor-help" />
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
@@ -489,7 +577,7 @@ export const QuizClipTrimmer: React.FC = () => {
                           </div>
                         )}
 
-                        <button 
+                        <button
                           onClick={handleVerifyYear}
                           className="p-1 hover:bg-slate-800 rounded transition-colors text-slate-500 hover:text-indigo-400"
                           title="Verify on Google"
@@ -526,9 +614,8 @@ export const QuizClipTrimmer: React.FC = () => {
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab as any)}
-                        className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                          activeTab === tab ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'
-                        }`}
+                        className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === tab ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'
+                          }`}
                       >
                         {tab} Marker
                       </button>
@@ -540,7 +627,7 @@ export const QuizClipTrimmer: React.FC = () => {
                       <div className="flex-1">
                         <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Start</label>
                         <input
-                          type="number" step="0.1" 
+                          type="number" step="0.1"
                           value={activeTab === 'main' ? startTime : altStartTime}
                           onChange={(e) => activeTab === 'main' ? setStartTime(e.target.value) : setAltStartTime(e.target.value)}
                           className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-center font-mono focus:ring-1 focus:ring-emerald-500 outline-none"
@@ -552,7 +639,7 @@ export const QuizClipTrimmer: React.FC = () => {
                       <div className="flex-1">
                         <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">End</label>
                         <input
-                          type="number" step="0.1" 
+                          type="number" step="0.1"
                           value={activeTab === 'main' ? endTime : altEndTime}
                           onChange={(e) => activeTab === 'main' ? setEndTime(e.target.value) : setAltEndTime(e.target.value)}
                           className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-center font-mono focus:ring-1 focus:ring-rose-500 outline-none"
@@ -567,22 +654,20 @@ export const QuizClipTrimmer: React.FC = () => {
                   <button
                     onClick={togglePreview}
                     disabled={!isPlayerReady}
-                    className={`w-full py-6 rounded-2xl font-black text-xl shadow-2xl transform transition-all flex items-center justify-center gap-3 ${
-                      !isPlayerReady ? 'bg-slate-800 text-slate-600' :
-                      isPreviewing ? 'bg-slate-700 text-white ring-2 ring-slate-500' : 
-                      'bg-indigo-600 text-white hover:bg-indigo-500'
-                    }`}
+                    className={`w-full py-6 rounded-2xl font-black text-xl shadow-2xl transform transition-all flex items-center justify-center gap-3 ${!isPlayerReady ? 'bg-slate-800 text-slate-600' :
+                      isPreviewing ? 'bg-slate-700 text-white ring-2 ring-slate-500' :
+                        'bg-indigo-600 text-white hover:bg-indigo-500'
+                      }`}
                   >
                     {isPreviewing ? <Pause fill="currentColor" /> : <Play fill="currentColor" />}
                     PREVIEW
                   </button>
 
                   <div className="flex items-center justify-center gap-2">
-                    <button 
+                    <button
                       onClick={() => setIsLooping(!isLooping)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-bold uppercase transition-all ${
-                        isLooping ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-600'
-                      }`}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-bold uppercase transition-all ${isLooping ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-600'
+                        }`}
                     >
                       <RotateCcw size={12} className={isLooping ? 'animate-spin-slow' : ''} />
                       Looping
@@ -640,12 +725,12 @@ export const QuizClipTrimmer: React.FC = () => {
                 <X size={24} />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-2 ml-1">Song Name (Artist - Title)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none text-white transition-all"
@@ -654,23 +739,23 @@ export const QuizClipTrimmer: React.FC = () => {
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-2 ml-1">Anime / Section</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editInfo}
                   onChange={(e) => setEditInfo(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none text-white transition-all"
                 />
               </div>
             </div>
-            
+
             <div className="flex gap-3 pt-2">
-              <button 
+              <button
                 onClick={() => setIsEditModalOpen(false)}
                 className="flex-1 py-3 rounded-xl font-bold bg-slate-800 hover:bg-slate-700 transition-all text-slate-300"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={updateMetadata}
                 className="flex-1 py-3 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-500 transition-all text-white shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
               >
