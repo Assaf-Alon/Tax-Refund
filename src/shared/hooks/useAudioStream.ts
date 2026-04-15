@@ -101,40 +101,58 @@ export const useAudioStream = () => {
     }
   }, [status]);
 
-  const getStreamUrl = async (videoId: string): Promise<string | null> => {
-    // 1. Check cache
-    const cached = urlCache.current.get(videoId);
-    if (cached) return cached;
+  const getStreamUrl = async (videoId: string, force = false): Promise<string | null> => {
+    // 1. Check cache (unless forcing refresh)
+    if (!force) {
+      const cached = urlCache.current.get(videoId);
+      if (cached) return cached;
+    } else {
+      urlCache.current.delete(videoId);
+    }
     
-    // 2. Check in-flight promises
-    const inFlight = fetchPromises.current.get(videoId);
-    if (inFlight) return inFlight as Promise<string | null>;
+    // 2. Check in-flight promises (unless forcing)
+    if (!force) {
+      const inFlight = fetchPromises.current.get(videoId);
+      if (inFlight) return inFlight as Promise<string | null>;
+    }
 
     const fetchPromise = (async () => {
-        try {
-          console.log(`Fetching stream via proxy for ${videoId}...`);
-          const proxyRes = await fetch(`/Tax-Refund/api/stream?id=${videoId}`);
-          if (proxyRes.ok) {
-            const data = await proxyRes.json() as any;
-            if (data.url) {
-              urlCache.current.set(videoId, data.url);
-              return data.url;
+        // 3. Try local proxy first in development
+        const isDev = import.meta.env.DEV;
+        
+        if (isDev) {
+          try {
+            console.log(`Fetching stream via local proxy for ${videoId}...`);
+            const proxyRes = await fetch(`/Tax-Refund/api/stream?id=${videoId}`);
+            if (proxyRes.ok) {
+              const data = await proxyRes.json() as any;
+              if (data.url) {
+                urlCache.current.set(videoId, data.url);
+                return data.url;
+              }
             }
+          } catch (e: any) {
+            console.warn("Local proxy fetch failed, falling back to Piped...");
           }
-        } catch (e: any) {}
+        }
 
         const instances = [
           'https://pipedapi.kavin.rocks',
           'https://pipedapi.ducks.party',
           'https://pipedapi.adminforge.de',
-          'https://piped-api.lavish.works'
-        ];
+          'https://piped-api.lavish.works',
+          'https://pipedapi.rivo.cc',
+          'https://pipedapi.syncit.dev',
+          'https://pipedapi.leptons.xyz',
+          'https://api-piped.mha.fi'
+        ].sort(() => Math.random() - 0.5); // Randomize to distribute load
         
         for (const instance of instances) {
           try {
+            console.log(`Trying Piped instance: ${instance}`);
             const res = await fetch(`${instance}/streams/${videoId}`, { 
               mode: 'cors',
-              signal: AbortSignal.timeout(3000)
+              signal: AbortSignal.timeout(5000) // 5s timeout
             });
             if (!res.ok) continue;
             const data = await res.json() as any;
@@ -143,14 +161,17 @@ export const useAudioStream = () => {
               urlCache.current.set(videoId, stream.url);
               return stream.url;
             }
-          } catch (e: any) { continue; }
+          } catch (e: any) { 
+            console.warn(`Piped instance ${instance} failed:`, e.message);
+            continue; 
+          }
         }
         return null;
     })();
 
-    fetchPromises.current.set(videoId, fetchPromise);
+    if (!force) fetchPromises.current.set(videoId, fetchPromise);
     const result = await fetchPromise;
-    fetchPromises.current.delete(videoId); // Cleanup promise cache
+    if (!force) fetchPromises.current.delete(videoId);
     return result;
   };
 
@@ -188,7 +209,7 @@ export const useAudioStream = () => {
     // Give browser a tick to flush
     await new Promise(r => setTimeout(r, 50));
 
-    const url = await getStreamUrl(videoId);
+    const url = await getStreamUrl(videoId, force);
     
     // If the request changed while we were fetching, bail
     if (activeIdRef.current !== videoId) return;
