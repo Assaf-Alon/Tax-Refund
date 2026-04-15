@@ -48,7 +48,7 @@ export const QuizClipTrimmer: React.FC = () => {
       fetch('/Tax-Refund/data/anime_songs.json')
         .then(res => res.json())
         .then(data => {
-          setSongs(data);
+          setSongs(data as SongItem[]);
           localStorage.setItem('trimmer_songs', JSON.stringify(data));
         })
         .catch(err => console.error("Failed to load songs:", err));
@@ -174,11 +174,11 @@ export const QuizClipTrimmer: React.FC = () => {
     try {
       const response = await fetch(`/api/metadata?id=${videoId}`);
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as any;
         if (data.year) setYear(data.year);
         setYearMetadata({ details: data.details, confidence: data.confidence });
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json() as any;
         setYearMetadata({
           error: errorData.error,
           message: errorData.message

@@ -115,7 +115,7 @@ export const useAudioStream = () => {
           console.log(`Fetching stream via proxy for ${videoId}...`);
           const proxyRes = await fetch(`/Tax-Refund/api/stream?id=${videoId}`);
           if (proxyRes.ok) {
-            const data = await proxyRes.json();
+            const data = await proxyRes.json() as any;
             if (data.url) {
               urlCache.current.set(videoId, data.url);
               return data.url;
@@ -137,7 +137,7 @@ export const useAudioStream = () => {
               signal: AbortSignal.timeout(3000)
             });
             if (!res.ok) continue;
-            const data = await res.json();
+            const data = await res.json() as any;
             const stream = data.audioStreams?.sort((a: any, b: any) => b.bitrate - a.bitrate)[0];
             if (stream?.url) {
               urlCache.current.set(videoId, stream.url);

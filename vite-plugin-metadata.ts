@@ -33,7 +33,7 @@ export default function metadataPlugin(): Plugin {
             // Fallback: try one reliable piped instance as proxy
             try {
               const pipedRes = await fetch(`https://pipedapi.kavin.rocks/streams/${id}`);
-              const data = await pipedRes.json();
+              const data = await pipedRes.json() as any;
               const stream = data.audioStreams?.sort((a: any, b: any) => b.bitrate - a.bitrate)[0];
               if (stream?.url) {
                 res.setHeader('Content-Type', 'application/json');
