@@ -86,7 +86,8 @@ export const useVinylGame = () => {
       const pool = allSongs.filter(s => s.status === 'completed' && s.year);
 
       // 2. Setup players
-      const players: Player[] = playerNames.map((name, i) => ({
+      const validNames = playerNames.length > 0 ? playerNames : [''];
+      const players: Player[] = validNames.map((name, i) => ({
         id: `p${i}`,
         name: name.trim() || `Player ${i + 1}`,
         score: 0,
@@ -141,8 +142,9 @@ export const useVinylGame = () => {
       const newTimeline = [...timeline];
       newTimeline.splice(targetIndex, 0, mysteryCard);
       
-      const newPlayers = [...state.players];
-      newPlayers[state.currentPlayerIndex].score += 100;
+      const newPlayers = state.players.map((p, i) => 
+        i === state.currentPlayerIndex ? { ...p, score: p.score + 100 } : p
+      );
 
       setState(s => ({
         ...s,
@@ -152,8 +154,9 @@ export const useVinylGame = () => {
         lastResult: { success: true, correctYear: mysteryCard.year! }
       }));
     } else {
-      const newPlayers = [...state.players];
-      newPlayers[state.currentPlayerIndex].lives -= 1;
+      const newPlayers = state.players.map((p, i) => 
+        i === state.currentPlayerIndex ? { ...p, lives: p.lives - 1 } : p
+      );
       
       setState(s => ({
         ...s,
@@ -202,6 +205,7 @@ export const useVinylGame = () => {
     setupGame,
     checkPlacement,
     proceedToNextPlayer,
-    resetGame
+    resetGame,
+    endGame: () => setState(s => ({ ...s, status: 'gameOver' }))
   };
 };

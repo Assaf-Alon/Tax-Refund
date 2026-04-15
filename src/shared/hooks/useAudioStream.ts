@@ -63,6 +63,10 @@ export const useAudioStream = () => {
         if (onEndRef.current) { onEndRef.current(); onEndRef.current = null; }
     };
     audio.onerror = () => {
+      // Ignore errors if we are intentionally flushing or loading
+      if (!audio.src || audio.src === window.location.href || statusRef.current === 'loading') {
+        return;
+      }
       const errorStr = audio.error ? `Code ${audio.error.code}: ${audio.error.message}` : "Unknown error";
       console.error("Audio element error:", errorStr);
       setStatus('error');

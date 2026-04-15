@@ -10,7 +10,7 @@ import {
   type DragStartEvent
 } from '@dnd-kit/core';
 import { useParams } from 'react-router-dom';
-import { Play, RotateCcw, Users, Music, AlertCircle, Pause } from 'lucide-react';
+import { Play, RotateCcw, Users, Music, AlertCircle, Pause, Plus, Trash2, UserPlus } from 'lucide-react';
 
 import { useVinylGame } from './hooks/useVinylGame';
 import { useAudioStream } from '../../shared/hooks/useAudioStream';
@@ -20,7 +20,7 @@ import { Timeline } from './components/Timeline';
 
 export const VinylTimelinePage: React.FC = () => {
   const params = useParams();
-  const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame } = useVinylGame();
+  const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame, endGame } = useVinylGame();
   
   const { 
     status: playerStatus,
@@ -39,6 +39,7 @@ export const VinylTimelinePage: React.FC = () => {
   const [playerNames, setPlayerNames] = useState<string[]>(['']);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [isSoloContinuing, setIsSoloContinuing] = useState(false);
 
   // 1. Auto-prepare stream & reset state
   useEffect(() => {
@@ -46,6 +47,9 @@ export const VinylTimelinePage: React.FC = () => {
       prepare(state.mysteryCard.youtubeId);
       setLocalIsPlaying(false);
       setShowResultModal(false);
+      if (state.status === 'playing' && state.players.filter(p => p.lives > 0).length > 1) {
+        setIsSoloContinuing(false); // Reset solo mode if we are back to actual multiplayer
+      }
     }
   }, [state?.mysteryCard?.id, prepare]);
 
@@ -115,6 +119,19 @@ export const VinylTimelinePage: React.FC = () => {
     }
   };
 
+  const getNextLivingPlayer = useCallback(() => {
+    if (!state.players.length) return null;
+    let nextIdx = (state.currentPlayerIndex + 1) % state.players.length;
+    // Walk through players until we find one with lives or reach start
+    while (state.players[nextIdx].lives <= 0 && nextIdx !== state.currentPlayerIndex) {
+      nextIdx = (nextIdx + 1) % state.players.length;
+    }
+    return state.players[nextIdx];
+  }, [state.players, state.currentPlayerIndex]);
+
+  const livingPlayersCount = state.players.filter(p => p.lives > 0).length;
+  const isMatchEnding = !isSoloContinuing && state.players.length > 1 && livingPlayersCount <= 1;
+
   const renderSetup = () => (
     <div className="w-full max-w-lg mt-8 p-6 bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl">
       <div className="flex items-center gap-4 mb-6">
@@ -126,25 +143,49 @@ export const VinylTimelinePage: React.FC = () => {
 
       <div className="space-y-3 mb-6">
         {playerNames.map((name, i) => (
-          <input
-            key={i}
-            type="text"
-            value={name}
-            onChange={(e) => {
-              const next = [...playerNames];
-              next[i] = e.target.value;
-              setPlayerNames(next);
-            }}
-            placeholder={`Player ${i + 1}`}
-            className="w-full bg-slate-950/50 border border-white/5 rounded-xl px-5 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-rose-500 font-medium"
-          />
+          <div key={i} className="flex gap-2 group">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => {
+                  const next = [...playerNames];
+                  next[i] = e.target.value;
+                  setPlayerNames(next);
+                }}
+                placeholder={`Player ${i + 1}`}
+                className="w-full bg-slate-950/50 border border-white/5 rounded-xl px-5 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-rose-500 font-medium transition-colors"
+              />
+            </div>
+            {playerNames.length > 1 && (
+              <button 
+                onClick={() => setPlayerNames(playerNames.filter((_, idx) => idx !== i))}
+                className="w-12 h-12 flex items-center justify-center bg-slate-800/50 hover:bg-rose-500/20 text-slate-500 hover:text-rose-500 rounded-xl transition-all"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
+          </div>
         ))}
+        
+        {playerNames.length < 5 && (
+          <button 
+            onClick={() => setPlayerNames([...playerNames, ''])}
+            className="w-full py-3 flex items-center justify-center gap-2 border border-dashed border-white/10 rounded-xl text-slate-500 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest"
+          >
+            <Plus size={16} />
+            <span>Add Player</span>
+          </button>
+        )}
       </div>
 
       <button
-        onClick={() => setupGame(playerNames, params.id ? parseInt(params.id) : undefined)}
-        className="w-full py-4 bg-rose-600 text-white rounded-xl font-black shadow-xl shadow-rose-900/20 uppercase tracking-widest"
+        onClick={() => {
+          setupGame(playerNames, params.id ? parseInt(params.id) : undefined);
+        }}
+        className="w-full py-4 bg-rose-600 text-white rounded-xl font-black shadow-xl shadow-rose-900/20 uppercase tracking-widest flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
       >
+        <UserPlus size={20} />
         START JOURNEY
       </button>
     </div>
@@ -264,16 +305,48 @@ export const VinylTimelinePage: React.FC = () => {
               <div className={`w-full max-w-xs p-10 rounded-[2.5rem] border flex flex-col items-center gap-4 text-center ${
                 state.lastResult.success ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-400' : 'bg-rose-950/80 border-rose-500/40 text-rose-400'
               }`}>
+                 <div className="w-16 h-16 rounded-2xl bg-rose-500/20 flex items-center justify-center mb-2 border border-rose-500/20 shadow-inner">
+                    <Music className="text-rose-500 w-8 h-8" />
+                 </div>
                  <h3 className="text-3xl font-black uppercase italic tracking-tighter">
                     {state.lastResult.success ? 'Brilliant!' : 'Nope!'}
                  </h3>
-                 <p className="text-sm font-bold opacity-80 uppercase">Year recorded: {state.lastResult.correctYear}</p>
-                 <button 
-                  onClick={proceedToNextPlayer}
-                  className="mt-4 px-10 py-4 bg-white text-slate-950 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
-                 >
-                    Next Turn
-                 </button>
+                 <p className="text-base font-black uppercase tracking-tight">
+                    <span className="text-white opacity-40">Year recorded:</span> {state.lastResult.correctYear}
+                 </p>
+                 <div className="w-full h-px bg-white/5 my-2" />
+                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    {livingPlayersCount > 1 
+                      ? `Up next: ${getNextLivingPlayer()?.name}` 
+                      : livingPlayersCount === 1 && state.players.length > 1 
+                        ? 'Match Point!' 
+                        : 'Final Stretch'}
+                 </p>
+                 
+                 {isMatchEnding ? (
+                   <div className="flex flex-col gap-2 w-full mt-2">
+                     <p className="text-[10px] font-bold text-amber-400 uppercase">You are the last survivor!</p>
+                     <button 
+                        onClick={() => setIsSoloContinuing(true)}
+                        className="w-full py-3 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-600/30 transition-all"
+                     >
+                        Keep Playing Solo
+                     </button>
+                     <button 
+                        onClick={endGame} 
+                        className="w-full py-4 bg-white text-slate-950 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
+                     >
+                        End Match
+                     </button>
+                   </div>
+                 ) : (
+                   <button 
+                    onClick={proceedToNextPlayer}
+                    className="mt-4 px-10 py-4 bg-white text-slate-950 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
+                   >
+                      Next Turn
+                   </button>
+                 )}
               </div>
            </div>
         )}
