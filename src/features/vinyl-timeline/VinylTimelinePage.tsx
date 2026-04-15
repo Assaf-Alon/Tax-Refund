@@ -383,55 +383,90 @@ export const VinylTimelinePage: React.FC = () => {
         )}
 
         {state.status === 'revealing' && state.lastResult && showResultModal && (
-           <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-8 pointer-events-auto animate-in fade-in zoom-in-95 duration-300">
-              <div className={`w-full max-w-xs p-10 rounded-[2.5rem] border flex flex-col items-center gap-4 text-center ${
-                state.lastResult.success ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-400' : 'bg-rose-950/80 border-rose-500/40 text-rose-400'
+           <div className={`fixed inset-0 z-[100] flex flex-col items-center justify-center p-8 animate-in fade-in duration-500 ${
+             state.lastResult.success ? 'bg-emerald-950/95' : 'bg-rose-950/95'
+           } backdrop-blur-xl`}>
+              
+              {/* STATUS ICON */}
+              <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center mb-6 shadow-2xl animate-bounce border ${
+                state.lastResult.success ? 'bg-emerald-500 border-emerald-400' : 'bg-rose-500 border-rose-400'
               }`}>
-                 <div className="w-16 h-16 rounded-2xl bg-rose-500/20 flex items-center justify-center mb-2 border border-rose-500/20 shadow-inner">
-                    <Music className="text-rose-500 w-8 h-8" />
+                 {state.lastResult.success ? <Music className="text-white w-10 h-10" /> : <Music className="text-white w-10 h-10 opacity-50" />}
+              </div>
+
+              <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter mb-2 text-center">
+                 {state.lastResult.success ? 'Brilliant!' : 'Nope!'}
+              </h2>
+              
+              <div className="flex flex-col items-center gap-1 mb-10">
+                 <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Correct Year</span>
+                 <span className="text-6xl font-black text-white tabular-nums tracking-tighter leading-none">{state.lastResult.correctYear}</span>
+              </div>
+
+              {/* SONG METADATA */}
+              <div className="flex flex-col items-center gap-4 mb-10 text-center px-6 max-w-md">
+                 <div className="flex flex-col items-center gap-1">
+                    <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Artist & Title</span>
+                    <h3 className="text-2xl font-black text-white leading-tight italic">
+                       {state.mysteryCard.name}
+                    </h3>
                  </div>
-                 <h3 className="text-3xl font-black uppercase italic tracking-tighter">
-                    {state.lastResult.success ? 'Brilliant!' : 'Nope!'}
-                 </h3>
-                 <p className="text-base font-black uppercase tracking-tight">
-                    <span className="text-white opacity-40">Year recorded:</span> {state.lastResult.correctYear}
-                 </p>
-                 <div className="w-full h-px bg-white/5 my-2" />
-                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    {state.mode === 'survivor' ? (
-                       livingPlayersCount > 1 
-                         ? `Up next: ${getNextLivingPlayer()?.name}` 
-                         : livingPlayersCount === 1 && state.players.length > 1 
-                           ? 'Match Point!' 
-                           : 'Final Stretch'
-                    ) : (
-                       state.players.length > 1 ? `Up next: ${getNextLivingPlayer()?.name}` : ''
-                    )}
-                 </p>
-                 
-                 {isMatchEnding ? (
-                   <div className="flex flex-col gap-2 w-full mt-2">
-                     <p className="text-[10px] font-bold text-amber-400 uppercase">You are the last survivor!</p>
-                     <button 
-                        onClick={() => setIsSoloContinuing(true)}
-                        className="w-full py-3 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-600/30 transition-all"
-                     >
-                        Keep Playing Solo
-                     </button>
-                     <button 
-                        onClick={endGame} 
-                        className="w-full py-4 bg-white text-slate-950 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
-                     >
-                        End Match
-                     </button>
-                   </div>
+                 <div className="w-10 h-px bg-white/10" />
+                 <div className="flex flex-col items-center gap-1">
+                    <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Source / Placement</span>
+                    <p className="text-sm font-bold text-rose-500 uppercase tracking-widest">
+                       {state.mysteryCard.info}
+                    </p>
+                 </div>
+              </div>
+
+              {/* HANDOVER / NEXT INFO */}
+              <div className="w-full max-w-sm p-8 bg-black/20 border border-white/5 rounded-[2.5rem] flex flex-col items-center gap-4 mb-10 shadow-inner">
+                 {state.players.length > 1 ? (
+                   <>
+                     <div className="flex flex-col items-center gap-1">
+                        <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Pass the device to</span>
+                        <h3 className="text-3xl font-black text-white uppercase tracking-tighter">{getNextLivingPlayer()?.name}</h3>
+                     </div>
+                     <div className="w-full h-px bg-white/5 my-2" />
+                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">
+                        {isMatchEnding ? 'Match Point!' : 'Next Turn'}
+                     </p>
+                   </>
                  ) : (
-                   <button 
-                    onClick={proceedToNextPlayer}
-                    className="mt-4 px-10 py-4 bg-white text-slate-950 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
-                   >
-                      Next Turn
-                   </button>
+                   <div className="flex flex-col items-center gap-1">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Phase Result</span>
+                      <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
+                         {state.lastResult.success ? '+100 Points' : 'Life Lost'}
+                      </h3>
+                   </div>
+                 )}
+              </div>
+
+              {/* ACTIONS */}
+              <div className="w-full max-w-xs flex flex-col gap-3">
+                 {isMatchEnding ? (
+                    <>
+                      <button 
+                        onClick={() => setIsSoloContinuing(true)}
+                        className="w-full py-4 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600/30 transition-all"
+                      >
+                         Keep Playing Solo
+                      </button>
+                      <button 
+                         onClick={endGame} 
+                         className="w-full py-5 bg-white text-slate-950 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-2xl"
+                      >
+                         End Match
+                      </button>
+                    </>
+                 ) : (
+                    <button 
+                      onClick={proceedToNextPlayer}
+                      className="w-full py-6 bg-white text-slate-950 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl"
+                    >
+                       {state.players.length > 1 ? `I'm ${getNextLivingPlayer()?.name}!` : 'Next Card'}
+                    </button>
                  )}
               </div>
            </div>
