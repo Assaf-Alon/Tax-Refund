@@ -163,6 +163,12 @@ export const AdminDashboard: React.FC = () => {
                     >
                         ✂️ Open Quiz Clip Trimmer
                     </Link>
+                    <Link
+                        to="/vinyl"
+                        className="bg-purple-600 text-white px-4 py-2 rounded font-medium hover:bg-purple-700 transition-colors flex items-center gap-2"
+                    >
+                        🎵 Open Vinyl Timeline
+                    </Link>
                 </div>
             </div>
         </div>

@@ -8,19 +8,9 @@ declare global {
   }
 }
 
-interface SongItem {
-  id: number;
-  query: string;
-  info: string;
-  name: string;
-  youtubeId: string;
-  startTime: number;
-  endTime: number;
-  altStartTime?: number;
-  altEndTime?: number;
-  year?: string;
-  status: 'pending' | 'completed';
-}
+import type { SongItem } from '../../shared/types/music';
+
+
 
 export const QuizClipTrimmer: React.FC = () => {
   const [songs, setSongs] = useState<SongItem[]>([]);

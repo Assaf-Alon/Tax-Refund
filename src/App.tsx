@@ -5,6 +5,7 @@ import { RiddleLayout } from './layouts/RiddleLayout';
 import { HomePage } from './features/taxes/HomePage';
 import { PinGate } from './features/admin/PinGate';
 import { QuizClipTrimmer } from './features/admin/QuizClipTrimmer';
+import { VinylTimelinePage } from './features/vinyl-timeline/VinylTimelinePage';
 import { TheCave } from './features/riddles/TheCave';
 import { SpiderLair } from './features/riddles/spider-lair/SpiderLair';
 import { OuterWilds } from './features/riddles/outer-wilds/OuterWilds';
@@ -32,6 +33,8 @@ function App() {
         <Route path="/linkedin-games" element={<LinkedInGames />} />
         <Route path="/translator" element={<Suspense fallback={<div>Loading...</div>}><Translator /></Suspense>} />
         <Route path="/admin/trimmer" element={<QuizClipTrimmer />} />
+        <Route path="/vinyl" element={<VinylTimelinePage />} />
+        <Route path="/vinyl/play/:id" element={<VinylTimelinePage />} />
         {/* Catch-all redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -40,4 +43,3 @@ function App() {
 }
 
 export default App;
-
