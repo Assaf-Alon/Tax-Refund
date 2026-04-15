@@ -33,6 +33,7 @@ export interface VinylGameState {
   mode: 'survivor' | 'points';
   oneListenOnly: boolean;
   listenedCurrentRound: boolean;
+  candidateMystery: SongItem | null;
   lastResult?: {
     success: boolean;
     correctYear: string;

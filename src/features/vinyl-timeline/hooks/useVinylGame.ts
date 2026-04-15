@@ -15,6 +15,7 @@ const INITIAL_STATE: VinylGameState = {
   mode: 'survivor',
   oneListenOnly: false,
   listenedCurrentRound: false,
+  candidateMystery: null,
 };
 
 const getInitialState = (): VinylGameState => {
@@ -89,10 +90,13 @@ export const useVinylGame = () => {
     startSongId?: number
   ) => {
     try {
-      // 1. Load data
-      const res = await fetch('/Tax-Refund/data/anime_songs.json');
-      const allSongs: SongItem[] = await res.json();
-      const pool = allSongs.filter(s => s.status === 'completed' && s.year);
+      // 1. Load data (only if not pre-loaded)
+      let currentPool = state.pool;
+      if (currentPool.length === 0) {
+        const res = await fetch('/Tax-Refund/data/anime_songs.json');
+        const allSongs: SongItem[] = await res.json();
+        currentPool = allSongs.filter(s => s.status === 'completed' && s.year);
+      }
 
       // 2. Setup players
       const validNames = playerNames.length > 0 ? playerNames : [''];
@@ -103,16 +107,16 @@ export const useVinylGame = () => {
         lives: 3,
       }));
 
-      // 3. Select Anchor
+      // 3. Select Anchor (Use currentPool)
       let anchor: SongItem;
       if (startSongId !== undefined) {
-        const candidate = pool.find(s => s.id === startSongId);
-        anchor = candidate || pool[Math.floor(Math.random() * pool.length)];
+        const candidate = currentPool.find(s => s.id === startSongId);
+        anchor = candidate || currentPool[Math.floor(Math.random() * currentPool.length)];
       } else {
-        const yearsArray = pool.map(s => parseInt(s.year!)).sort((a, b) => a - b);
+        const yearsArray = currentPool.map(s => parseInt(s.year!)).sort((a, b) => a - b);
         const medianYear = yearsArray[Math.floor(yearsArray.length / 2)];
         const range = 2;
-        const anchorCandidates = pool.filter(s => {
+        const anchorCandidates = currentPool.filter(s => {
           const y = parseInt(s.year!);
           return y >= medianYear - range && y <= medianYear + range;
         });
@@ -127,9 +131,11 @@ export const useVinylGame = () => {
         ...s,
         mode,
         oneListenOnly,
+        pool: currentPool
       }));
 
-      startRound(pool, initialUsedIds, players, 0, initialTimeline);
+      // Use the preloaded candidate if it exists
+      startRound(currentPool, initialUsedIds, players, 0, initialTimeline, state.candidateMystery || undefined);
     } catch (error) {
       console.error("Failed to setup game:", error);
     }
@@ -233,6 +239,26 @@ export const useVinylGame = () => {
     );
   }, [state, startRound]);
 
+  const prepareInitialSongs = useCallback(async () => {
+    try {
+      if (state.candidateMystery) return; // Already prepared
+      const res = await fetch('/Tax-Refund/data/anime_songs.json');
+      const allSongs: SongItem[] = await res.json();
+      const pool = allSongs.filter(s => s.status === 'completed' && s.year);
+      
+      // Pick a random mystery to preload
+      const mystery = pool[Math.floor(Math.random() * pool.length)];
+      
+      setState(s => ({
+        ...s,
+        pool,
+        candidateMystery: mystery
+      }));
+    } catch (e) {
+      console.error("Failed to preload songs", e);
+    }
+  }, [state.candidateMystery]);
+
   return {
     state,
     setupGame,
@@ -240,6 +266,7 @@ export const useVinylGame = () => {
     proceedToNextPlayer,
     resetGame,
     skipCurrentMystery,
+    prepareInitialSongs,
     consumeListen: () => setState(s => ({ ...s, listenedCurrentRound: true })),
     endGame: () => setState(s => ({ ...s, status: 'gameOver' }))
   };

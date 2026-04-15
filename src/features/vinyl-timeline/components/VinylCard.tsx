@@ -52,8 +52,8 @@ export const VinylCard: React.FC<VinylCardProps> = ({
              </p>
           </div>
 
-          {/* Flicker Overlay */}
-          <div className="absolute inset-0 pointer-events-none bg-white animate-vinyl-flicker mix-blend-overlay opacity-0" />
+          {/* Flicker Overlay - Grain Noise */}
+          <div className={`absolute inset-0 pointer-events-none noise-texture animate-vinyl-flicker mix-blend-overlay transition-opacity duration-1000 ${isPlaying ? 'opacity-100' : 'opacity-60'}`} />
         </div>
 
         {/* Back Side (Revealed Song) */}

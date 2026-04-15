@@ -20,7 +20,7 @@ import { Timeline } from './components/Timeline';
 
 export const VinylTimelinePage: React.FC = () => {
   const params = useParams();
-  const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame, skipCurrentMystery, consumeListen, endGame } = useVinylGame();
+  const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame, skipCurrentMystery, prepareInitialSongs, consumeListen, endGame } = useVinylGame();
   
   const { 
     status: playerStatus,
@@ -43,21 +43,29 @@ export const VinylTimelinePage: React.FC = () => {
   const [gameMode, setGameMode] = useState<'survivor' | 'points'>('survivor');
   const [oneListenOnly, setOneListenOnly] = useState(false);
 
+  // 0. Preload pool and initial candidate on mount
+  useEffect(() => {
+    prepareInitialSongs();
+  }, [prepareInitialSongs]);
+
   // 1. Auto-prepare stream & reset state
   useEffect(() => {
-    if (state?.mysteryCard?.youtubeId) {
+    if (state.status === 'playing' && state.mysteryCard?.youtubeId) {
       prepare(state.mysteryCard.youtubeId);
       setLocalIsPlaying(false);
       setShowResultModal(false);
-      if (state.status === 'playing' && state.players.filter(p => p.lives > 0).length > 1) {
+      if (state.players.filter(p => p.lives > 0).length > 1) {
         setIsSoloContinuing(false); // Reset solo mode if we are back to actual multiplayer
       }
+    } else if (state.status === 'setup' && state.candidateMystery?.youtubeId) {
+      // PRELOAD the first song while in setup screen
+      prepare(state.candidateMystery.youtubeId);
     }
-  }, [state?.mysteryCard?.id, prepare]);
+  }, [state.status, state?.mysteryCard?.id, state?.candidateMystery?.youtubeId, prepare]);
 
   // 2. Global status observer (Cleanup)
   useEffect(() => {
-    if (state.status === 'setup' || state.status === 'gameOver') {
+    if (state.status === 'gameOver') {
       reset();
     }
   }, [state.status, reset]);
