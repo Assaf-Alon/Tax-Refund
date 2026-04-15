@@ -12,6 +12,9 @@ const INITIAL_STATE: VinylGameState = {
   nextMysteryCard: null,
   pool: [],
   usedIds: [],
+  mode: 'survivor',
+  oneListenOnly: false,
+  listenedCurrentRound: false,
 };
 
 const getInitialState = (): VinylGameState => {
@@ -74,11 +77,17 @@ export const useVinylGame = () => {
       players,
       currentPlayerIndex,
       timeline,
-      pool: currentPool
+      pool: currentPool,
+      listenedCurrentRound: false // Reset for new round
     }));
   }, []);
 
-  const setupGame = useCallback(async (playerNames: string[], startSongId?: number) => {
+  const setupGame = useCallback(async (
+    playerNames: string[], 
+    mode: 'survivor' | 'points' = 'survivor',
+    oneListenOnly: boolean = false,
+    startSongId?: number
+  ) => {
     try {
       // 1. Load data
       const res = await fetch('/Tax-Refund/data/anime_songs.json');
@@ -113,6 +122,12 @@ export const useVinylGame = () => {
       // 4. Initial state
       const initialTimeline = [anchor];
       const initialUsedIds = [anchor.id];
+
+      setState(s => ({
+        ...s,
+        mode,
+        oneListenOnly,
+      }));
 
       startRound(pool, initialUsedIds, players, 0, initialTimeline);
     } catch (error) {
@@ -154,9 +169,13 @@ export const useVinylGame = () => {
         lastResult: { success: true, correctYear: mysteryCard.year! }
       }));
     } else {
-      const newPlayers = state.players.map((p, i) => 
-        i === state.currentPlayerIndex ? { ...p, lives: p.lives - 1 } : p
-      );
+      const newPlayers = state.players.map((p, i) => {
+        if (i !== state.currentPlayerIndex) return p;
+        if (state.mode === 'survivor') {
+          return { ...p, lives: p.lives - 1 };
+        }
+        return p; // No life loss in points mode
+      });
       
       setState(s => ({
         ...s,
@@ -206,6 +225,7 @@ export const useVinylGame = () => {
     checkPlacement,
     proceedToNextPlayer,
     resetGame,
+    consumeListen: () => setState(s => ({ ...s, listenedCurrentRound: true })),
     endGame: () => setState(s => ({ ...s, status: 'gameOver' }))
   };
 };

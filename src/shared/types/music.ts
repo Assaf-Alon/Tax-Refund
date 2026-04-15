@@ -30,6 +30,9 @@ export interface VinylGameState {
   nextMysteryCard: SongItem | null;
   pool: SongItem[];
   usedIds: number[];
+  mode: 'survivor' | 'points';
+  oneListenOnly: boolean;
+  listenedCurrentRound: boolean;
   lastResult?: {
     success: boolean;
     correctYear: string;

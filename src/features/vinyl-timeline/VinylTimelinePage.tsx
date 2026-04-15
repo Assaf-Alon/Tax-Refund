@@ -10,7 +10,7 @@ import {
   type DragStartEvent
 } from '@dnd-kit/core';
 import { useParams } from 'react-router-dom';
-import { Play, RotateCcw, Users, Music, AlertCircle, Pause, Plus, Trash2, UserPlus } from 'lucide-react';
+import { Play, RotateCcw, Users, Music, AlertCircle, Pause, Square, Plus, Trash2, UserPlus } from 'lucide-react';
 
 import { useVinylGame } from './hooks/useVinylGame';
 import { useAudioStream } from '../../shared/hooks/useAudioStream';
@@ -20,7 +20,7 @@ import { Timeline } from './components/Timeline';
 
 export const VinylTimelinePage: React.FC = () => {
   const params = useParams();
-  const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame, endGame } = useVinylGame();
+  const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame, consumeListen, endGame } = useVinylGame();
   
   const { 
     status: playerStatus,
@@ -40,6 +40,8 @@ export const VinylTimelinePage: React.FC = () => {
   const [activeId, setActiveId] = useState<number | null>(null);
   const [showResultModal, setShowResultModal] = useState(false);
   const [isSoloContinuing, setIsSoloContinuing] = useState(false);
+  const [gameMode, setGameMode] = useState<'survivor' | 'points'>('survivor');
+  const [oneListenOnly, setOneListenOnly] = useState(false);
 
   // 1. Auto-prepare stream & reset state
   useEffect(() => {
@@ -97,13 +99,20 @@ export const VinylTimelinePage: React.FC = () => {
     if (isPlaying) {
       togglePlayback();
       setLocalIsPlaying(false);
+      // Consume listen when pausing or when it ends
+      if (state.oneListenOnly) consumeListen();
     } else {
+      if (state.oneListenOnly && state.listenedCurrentRound) return;
+
       setLocalIsPlaying(true);
       playExcerpt(
         state.mysteryCard.youtubeId, 
         state.mysteryCard.startTime, 
         state.mysteryCard.endTime,
-        () => setLocalIsPlaying(false)
+        () => {
+          setLocalIsPlaying(false);
+          if (state.oneListenOnly) consumeListen();
+        }
       );
     }
   }, [state?.mysteryCard, isReady, isPlaying, playExcerpt, togglePlayback]);
@@ -179,9 +188,44 @@ export const VinylTimelinePage: React.FC = () => {
         )}
       </div>
 
+      {/* Settings Section */}
+      <div className="space-y-4 mb-8 pt-4 border-t border-white/5">
+         <div className="flex flex-col gap-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Game Mode</label>
+            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-950/50 rounded-2xl border border-white/5">
+                <button 
+                  onClick={() => setGameMode('survivor')}
+                  className={`py-3 rounded-xl text-[10px] font-black uppercase transition-all ${gameMode === 'survivor' ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                >
+                  Survivor
+                </button>
+                <button 
+                  onClick={() => setGameMode('points')}
+                  className={`py-3 rounded-xl text-[10px] font-black uppercase transition-all ${gameMode === 'points' ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                >
+                  Points
+                </button>
+            </div>
+         </div>
+
+         <div className="flex items-center justify-between p-4 bg-slate-950/50 rounded-2xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group"
+              onClick={() => setOneListenOnly(!oneListenOnly)}>
+            <div className="flex flex-col">
+               <span className="text-[10px] font-black text-white uppercase flex items-center gap-2">
+                 One Listen Only
+                 <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+               </span>
+               <span className="text-[8px] font-medium text-slate-500 uppercase tracking-tighter">Snippet plays once per turn</span>
+            </div>
+            <div className={`w-10 h-5 rounded-full relative transition-colors ${oneListenOnly ? 'bg-rose-600' : 'bg-slate-800'}`}>
+               <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${oneListenOnly ? 'left-6' : 'left-1'}`} />
+            </div>
+         </div>
+      </div>
+
       <button
         onClick={() => {
-          setupGame(playerNames, params.id ? parseInt(params.id) : undefined);
+          setupGame(playerNames, gameMode, oneListenOnly, params.id ? parseInt(params.id) : undefined);
         }}
         className="w-full py-4 bg-rose-600 text-white rounded-xl font-black shadow-xl shadow-rose-900/20 uppercase tracking-widest flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
       >
@@ -206,9 +250,15 @@ export const VinylTimelinePage: React.FC = () => {
            </div>
            <div className="w-px h-6 bg-white/10" />
            <div className="flex gap-1">
-              {[...Array(3)].map((_, i) => (
-                 <div key={i} className={`w-2 h-2 rounded-full ${i < activePlayer.lives ? 'bg-rose-500 shadow-lg shadow-rose-500/50' : 'bg-slate-800'}`} />
-              ))}
+              {state.mode === 'survivor' ? (
+                [...Array(3)].map((_, i) => (
+                   <div key={i} className={`w-2 h-2 rounded-full ${i < activePlayer.lives ? 'bg-rose-500 shadow-lg shadow-rose-500/50' : 'bg-slate-800'}`} />
+                ))
+              ) : (
+                <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
+                   <span className="text-[8px] font-black text-emerald-400 uppercase tracking-tighter">Unlimited Lives</span>
+                </div>
+              )}
            </div>
            <div className="w-px h-6 bg-white/10" />
            <span className="text-emerald-400 font-black text-sm tabular-nums">{activePlayer.score.toLocaleString()}</span>
@@ -253,25 +303,25 @@ export const VinylTimelinePage: React.FC = () => {
 
                 <button 
                    onClick={handlePlaySnippet}
-                   disabled={!isReady}
+                   disabled={!isReady || (state.oneListenOnly && state.listenedCurrentRound && !isPlaying)}
                    className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 z-20 ${
                     isPlaying 
                       ? 'bg-rose-500 text-white shadow-2xl scale-110' 
-                      : !isReady ? 'bg-slate-800 text-slate-600' : 'bg-white text-slate-950 shadow-xl'
+                      : !isReady || (state.oneListenOnly && state.listenedCurrentRound) ? 'bg-slate-800 text-slate-600' : 'bg-white text-slate-950 shadow-xl'
                   }`}
                 >
                   {!isReady && playerStatus !== 'error' ? (
                      <div className="w-5 h-5 border-2 border-slate-600 border-t-white rounded-full animate-spin" />
                   ) : isPlaying ? (
-                    <Pause className="fill-current w-7 h-7" />
+                    state.oneListenOnly ? <Square className="fill-current w-7 h-7" /> : <Pause className="fill-current w-7 h-7" />
                   ) : playerStatus === 'error' ? (
                     <RotateCcw className="w-7 h-7" onClick={(e) => { e.stopPropagation(); prepare(state.mysteryCard!.youtubeId); }} />
                   ) : (
-                    <Play className="fill-current w-7 h-7 ml-1" />
+                    <Play className={`fill-current w-7 h-7 ml-1 ${(state.oneListenOnly && state.listenedCurrentRound) ? 'opacity-20' : ''}`} />
                   )}
                 </button>
                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">
-                  {playerStatus === 'loading' ? 'Loading' : playerStatus === 'error' ? 'Tap to Retry' : isPlaying ? 'Pause' : 'Play Snippet'}
+                  {playerStatus === 'loading' ? 'Loading' : playerStatus === 'error' ? 'Tap to Retry' : isPlaying ? (state.oneListenOnly ? 'Stop' : 'Pause') : (state.oneListenOnly && state.listenedCurrentRound) ? 'Listen Used' : 'Play Snippet'}
                 </span>
              </div>
           </div>
@@ -316,11 +366,15 @@ export const VinylTimelinePage: React.FC = () => {
                  </p>
                  <div className="w-full h-px bg-white/5 my-2" />
                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    {livingPlayersCount > 1 
-                      ? `Up next: ${getNextLivingPlayer()?.name}` 
-                      : livingPlayersCount === 1 && state.players.length > 1 
-                        ? 'Match Point!' 
-                        : 'Final Stretch'}
+                    {state.mode === 'survivor' ? (
+                       livingPlayersCount > 1 
+                         ? `Up next: ${getNextLivingPlayer()?.name}` 
+                         : livingPlayersCount === 1 && state.players.length > 1 
+                           ? 'Match Point!' 
+                           : 'Final Stretch'
+                    ) : (
+                       state.players.length > 1 ? `Up next: ${getNextLivingPlayer()?.name}` : ''
+                    )}
                  </p>
                  
                  {isMatchEnding ? (
