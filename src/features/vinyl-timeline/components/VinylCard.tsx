@@ -64,15 +64,25 @@ export const VinylCard: React.FC<VinylCardProps> = ({
               <div 
                 className="absolute inset-0 opacity-20 blur-xl scale-110"
                 style={{ 
-                  backgroundImage: `url(https://img.youtube.com/vi/${song.youtubeId}/0.jpg)`,
+                  backgroundImage: `url(https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg)`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
               />
             )}
 
-            <div className="relative flex-1 p-6 flex flex-col justify-end">
-               <div className="space-y-1">
+            <div className="relative flex-1 p-6 flex flex-col items-center">
+              {/* High-Res Center Cover */}
+              {song?.youtubeId && (
+                <div className="w-40 h-40 mb-4 rounded-lg overflow-hidden shadow-2xl border border-white/10 shrink-0">
+                  <img 
+                    src={`https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg`} 
+                    alt={song.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+               <div className="space-y-1 text-center">
                   <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-tight">
                     {song?.info || "Unknown Source"}
                   </span>

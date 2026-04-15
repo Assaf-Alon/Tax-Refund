@@ -9,6 +9,7 @@ const INITIAL_STATE: VinylGameState = {
   currentPlayerIndex: 0,
   timeline: [],
   mysteryCard: null,
+  nextMysteryCard: null,
   pool: [],
   usedIds: [],
 };
@@ -42,21 +43,33 @@ export const useVinylGame = () => {
     usedIds: number[], 
     players: Player[], 
     currentPlayerIndex: number,
-    timeline: SongItem[]
+    timeline: SongItem[],
+    incomingMystery?: SongItem
   ) => {
     const available = currentPool.filter(s => !usedIds.includes(s.id));
-    if (available.length === 0) {
+    
+    // Use provided mystery (from nextMysteryCard) or pick one
+    const mysteryCard = incomingMystery || (available.length > 0 
+      ? available[Math.floor(Math.random() * available.length)] 
+      : null);
+
+    if (!mysteryCard) {
       setState(s => ({ ...s, status: 'gameOver' }));
       return;
     }
 
-    const nextMystery = available[Math.floor(Math.random() * available.length)];
+    const updatedUsedIds = [...usedIds, mysteryCard.id];
+    const stillAvailable = currentPool.filter(s => !updatedUsedIds.includes(s.id));
+    const nextMystery = stillAvailable.length > 0 
+      ? stillAvailable[Math.floor(Math.random() * stillAvailable.length)]
+      : null;
     
     setState(s => ({
       ...s,
       status: 'playing',
-      mysteryCard: nextMystery,
-      usedIds: [...usedIds, nextMystery.id],
+      mysteryCard,
+      nextMysteryCard: nextMystery,
+      usedIds: updatedUsedIds,
       lastResult: undefined,
       players,
       currentPlayerIndex,
@@ -169,7 +182,14 @@ export const useVinylGame = () => {
       finalNextIdx = (finalNextIdx + 1) % state.players.length;
     }
 
-    startRound(state.pool, state.usedIds, state.players, finalNextIdx, state.timeline);
+    startRound(
+      state.pool, 
+      state.usedIds, 
+      state.players, 
+      finalNextIdx, 
+      state.timeline,
+      state.nextMysteryCard || undefined
+    );
   }, [state, startRound]);
 
   const resetGame = useCallback(() => {

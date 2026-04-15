@@ -9,6 +9,11 @@ export const useAudioStream = () => {
   const [streamUrl, setStreamUrl] = useState<string | null>(null);
   
   // Refs for tracking internal state (Stable function identity)
+  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const excerptBounds = useRef<{ start: number; end: number } | null>(null);
+  
+  // Refs for tracking internal state (Stable function identity)
   const activeIdRef = useRef<string | null>(null);
   const activeUrlRef = useRef<string | null>(null);
   const isLoadingRef = useRef<string | null>(null);
@@ -34,6 +39,25 @@ export const useAudioStream = () => {
     audio.onstalled = () => console.warn("Audio: stalled (buffering issue)");
     audio.onwaiting = () => console.log("Audio: waiting for data...");
     
+    audio.ontimeupdate = () => {
+      setCurrentTime(audio.currentTime);
+      if (excerptBounds.current) {
+        const { start, end } = excerptBounds.current;
+        const total = end - start;
+        const current = Math.max(0, audio.currentTime - start);
+        setProgress(Math.min(100, (current / total) * 100));
+
+        if (audio.currentTime >= end) {
+          audio.pause();
+          setStatus('ended');
+          if (onEndRef.current) { 
+            onEndRef.current(); 
+            onEndRef.current = null; 
+          }
+        }
+      }
+    };
+
     audio.onended = () => {
         setStatus('ended');
         if (onEndRef.current) { onEndRef.current(); onEndRef.current = null; }
@@ -61,6 +85,17 @@ export const useAudioStream = () => {
     }
     setStatus('paused');
   }, []);
+
+  const togglePlayback = useCallback(() => {
+    if (!audioRef.current) return;
+    // If it's playing OR was about to play (ready/loading), we should pause it
+    if (status === 'playing' || status === 'ready' || status === 'loading') {
+      audioRef.current.pause();
+      setStatus('paused');
+    } else {
+      audioRef.current.play().catch(e => console.error("Toggle play failed:", e));
+    }
+  }, [status]);
 
   const getStreamUrl = async (videoId: string): Promise<string | null> => {
     // 1. Check cache
@@ -120,11 +155,11 @@ export const useAudioStream = () => {
     await getStreamUrl(videoId);
   }, []);
 
-  const prepare = useCallback(async (videoId: string) => {
+  const prepare = useCallback(async (videoId: string, force = false) => {
     if (!videoId) return;
     
     // Guard: already have it or currently loading it
-    if (videoId === activeIdRef.current && (activeUrlRef.current || isLoadingRef.current === videoId)) {
+    if (!force && videoId === activeIdRef.current && (activeUrlRef.current || isLoadingRef.current === videoId)) {
         return;
     }
     
@@ -135,16 +170,23 @@ export const useAudioStream = () => {
 
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.removeAttribute('src');
+      // "Flush" to prevent fraction-of-second glitches
+      audioRef.current.src = ""; 
       audioRef.current.load();
     }
 
     setCurrentVideoId(videoId);
     setStreamUrl(null);
     setStatus('loading');
+    setProgress(0);
+    setCurrentTime(0);
     
+    // Give browser a tick to flush
+    await new Promise(r => setTimeout(r, 50));
+
     const url = await getStreamUrl(videoId);
     
+    // If the request changed while we were fetching, bail
     if (activeIdRef.current !== videoId) return;
     
     if (url) {
@@ -163,6 +205,22 @@ export const useAudioStream = () => {
     }
   }, []);
 
+  const reset = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current.load();
+    }
+    setCurrentVideoId(null);
+    setStreamUrl(null);
+    setStatus('uninitialized');
+    setProgress(0);
+    setCurrentTime(0);
+    activeIdRef.current = null;
+    activeUrlRef.current = null;
+    isLoadingRef.current = null;
+  }, []);
+
   const playExcerpt = useCallback((videoId: string, start: number, end: number, onEnd?: () => void) => {
     const audio = audioRef.current;
     if (!audio || !streamUrl || videoId !== currentVideoId) {
@@ -171,38 +229,41 @@ export const useAudioStream = () => {
     }
     
     onEndRef.current = onEnd || null;
+    excerptBounds.current = { start, end };
 
-    const cleanup = () => {
-      audio.removeEventListener('seeked', onOnceSeeked);
-      audio.removeEventListener('timeupdate', onTimeUpdate);
-    };
-
-    const onTimeUpdate = () => {
-      if (audio.currentTime >= end) {
-        audio.pause();
-        cleanup();
-        if (onEndRef.current) { onEndRef.current(); onEndRef.current = null; }
-      }
-    };
-
-    const onOnceSeeked = () => {
-      audio.addEventListener('timeupdate', onTimeUpdate);
-    };
-
-    cleanup();
+    // Support resuming if within bounds
+    const isWithinBounds = audio.currentTime >= start - 0.5 && audio.currentTime < end;
     
-    audio.play()
-      .then(() => {
-        audio.addEventListener('seeked', onOnceSeeked);
-        audio.currentTime = start;
-      })
-      .catch(() => {
-        audio.addEventListener('seeked', onOnceSeeked);
-        audio.currentTime = start;
-        audio.play().catch(() => {});
-      });
+    if (isWithinBounds && statusRef.current === 'playing') {
+      return; // Already playing
+    }
+
+    if (isWithinBounds && (statusRef.current === 'paused' || statusRef.current === 'ready')) {
+      audio.play().catch(e => console.error("Resume failed:", e));
+      return;
+    }
+
+    // Otherwise (re)start from start
+    audio.currentTime = start;
+    audio.play().catch(e => {
+        console.warn("Autoplay block? Retrying on user interaction...", e);
+    });
 
   }, [currentVideoId, streamUrl]);
 
-  return { status, isReady: !!streamUrl && status !== 'error', isPlaying: status === 'playing', prepare, playExcerpt, stop, prefetch };
+  const isReady = (!!streamUrl && status !== 'error') || (!!currentVideoId && urlCache.current.has(currentVideoId));
+
+  return { 
+    status, 
+    isReady, 
+    isPlaying: status === 'playing', 
+    progress,
+    currentTime,
+    prepare, 
+    playExcerpt, 
+    stop, 
+    togglePlayback,
+    prefetch,
+    reset
+  };
 };

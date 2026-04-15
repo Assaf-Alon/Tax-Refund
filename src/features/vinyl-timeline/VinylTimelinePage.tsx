@@ -10,7 +10,7 @@ import {
   type DragStartEvent
 } from '@dnd-kit/core';
 import { useParams } from 'react-router-dom';
-import { Play, RotateCcw, Users, Music, Volume2, AlertCircle } from 'lucide-react';
+import { Play, RotateCcw, Users, Music, AlertCircle, Pause } from 'lucide-react';
 
 import { useVinylGame } from './hooks/useVinylGame';
 import { useAudioStream } from '../../shared/hooks/useAudioStream';
@@ -28,29 +28,59 @@ export const VinylTimelinePage: React.FC = () => {
     isPlaying: actualIsPlaying, 
     prepare,
     playExcerpt,
-    stop,
-    prefetch
+    togglePlayback,
+    progress,
+    prefetch,
+    reset
   } = useAudioStream();
 
   const [localIsPlaying, setLocalIsPlaying] = useState(false);
   const isPlaying = localIsPlaying || actualIsPlaying;
   const [playerNames, setPlayerNames] = useState<string[]>(['']);
   const [activeId, setActiveId] = useState<number | null>(null);
+  const [showResultModal, setShowResultModal] = useState(false);
 
-  // 1. Auto-prepare stream
+  // 1. Auto-prepare stream & reset state
   useEffect(() => {
     if (state?.mysteryCard?.youtubeId) {
       prepare(state.mysteryCard.youtubeId);
+      setLocalIsPlaying(false);
+      setShowResultModal(false);
     }
-  }, [state?.mysteryCard?.youtubeId, prepare]);
+  }, [state?.mysteryCard?.id, prepare]);
 
-  // 2. Preload pool in background
+  // 2. Global status observer (Cleanup)
   useEffect(() => {
-    if (state?.pool?.length > 0 && state.mysteryCard) {
-      const remaining = state.pool.filter(s => !state.usedIds.includes(s.id));
-      remaining.slice(0, 3).forEach(s => prefetch(s.youtubeId));
+    if (state.status === 'setup' || state.status === 'gameOver') {
+      reset();
     }
-  }, [state?.pool, state?.usedIds, prefetch]);
+  }, [state.status, reset]);
+
+  // 3. Preload next mystery & pool in background
+  useEffect(() => {
+    if (state.status === 'playing') {
+      // High priority: The very next card
+      if (state.nextMysteryCard?.youtubeId) {
+        prefetch(state.nextMysteryCard.youtubeId);
+      }
+
+      // Low priority: General pool
+      if (state?.pool?.length > 0) {
+        const remaining = state.pool.filter(s => !state.usedIds.includes(s.id));
+        remaining.slice(0, 3).forEach(s => prefetch(s.youtubeId));
+      }
+    }
+  }, [state?.status, state.nextMysteryCard?.id, state?.pool, state?.usedIds, prefetch]);
+
+  // 4. Result modal delay
+  useEffect(() => {
+    if (state.status === 'revealing' && state.lastResult) {
+      const timer = setTimeout(() => setShowResultModal(true), 800);
+      return () => clearTimeout(timer);
+    } else {
+      setShowResultModal(false);
+    }
+  }, [state.status, state.lastResult]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -58,7 +88,12 @@ export const VinylTimelinePage: React.FC = () => {
   );
 
   const handlePlaySnippet = useCallback(() => {
-    if (state?.mysteryCard && isReady) {
+    if (!state?.mysteryCard || !isReady) return;
+
+    if (isPlaying) {
+      togglePlayback();
+      setLocalIsPlaying(false);
+    } else {
       setLocalIsPlaying(true);
       playExcerpt(
         state.mysteryCard.youtubeId, 
@@ -67,14 +102,10 @@ export const VinylTimelinePage: React.FC = () => {
         () => setLocalIsPlaying(false)
       );
     }
-  }, [state?.mysteryCard, isReady, playExcerpt]);
+  }, [state?.mysteryCard, isReady, isPlaying, playExcerpt, togglePlayback]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as number);
-    if (isPlaying && stop) {
-      stop();
-      setLocalIsPlaying(false);
-    }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -170,11 +201,19 @@ export const VinylTimelinePage: React.FC = () => {
              </div>
 
              {/* Mobile-Friendly Control */}
-             <div className="flex flex-col items-center gap-1 z-10">
+             <div className="flex flex-col items-center gap-1 z-10 w-full max-w-[200px]">
+                {/* Progress Bar */}
+                <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-2">
+                   <div 
+                     className="h-full bg-rose-500 transition-all duration-300 ease-linear" 
+                     style={{ width: `${progress}%` }}
+                   />
+                </div>
+
                 <button 
-                  onClick={handlePlaySnippet}
-                  disabled={!isReady || isPlaying}
-                  className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 z-20 ${
+                   onClick={handlePlaySnippet}
+                   disabled={!isReady}
+                   className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 z-20 ${
                     isPlaying 
                       ? 'bg-rose-500 text-white shadow-2xl scale-110' 
                       : !isReady ? 'bg-slate-800 text-slate-600' : 'bg-white text-slate-950 shadow-xl'
@@ -183,7 +222,7 @@ export const VinylTimelinePage: React.FC = () => {
                   {!isReady && playerStatus !== 'error' ? (
                      <div className="w-5 h-5 border-2 border-slate-600 border-t-white rounded-full animate-spin" />
                   ) : isPlaying ? (
-                    <Volume2 className="w-8 h-8 animate-pulse" />
+                    <Pause className="fill-current w-7 h-7" />
                   ) : playerStatus === 'error' ? (
                     <RotateCcw className="w-7 h-7" onClick={(e) => { e.stopPropagation(); prepare(state.mysteryCard!.youtubeId); }} />
                   ) : (
@@ -191,7 +230,7 @@ export const VinylTimelinePage: React.FC = () => {
                   )}
                 </button>
                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">
-                  {playerStatus === 'loading' ? 'Loading' : playerStatus === 'error' ? 'Tap to Retry' : isPlaying ? 'Playing' : 'Play Snippet'}
+                  {playerStatus === 'loading' ? 'Loading' : playerStatus === 'error' ? 'Tap to Retry' : isPlaying ? 'Pause' : 'Play Snippet'}
                 </span>
              </div>
           </div>
@@ -220,8 +259,8 @@ export const VinylTimelinePage: React.FC = () => {
            </div>
         )}
 
-        {state.status === 'revealing' && state.lastResult && (
-           <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-8 pointer-events-auto">
+        {state.status === 'revealing' && state.lastResult && showResultModal && (
+           <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-8 pointer-events-auto animate-in fade-in zoom-in-95 duration-300">
               <div className={`w-full max-w-xs p-10 rounded-[2.5rem] border flex flex-col items-center gap-4 text-center ${
                 state.lastResult.success ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-400' : 'bg-rose-950/80 border-rose-500/40 text-rose-400'
               }`}>

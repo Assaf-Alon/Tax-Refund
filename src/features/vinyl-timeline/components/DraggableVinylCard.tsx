@@ -31,7 +31,7 @@ export const DraggableVinylCard: React.FC<DraggableVinylCardProps> = ({
 
   const style = {
     transform: CSS.Translate.toString(transform),
-    opacity: isDragging ? 0.3 : undefined,
+    opacity: isDragging ? 0 : 1,
     touchAction: 'none' // Crucial for mobile dragging
   };
 

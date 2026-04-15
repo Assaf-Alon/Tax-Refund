@@ -27,6 +27,7 @@ export interface VinylGameState {
   currentPlayerIndex: number;
   timeline: SongItem[];
   mysteryCard: SongItem | null;
+  nextMysteryCard: SongItem | null;
   pool: SongItem[];
   usedIds: number[];
   lastResult?: {
@@ -34,3 +35,4 @@ export interface VinylGameState {
     correctYear: string;
   };
 }
+
