@@ -20,7 +20,7 @@ import { Timeline } from './components/Timeline';
 
 export const VinylTimelinePage: React.FC = () => {
   const params = useParams();
-  const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame, consumeListen, endGame } = useVinylGame();
+  const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame, skipCurrentMystery, consumeListen, endGame } = useVinylGame();
   
   const { 
     status: playerStatus,
@@ -315,7 +315,7 @@ export const VinylTimelinePage: React.FC = () => {
                   ) : isPlaying ? (
                     state.oneListenOnly ? <Square className="fill-current w-7 h-7" /> : <Pause className="fill-current w-7 h-7" />
                   ) : playerStatus === 'error' ? (
-                    <RotateCcw className="w-7 h-7" onClick={(e) => { e.stopPropagation(); prepare(state.mysteryCard!.youtubeId); }} />
+                    <RotateCcw className="w-7 h-7" onClick={(e) => { e.stopPropagation(); prepare(state.mysteryCard!.youtubeId, true); }} />
                   ) : (
                     <Play className={`fill-current w-7 h-7 ml-1 ${(state.oneListenOnly && state.listenedCurrentRound) ? 'opacity-20' : ''}`} />
                   )}
@@ -343,10 +343,42 @@ export const VinylTimelinePage: React.FC = () => {
         </DndContext>
 
         {/* OVERLAYS */}
-        {playerStatus === 'error' && (
-           <div className="fixed bottom-32 flex items-center gap-2 bg-rose-500/20 border border-rose-500/50 px-4 py-2 rounded-lg backdrop-blur-md z-50 animate-in fade-in slide-in-from-bottom-4">
-              <AlertCircle size={14} className="text-rose-500" />
-              <span className="text-[10px] text-rose-500 font-bold uppercase">Stream connection lost. Tap the retry button above.</span>
+        {playerStatus === 'error' && state.mysteryCard && (
+           <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in zoom-in-95 duration-300">
+              <div className="w-full max-w-sm p-8 bg-slate-900 border border-rose-500/30 rounded-[2.5rem] flex flex-col items-center text-center shadow-2xl">
+                 <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-6 border border-rose-500/20">
+                    <AlertCircle className="text-rose-500 w-8 h-8" />
+                 </div>
+                 
+                 <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">Connection Blocked</h3>
+                 
+                 <div className="p-4 bg-black/40 rounded-2xl border border-white/5 w-full mb-6">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Failing Song:</p>
+                    <p className="text-sm font-bold text-white mb-2">{state.mysteryCard.name}</p>
+                    <p className="text-[8px] font-medium text-slate-500 break-all opacity-50">
+                       https://youtube.com/watch?v={state.mysteryCard.youtubeId}
+                    </p>
+                 </div>
+
+                 <p className="text-[10px] font-bold text-slate-400 uppercase leading-relaxed mb-8">
+                    YouTube is blocking this specific stream. You can retry or skip this song to keep the game going.
+                 </p>
+
+                 <div className="flex flex-col gap-3 w-full">
+                    <button 
+                      onClick={() => prepare(state.mysteryCard!.youtubeId, true)}
+                      className="w-full py-4 bg-white text-slate-950 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
+                    >
+                       Try Reconnecting
+                    </button>
+                    <button 
+                      onClick={skipCurrentMystery}
+                      className="w-full py-4 bg-rose-600/10 text-rose-500 border border-rose-500/20 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-rose-500/20 transition-all"
+                    >
+                       Skip This Card
+                    </button>
+                 </div>
+              </div>
            </div>
         )}
 

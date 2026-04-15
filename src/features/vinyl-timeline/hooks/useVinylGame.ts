@@ -219,12 +219,27 @@ export const useVinylGame = () => {
     setState(INITIAL_STATE);
   }, []);
 
+  const skipCurrentMystery = useCallback(() => {
+    if (!state.mysteryCard) return;
+    
+    // Pick a new mystery (startRound will handle it)
+    startRound(
+      state.pool, 
+      state.usedIds, 
+      state.players, 
+      state.currentPlayerIndex, 
+      state.timeline, 
+      undefined // Force a new random one
+    );
+  }, [state, startRound]);
+
   return {
     state,
     setupGame,
     checkPlacement,
     proceedToNextPlayer,
     resetGame,
+    skipCurrentMystery,
     consumeListen: () => setState(s => ({ ...s, listenedCurrentRound: true })),
     endGame: () => setState(s => ({ ...s, status: 'gameOver' }))
   };
