@@ -32,11 +32,18 @@ export interface VinylGameState {
   usedIds: number[];
   mode: 'survivor' | 'points';
   oneListenOnly: boolean;
+  shuffleMode: boolean;
+  hardMode: boolean;
   listenedCurrentRound: boolean;
   candidateMystery: SongItem | null;
+  playbackStart?: number;
+  playbackEnd?: number;
+  nextPlaybackStart?: number;
+  nextPlaybackEnd?: number;
   lastResult?: {
     success: boolean;
     correctYear: string;
   };
 }
+
 

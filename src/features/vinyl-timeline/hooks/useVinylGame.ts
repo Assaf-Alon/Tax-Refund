@@ -14,8 +14,30 @@ const INITIAL_STATE: VinylGameState = {
   usedIds: [],
   mode: 'survivor',
   oneListenOnly: false,
+  shuffleMode: false,
+  hardMode: false,
   listenedCurrentRound: false,
   candidateMystery: null,
+};
+
+export const calculatePlaybackRange = (song: SongItem, shuffle: boolean, hard: boolean) => {
+  if (shuffle) {
+    // Base safety: OPs are ~90s, but we use known metadata as a hint for longer videos
+    const safeMax = Math.max(100, song.altEndTime || 0, song.endTime || 0);
+    const duration = hard ? 10 : 20;
+    const start = Math.random() * Math.max(0, safeMax - duration);
+    return { start, end: start + duration };
+  } else {
+    // Pick between primary and alternative
+    const useAlt = song.altStartTime !== undefined && Math.random() > 0.5;
+    const start = useAlt ? song.altStartTime! : song.startTime;
+    const end = useAlt ? song.altEndTime! : song.endTime;
+    
+    if (hard) {
+      return { start, end: start + 10 };
+    }
+    return { start, end };
+  }
 };
 
 const getInitialState = (): VinylGameState => {
@@ -24,7 +46,12 @@ const getInitialState = (): VinylGameState => {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      if (parsed.status) return parsed;
+      if (parsed.status) return {
+        ...INITIAL_STATE,
+        ...parsed,
+        shuffleMode: parsed.shuffleMode ?? false,
+        hardMode: parsed.hardMode ?? false
+      };
     } catch (e) {
       console.error("Failed to load game state", e);
     }
@@ -48,7 +75,10 @@ export const useVinylGame = () => {
     players: Player[], 
     currentPlayerIndex: number,
     timeline: SongItem[],
-    incomingMystery?: SongItem
+    shuffle: boolean,
+    hard: boolean,
+    incomingMystery?: SongItem,
+    incomingRange?: { start: number, end: number }
   ) => {
     const available = currentPool.filter(s => !usedIds.includes(s.id));
     
@@ -62,24 +92,39 @@ export const useVinylGame = () => {
       return;
     }
 
+    // Calculate range for current mystery if not provided
+    const currentRange = incomingRange || calculatePlaybackRange(mysteryCard, shuffle, hard);
+
     const updatedUsedIds = [...usedIds, mysteryCard.id];
     const stillAvailable = currentPool.filter(s => !updatedUsedIds.includes(s.id));
     const nextMystery = stillAvailable.length > 0 
       ? stillAvailable[Math.floor(Math.random() * stillAvailable.length)]
       : null;
     
+    // Calculate range for next mystery
+    let nextRange = undefined;
+    if (nextMystery) {
+      nextRange = calculatePlaybackRange(nextMystery, shuffle, hard);
+    }
+    
     setState(s => ({
       ...s,
       status: 'playing',
       mysteryCard,
       nextMysteryCard: nextMystery,
+      playbackStart: currentRange.start,
+      playbackEnd: currentRange.end,
+      nextPlaybackStart: nextRange?.start,
+      nextPlaybackEnd: nextRange?.end,
       usedIds: updatedUsedIds,
       lastResult: undefined,
       players,
       currentPlayerIndex,
       timeline,
       pool: currentPool,
-      listenedCurrentRound: false // Reset for new round
+      listenedCurrentRound: false, // Reset for new round
+      shuffleMode: shuffle,
+      hardMode: hard
     }));
   }, []);
 
@@ -87,6 +132,8 @@ export const useVinylGame = () => {
     playerNames: string[], 
     mode: 'survivor' | 'points' = 'survivor',
     oneListenOnly: boolean = false,
+    shuffleMode: boolean = false,
+    hardMode: boolean = false,
     startSongId?: number
   ) => {
     try {
@@ -131,15 +178,21 @@ export const useVinylGame = () => {
         ...s,
         mode,
         oneListenOnly,
+        shuffleMode,
+        hardMode,
         pool: currentPool
       }));
 
       // Use the preloaded candidate if it exists
-      startRound(currentPool, initialUsedIds, players, 0, initialTimeline, state.candidateMystery || undefined);
+      const range = state.candidateMystery && state.playbackStart !== undefined && state.playbackEnd !== undefined
+        ? { start: state.playbackStart, end: state.playbackEnd }
+        : undefined;
+
+      startRound(currentPool, initialUsedIds, players, 0, initialTimeline, shuffleMode, hardMode, state.candidateMystery || undefined, range);
     } catch (error) {
       console.error("Failed to setup game:", error);
     }
-  }, [startRound]);
+  }, [startRound, state.pool, state.candidateMystery, state.playbackStart, state.playbackEnd]);
 
   const checkPlacement = useCallback((targetIndex: number) => {
     if (!state.mysteryCard || state.status !== 'playing') return;
@@ -216,7 +269,12 @@ export const useVinylGame = () => {
       state.players, 
       finalNextIdx, 
       state.timeline,
-      state.nextMysteryCard || undefined
+      state.shuffleMode,
+      state.hardMode,
+      state.nextMysteryCard || undefined,
+      state.nextPlaybackStart !== undefined && state.nextPlaybackEnd !== undefined 
+        ? { start: state.nextPlaybackStart, end: state.nextPlaybackEnd } 
+        : undefined
     );
   }, [state, startRound]);
 
@@ -235,29 +293,42 @@ export const useVinylGame = () => {
       state.players, 
       state.currentPlayerIndex, 
       state.timeline, 
-      undefined // Force a new random one
+      state.shuffleMode,
+      state.hardMode,
+      undefined, // Force a new random one
+      undefined  // Force new range
     );
   }, [state, startRound]);
 
-  const prepareInitialSongs = useCallback(async () => {
+  const prepareInitialSongs = useCallback(async (shuffle?: boolean, hard?: boolean) => {
     try {
-      if (state.candidateMystery) return; // Already prepared
       const res = await fetch('/Tax-Refund/data/anime_songs.json');
       const allSongs: SongItem[] = await res.json();
       const pool = allSongs.filter(s => s.status === 'completed' && s.year);
       
-      // Pick a random mystery to preload
-      const mystery = pool[Math.floor(Math.random() * pool.length)];
+      // If we already have a candidate and the modes haven't changed, we can skip if we want,
+      // but the requirement says "When selection changes, load a different section".
+      // So we always recalculate the range.
+      
+      const mystery = state.candidateMystery || pool[Math.floor(Math.random() * pool.length)];
+      
+      // Use provided modes or current state
+      const sMode = shuffle !== undefined ? shuffle : state.shuffleMode;
+      const hMode = hard !== undefined ? hard : state.hardMode;
+      
+      const range = calculatePlaybackRange(mystery, sMode, hMode);
       
       setState(s => ({
         ...s,
         pool,
-        candidateMystery: mystery
+        candidateMystery: mystery,
+        playbackStart: range.start,
+        playbackEnd: range.end
       }));
     } catch (e) {
       console.error("Failed to preload songs", e);
     }
-  }, [state.candidateMystery]);
+  }, [state.candidateMystery, state.shuffleMode, state.hardMode]);
 
   return {
     state,
@@ -271,3 +342,4 @@ export const useVinylGame = () => {
     endGame: () => setState(s => ({ ...s, status: 'gameOver' }))
   };
 };
+

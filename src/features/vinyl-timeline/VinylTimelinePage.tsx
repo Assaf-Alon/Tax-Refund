@@ -10,7 +10,7 @@ import {
   type DragStartEvent
 } from '@dnd-kit/core';
 import { useParams } from 'react-router-dom';
-import { Play, RotateCcw, Users, Music, AlertCircle, Pause, Square, Plus, Trash2, UserPlus } from 'lucide-react';
+import { Play, RotateCcw, Users, Music, AlertCircle, Pause, Square, Plus, Trash2, UserPlus, Shuffle, Zap } from 'lucide-react';
 
 import { useVinylGame } from './hooks/useVinylGame';
 import { useAudioStream } from '../../shared/hooks/useAudioStream';
@@ -42,11 +42,15 @@ export const VinylTimelinePage: React.FC = () => {
   const [isSoloContinuing, setIsSoloContinuing] = useState(false);
   const [gameMode, setGameMode] = useState<'survivor' | 'points'>('survivor');
   const [oneListenOnly, setOneListenOnly] = useState(false);
+  const [shuffleMode, setShuffleMode] = useState(false);
+  const [hardMode, setHardMode] = useState(false);
 
-  // 0. Preload pool and initial candidate on mount
+  // 0. Preload pool and initial candidate on mount OR when modes change in setup
   useEffect(() => {
-    prepareInitialSongs();
-  }, [prepareInitialSongs]);
+    if (state.status === 'setup') {
+      prepareInitialSongs(shuffleMode, hardMode);
+    }
+  }, [prepareInitialSongs, state.status, shuffleMode, hardMode]);
 
   // 1. Auto-prepare stream & reset state
   useEffect(() => {
@@ -61,7 +65,8 @@ export const VinylTimelinePage: React.FC = () => {
       // PRELOAD the first song while in setup screen
       prepare(state.candidateMystery.youtubeId);
     }
-  }, [state.status, state?.mysteryCard?.id, state?.candidateMystery?.youtubeId, prepare]);
+  }, [state.status, state?.mysteryCard?.id, state?.candidateMystery?.youtubeId, state.playbackStart, state.playbackEnd, prepare]);
+
 
   // 2. Global status observer (Cleanup)
   useEffect(() => {
@@ -115,15 +120,15 @@ export const VinylTimelinePage: React.FC = () => {
       setLocalIsPlaying(true);
       playExcerpt(
         state.mysteryCard.youtubeId, 
-        state.mysteryCard.startTime, 
-        state.mysteryCard.endTime,
+        state.playbackStart ?? state.mysteryCard.startTime, 
+        state.playbackEnd ?? state.mysteryCard.endTime,
         () => {
           setLocalIsPlaying(false);
           if (state.oneListenOnly) consumeListen();
         }
       );
     }
-  }, [state?.mysteryCard, isReady, isPlaying, playExcerpt, togglePlayback]);
+  }, [state?.mysteryCard, state.playbackStart, state.playbackEnd, isReady, isPlaying, playExcerpt, togglePlayback, state.oneListenOnly, state.listenedCurrentRound, consumeListen]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as number);
@@ -229,11 +234,41 @@ export const VinylTimelinePage: React.FC = () => {
                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${oneListenOnly ? 'left-6' : 'left-1'}`} />
             </div>
          </div>
+
+         <div className="grid grid-cols-2 gap-4">
+            <div className={`flex flex-col gap-2 p-4 bg-slate-950/50 rounded-2xl border transition-all cursor-pointer group ${shuffleMode ? 'border-rose-500/50 bg-rose-500/5' : 'border-white/5'}`}
+                 onClick={() => setShuffleMode(!shuffleMode)}>
+              <div className="flex items-center justify-between">
+                <Shuffle size={14} className={shuffleMode ? 'text-rose-500' : 'text-slate-500'} />
+                <div className={`w-10 h-5 rounded-full relative transition-colors ${shuffleMode ? 'bg-rose-600' : 'bg-slate-800'}`}>
+                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${shuffleMode ? 'left-6' : 'left-1'}`} />
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-white uppercase">Shuffle</span>
+                <span className="text-[8px] font-medium text-slate-500 uppercase tracking-tighter">Random 20s Clip</span>
+              </div>
+            </div>
+
+            <div className={`flex flex-col gap-2 p-4 bg-slate-950/50 rounded-2xl border transition-all cursor-pointer group ${hardMode ? 'border-rose-500/50 bg-rose-500/5' : 'border-white/5'}`}
+                 onClick={() => setHardMode(!hardMode)}>
+              <div className="flex items-center justify-between">
+                <Zap size={14} className={hardMode ? 'text-rose-500' : 'text-slate-500'} />
+                <div className={`w-10 h-5 rounded-full relative transition-colors ${hardMode ? 'bg-rose-600' : 'bg-slate-800'}`}>
+                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${hardMode ? 'left-6' : 'left-1'}`} />
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-white uppercase">Hard Mode</span>
+                <span className="text-[8px] font-medium text-slate-500 uppercase tracking-tighter">10s Snippet Only</span>
+              </div>
+            </div>
+         </div>
       </div>
 
       <button
         onClick={() => {
-          setupGame(playerNames, gameMode, oneListenOnly, params.id ? parseInt(params.id) : undefined);
+          setupGame(playerNames, gameMode, oneListenOnly, shuffleMode, hardMode, params.id ? parseInt(params.id) : undefined);
         }}
         className="w-full py-4 bg-rose-600 text-white rounded-xl font-black shadow-xl shadow-rose-900/20 uppercase tracking-widest flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
       >
