@@ -1,286 +1,403 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
+// Define YT types for internal use since they might not be in global @types
+declare global {
+  interface Window {
+    onYouTubeIframeAPIReady: () => void;
+    YT: any;
+  }
+}
+
 export type PlayerStatus = 'uninitialized' | 'loading' | 'ready' | 'playing' | 'paused' | 'ended' | 'error';
+export type EngineType = 'native' | 'youtube';
+
+const ensureYTAPI = () => {
+  if (typeof window === 'undefined') return Promise.resolve();
+  if (window.YT && window.YT.Player) return Promise.resolve();
+  
+  return new Promise<void>((resolve) => {
+    // If someone already started loading it, we can't easily hook into their onYouTubeIframeAPIReady
+    // but check if script tag exists
+    const existing = document.querySelector('script[src*="youtube.com/iframe_api"]');
+    
+    // Store original callback if it exists
+    const prevCallback = window.onYouTubeIframeAPIReady;
+    
+    window.onYouTubeIframeAPIReady = () => {
+      if (prevCallback) prevCallback();
+      resolve();
+    };
+
+    if (!existing) {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    } else if (window.YT && window.YT.Player) {
+      // Already loaded by someone else
+      resolve();
+    }
+  });
+};
 
 export const useAudioStream = () => {
+  // --- Refs & State ---
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [status, setStatus] = useState<PlayerStatus>('uninitialized');
-  const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
-  const [streamUrl, setStreamUrl] = useState<string | null>(null);
+  const ytPlayerRef = useRef<any>(null);
+  const ytContainerRef = useRef<HTMLDivElement | null>(null);
   
-  // Refs for tracking internal state (Stable function identity)
+  const [status, setStatus] = useState<PlayerStatus>('uninitialized');
+  const [engine, setEngine] = useState<EngineType>('native');
+  const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
+  
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const excerptBounds = useRef<{ start: number; end: number } | null>(null);
   
-  // Refs for tracking internal state (Stable function identity)
+  const excerptBounds = useRef<{ start: number; end: number } | null>(null);
   const activeIdRef = useRef<string | null>(null);
-  const activeUrlRef = useRef<string | null>(null);
   const isLoadingRef = useRef<string | null>(null);
   const fetchPromises = useRef<Map<string, Promise<string | null>>>(new Map());
-  
   const urlCache = useRef<Map<string, string>>(new Map());
   const onEndRef = useRef<(() => void) | null>(null);
+  const progressIntervalRef = useRef<number | null>(null);
+  const statusRef = useRef<PlayerStatus>('uninitialized');
+  const engineRef = useRef<EngineType>('native');
 
+  useEffect(() => { statusRef.current = status; }, [status]);
+  useEffect(() => { engineRef.current = engine; }, [engine]);
+
+  // --- Initialization ---
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // Setup Native Audio
     const audio = new Audio();
     audioRef.current = audio;
 
+    // Setup YT Container
+    const container = document.createElement('div');
+    container.id = `yt-player-${Math.random().toString(36).substr(2, 9)}`;
+    container.style.position = 'fixed';
+    container.style.top = '-1000px'; // Hidden but active
+    container.style.opacity = '0';
+    container.style.pointerEvents = 'none';
+    document.body.appendChild(container);
+    ytContainerRef.current = container;
+
+    // --- Audio Event Listeners ---
     audio.oncanplaythrough = () => { 
-      // Only log if it's a new load
-      if (statusRef.current === 'loading') {
-        console.log("Audio: ready to play");
+      if (statusRef.current === 'loading' && engineRef.current === 'native') {
+        setStatus('ready'); 
       }
-      setStatus('ready'); 
     };
-    audio.onplaying = () => setStatus('playing');
-    audio.onpause = () => setStatus('paused');
-    audio.onstalled = () => console.warn("Audio: stalled (buffering issue)");
-    audio.onwaiting = () => console.log("Audio: waiting for data...");
-    
+    audio.onplaying = () => { if (engineRef.current === 'native') setStatus('playing'); };
+    audio.onpause = () => { if (engineRef.current === 'native') setStatus('paused'); };
     audio.ontimeupdate = () => {
-      setCurrentTime(audio.currentTime);
-      if (excerptBounds.current) {
-        const { start, end } = excerptBounds.current;
-        const total = end - start;
-        const current = Math.max(0, audio.currentTime - start);
-        setProgress(Math.min(100, (current / total) * 100));
-
-        if (audio.currentTime >= end) {
-          audio.pause();
-          setStatus('ended');
-          if (onEndRef.current) { 
-            onEndRef.current(); 
-            onEndRef.current = null; 
-          }
-        }
-      }
+      if (engineRef.current !== 'native') return;
+      handleTimeUpdate(audio.currentTime);
     };
-
     audio.onended = () => {
-        setStatus('ended');
-        if (onEndRef.current) { onEndRef.current(); onEndRef.current = null; }
+      if (engineRef.current !== 'native') return;
+      handleEnded();
     };
     audio.onerror = () => {
-      // Ignore errors if we are intentionally flushing or loading
-      if (!audio.src || audio.src === window.location.href || statusRef.current === 'loading') {
-        return;
-      }
-      const errorStr = audio.error ? `Code ${audio.error.code}: ${audio.error.message}` : "Unknown error";
-      console.error("Audio element error:", errorStr);
+      if (engineRef.current !== 'native') return;
+      if (!audio.src || audio.src === window.location.href || statusRef.current === 'loading') return;
+      console.error("Audio element error:", audio.error);
       setStatus('error');
     };
 
     return () => {
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
       audio.pause();
       audio.src = '';
-      audio.load();
+      if (ytPlayerRef.current) {
+        try { ytPlayerRef.current.destroy(); } catch(e) {}
+      }
+      if (ytContainerRef.current) {
+        document.body.removeChild(ytContainerRef.current);
+      }
     };
   }, []);
 
-  // Track status in a ref to avoid log spam
-  const statusRef = useRef<PlayerStatus>('uninitialized');
-  useEffect(() => { statusRef.current = status; }, [status]);
+  // --- Shared Logic ---
+  const handleTimeUpdate = (time: number) => {
+    setCurrentTime(time);
+    if (excerptBounds.current) {
+      const { start, end } = excerptBounds.current;
+      const total = end - start;
+      const current = Math.max(0, time - start);
+      setProgress(Math.min(100, (current / total) * 100));
 
+      if (time >= end) {
+        stop();
+        handleEnded();
+      }
+    }
+  };
+
+  const handleEnded = () => {
+    setStatus('ended');
+    if (onEndRef.current) { 
+      onEndRef.current(); 
+      onEndRef.current = null; 
+    }
+  };
+
+  // --- Engine Control ---
   const stop = useCallback(() => {
-    if (audioRef.current) {
+    if (engineRef.current === 'youtube' && ytPlayerRef.current?.pauseVideo) {
+      try { ytPlayerRef.current.pauseVideo(); } catch(e) {}
+    } else if (audioRef.current) {
       audioRef.current.pause();
+    }
+    if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
     }
     setStatus('paused');
   }, []);
 
   const togglePlayback = useCallback(() => {
-    if (!audioRef.current) return;
-    // If it's playing OR was about to play (ready/loading), we should pause it
-    if (status === 'playing' || status === 'ready' || status === 'loading') {
-      audioRef.current.pause();
-      setStatus('paused');
+    const isPlaying = statusRef.current === 'playing';
+    if (isPlaying) {
+      stop();
     } else {
-      audioRef.current.play().catch(e => console.error("Toggle play failed:", e));
+       if (engineRef.current === 'youtube' && ytPlayerRef.current?.playVideo) {
+         try { ytPlayerRef.current.playVideo(); } catch(e) {}
+       } else if (audioRef.current) {
+         audioRef.current.play().catch(e => console.error("Native play failed:", e));
+       }
     }
-  }, [status]);
+  }, [stop]);
 
+  // --- Fetching Logic ---
   const getStreamUrl = async (videoId: string, force = false): Promise<string | null> => {
-    // 1. Check cache (unless forcing refresh)
     if (!force) {
       const cached = urlCache.current.get(videoId);
       if (cached) return cached;
-    } else {
-      urlCache.current.delete(videoId);
-    }
-    
-    // 2. Check in-flight promises (unless forcing)
-    if (!force) {
       const inFlight = fetchPromises.current.get(videoId);
-      if (inFlight) return inFlight as Promise<string | null>;
+      if (inFlight) return inFlight;
     }
 
     const fetchPromise = (async () => {
-        // 3. Try local proxy first in development
-        const isDev = import.meta.env.DEV;
-        
-        if (isDev) {
-          try {
-            console.log(`Fetching stream via local proxy for ${videoId}...`);
-            const proxyRes = await fetch(`/Tax-Refund/api/stream?id=${videoId}`);
-            if (proxyRes.ok) {
-              const data = await proxyRes.json() as any;
-              if (data.url) {
-                urlCache.current.set(videoId, data.url);
-                return data.url;
-              }
-            }
-          } catch (e: any) {
-            console.warn("Local proxy fetch failed, falling back to Piped...");
+      const isDev = import.meta.env.DEV;
+      
+      // 1. Try local proxy first (Dev only)
+      if (isDev) {
+        try {
+          const res = await fetch(`/Tax-Refund/api/stream?id=${videoId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.url) return data.url;
           }
-        }
+        } catch (e) {}
+      }
 
-        const instances = [
-          'https://pipedapi.kavin.rocks',
-          'https://pipedapi.ducks.party',
-          'https://pipedapi.adminforge.de',
-          'https://piped-api.lavish.works',
-          'https://pipedapi.rivo.cc',
-          'https://pipedapi.syncit.dev',
-          'https://pipedapi.leptons.xyz',
-          'https://api-piped.mha.fi'
-        ].sort(() => Math.random() - 0.5); // Randomize to distribute load
-        
-        for (const instance of instances) {
-          try {
-            console.log(`Trying Piped instance: ${instance}`);
-            const res = await fetch(`${instance}/streams/${videoId}`, { 
-              mode: 'cors',
-              signal: AbortSignal.timeout(5000) // 5s timeout
-            });
-            if (!res.ok) continue;
-            const data = await res.json() as any;
+      // 2. Swarm Proxy Logic (Improved for Prod)
+      const pipedInstances = [
+        'https://pipedapi.kavin.rocks',
+        'https://pipedapi.ducks.party',
+        'https://piped-api.lavish.works',
+        'https://pipedapi.adminforge.de',
+        'https://api-piped.mha.fi'
+      ].sort(() => Math.random() - 0.5);
+
+      for (const instance of pipedInstances) {
+        try {
+          const targetUrl = `${instance}/streams/${videoId}`;
+          const res = await fetch(targetUrl, { 
+            referrerPolicy: 'no-referrer',
+            signal: AbortSignal.timeout(3000) 
+          });
+          
+          if (res.ok) {
+            const data = await res.json();
             const stream = data.audioStreams?.sort((a: any, b: any) => b.bitrate - a.bitrate)[0];
             if (stream?.url) {
-              urlCache.current.set(videoId, stream.url);
-              return stream.url;
+              const finalUrl = stream.url.includes('googlevideo.com') ? stream.url : `${stream.url}${stream.url.includes('?') ? '&' : '?'}local=true`;
+              return finalUrl;
             }
-          } catch (e: any) { 
-            console.warn(`Piped instance ${instance} failed:`, e.message);
-            continue; 
           }
-        }
-        return null;
+        } catch (e) {}
+      }
+      return null;
     })();
 
-    if (!force) fetchPromises.current.set(videoId, fetchPromise);
+    fetchPromises.current.set(videoId, fetchPromise);
     const result = await fetchPromise;
-    if (!force) fetchPromises.current.delete(videoId);
+    if (result) urlCache.current.set(videoId, result);
+    fetchPromises.current.delete(videoId);
     return result;
   };
+
+  const fallbackToNative = async (videoId: string) => {
+    console.log(`[AudioEngine] Switching to native fallback for ${videoId}`);
+    const url = await getStreamUrl(videoId);
+    if (activeIdRef.current !== videoId) return;
+
+    if (url) {
+      setEngine('native');
+      if (audioRef.current) {
+        audioRef.current.src = url;
+        audioRef.current.load();
+      }
+    } else {
+      setStatus('error');
+    }
+    isLoadingRef.current = null;
+  };
+
+  // --- Main Engine Operations ---
+  const prepare = useCallback(async (videoId: string, force = false) => {
+    if (!videoId) return;
+    if (!force && videoId === activeIdRef.current && (statusRef.current === 'ready' || isLoadingRef.current === videoId)) return;
+
+    console.log(`[AudioEngine] Preparing ${videoId}...`);
+    isLoadingRef.current = videoId;
+    activeIdRef.current = videoId;
+    setStatus('loading');
+    setCurrentVideoId(videoId);
+    setProgress(0);
+    setCurrentTime(0);
+
+    // Initial stop
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
+    if (ytPlayerRef.current?.pauseVideo) { try { ytPlayerRef.current.pauseVideo(); } catch(e) {} }
+    if (progressIntervalRef.current) { clearInterval(progressIntervalRef.current); progressIntervalRef.current = null; }
+
+    const isProd = import.meta.env.PROD;
+    
+    // --- Step 1: Try YouTube IFrame (Primary for Prod) ---
+    if (isProd) {
+      try {
+        await ensureYTAPI();
+        if (activeIdRef.current !== videoId) return; 
+
+        return new Promise<void>((resolve) => {
+          let hasTimedOut = false;
+          const timeout = setTimeout(() => {
+            hasTimedOut = true;
+            console.warn("[AudioEngine] YouTube load timed out, falling back...");
+            fallbackToNative(videoId).then(resolve);
+          }, 6000);
+
+          const initPlayer = () => {
+            if (hasTimedOut) return;
+            
+            if (ytPlayerRef.current && ytPlayerRef.current.cueVideoById) {
+                try {
+                    ytPlayerRef.current.cueVideoById(videoId);
+                    setEngine('youtube');
+                    setStatus('ready');
+                    clearTimeout(timeout);
+                    resolve();
+                    return;
+                } catch (e) {
+                    console.warn("[AudioEngine] YouTube sync error, re-creating player...");
+                }
+            }
+
+            ytPlayerRef.current = new window.YT.Player(ytContainerRef.current?.id, {
+                height: '0',
+                width: '0',
+                videoId: videoId,
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'fs': 0,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'iv_load_policy': 3,
+                    'origin': window.location.origin
+                },
+                events: {
+                    'onReady': () => {
+                        if (hasTimedOut) return;
+                        clearTimeout(timeout);
+                        setEngine('youtube');
+                        setStatus('ready');
+                        resolve();
+                    },
+                    'onStateChange': (event: any) => {
+                        if (event.data === window.YT.PlayerState.PLAYING) setStatus('playing');
+                        if (event.data === window.YT.PlayerState.PAUSED) setStatus('paused');
+                        if (event.data === window.YT.PlayerState.ENDED) handleEnded();
+                    },
+                    'onError': (e: any) => {
+                        console.warn(`[AudioEngine] YT Error ${e.data}, falling back...`);
+                        clearTimeout(timeout);
+                        fallbackToNative(videoId).then(resolve);
+                    }
+                }
+            });
+          };
+
+          initPlayer();
+        });
+      } catch (e) {
+        console.error("[AudioEngine] YT API block:", e);
+        return fallbackToNative(videoId);
+      }
+    } else {
+      return fallbackToNative(videoId);
+    }
+  }, []);
+
+  const playExcerpt = useCallback((videoId: string, start: number, end: number, onEnd?: () => void) => {
+    if (videoId !== currentVideoId || statusRef.current === 'error') {
+        console.error("playExcerpt blocked: not prepared or error status");
+        return;
+    }
+
+    onEndRef.current = onEnd || null;
+    excerptBounds.current = { start, end };
+
+    if (engineRef.current === 'youtube' && ytPlayerRef.current) {
+        try {
+            ytPlayerRef.current.seekTo(start, true);
+            ytPlayerRef.current.playVideo();
+            
+            if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+            progressIntervalRef.current = window.setInterval(() => {
+                if (ytPlayerRef.current?.getCurrentTime) {
+                    handleTimeUpdate(ytPlayerRef.current.getCurrentTime());
+                }
+            }, 100);
+        } catch (e) {
+            console.error("[AudioEngine] YT Playback command failed:", e);
+            setStatus('error');
+        }
+    } else if (audioRef.current) {
+        audioRef.current.currentTime = start;
+        audioRef.current.play().catch(e => {
+            console.warn("Native playback blocked (awaiting user gesture?)", e);
+        });
+    }
+  }, [currentVideoId]);
+
+  const reset = useCallback(() => {
+    stop();
+    if (audioRef.current) { audioRef.current.src = ""; }
+    if (ytPlayerRef.current?.stopVideo) { try { ytPlayerRef.current.stopVideo(); } catch(e) {} }
+    setCurrentVideoId(null);
+    setStatus('uninitialized');
+    setEngine('native');
+    setProgress(0);
+    setCurrentTime(0);
+    activeIdRef.current = null;
+    isLoadingRef.current = null;
+  }, [stop]);
 
   const prefetch = useCallback(async (videoId: string) => {
     if (!videoId || urlCache.current.has(videoId)) return;
     await getStreamUrl(videoId);
   }, []);
 
-  const prepare = useCallback(async (videoId: string, force = false) => {
-    if (!videoId) return;
-    
-    // Guard: already have it or currently loading it
-    if (!force && videoId === activeIdRef.current && (activeUrlRef.current || isLoadingRef.current === videoId)) {
-        return;
-    }
-    
-    console.log(`Preparing audio for ${videoId}...`);
-    isLoadingRef.current = videoId;
-    activeIdRef.current = videoId;
-    activeUrlRef.current = null;
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-      // "Flush" to prevent fraction-of-second glitches
-      audioRef.current.src = ""; 
-      audioRef.current.load();
-    }
-
-    setCurrentVideoId(videoId);
-    setStreamUrl(null);
-    setStatus('loading');
-    setProgress(0);
-    setCurrentTime(0);
-    
-    // Give browser a tick to flush
-    await new Promise(r => setTimeout(r, 50));
-
-    const url = await getStreamUrl(videoId, force);
-    
-    // If the request changed while we were fetching, bail
-    if (activeIdRef.current !== videoId) return;
-    
-    if (url) {
-      console.log("Audio URL acquired, loading into element...");
-      isLoadingRef.current = null;
-      activeUrlRef.current = url;
-      setStreamUrl(url);
-      if (audioRef.current) {
-        audioRef.current.src = url;
-        audioRef.current.load();
-      }
-    } else {
-      console.error("All providers failed.");
-      isLoadingRef.current = null;
-      setStatus('error');
-    }
-  }, []);
-
-  const reset = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = "";
-      audioRef.current.load();
-    }
-    setCurrentVideoId(null);
-    setStreamUrl(null);
-    setStatus('uninitialized');
-    setProgress(0);
-    setCurrentTime(0);
-    activeIdRef.current = null;
-    activeUrlRef.current = null;
-    isLoadingRef.current = null;
-  }, []);
-
-  const playExcerpt = useCallback((videoId: string, start: number, end: number, onEnd?: () => void) => {
-    const audio = audioRef.current;
-    if (!audio || !streamUrl || videoId !== currentVideoId) {
-      console.error("playExcerpt blocked: audio not ready");
-      return;
-    }
-    
-    onEndRef.current = onEnd || null;
-    excerptBounds.current = { start, end };
-
-    // Support resuming if within bounds
-    const isWithinBounds = audio.currentTime >= start - 0.5 && audio.currentTime < end;
-    
-    if (isWithinBounds && statusRef.current === 'playing') {
-      return; // Already playing
-    }
-
-    if (isWithinBounds && (statusRef.current === 'paused' || statusRef.current === 'ready')) {
-      audio.play().catch(e => console.error("Resume failed:", e));
-      return;
-    }
-
-    // Otherwise (re)start from start
-    audio.currentTime = start;
-    audio.play().catch(e => {
-        console.warn("Autoplay block? Retrying on user interaction...", e);
-    });
-
-  }, [currentVideoId, streamUrl]);
-
-  const isReady = (!!streamUrl && status !== 'error') || (!!currentVideoId && urlCache.current.has(currentVideoId));
-
   return { 
     status, 
-    isReady, 
+    isReady: status === 'ready' || status === 'playing' || status === 'paused', 
     isPlaying: status === 'playing', 
     progress,
     currentTime,
