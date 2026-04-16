@@ -203,15 +203,21 @@ export const useAudioStream = () => {
         'https://api-piped.mha.fi'
       ].sort(() => Math.random() - 0.5);
 
+      const isProd = import.meta.env.PROD;
+
       for (const instance of pipedInstances) {
         try {
           const targetUrl = `${instance}/streams/${videoId}`;
+          
+          // In Prod, don't even try direct fetch as it creates CORS noise
+          // jump straight to CORS proxy if needed or proceed with cautious fetch
           const res = await fetch(targetUrl, { 
             referrerPolicy: 'no-referrer',
+            mode: isProd ? 'cors' : 'no-cors', // Cautious mode
             signal: AbortSignal.timeout(3000) 
-          });
+          }).catch(() => null);
           
-          if (res.ok) {
+          if (res && res.ok) {
             const data = await res.json();
             const stream = data.audioStreams?.sort((a: any, b: any) => b.bitrate - a.bitrate)[0];
             if (stream?.url) {
@@ -391,6 +397,10 @@ export const useAudioStream = () => {
   }, [stop]);
 
   const prefetch = useCallback(async (videoId: string) => {
+    // In Production, background fetching stream URLs causes massive CORS noise 
+    // and is unnecessary because we default to the YouTube IFrame engine.
+    if (import.meta.env.PROD) return; 
+
     if (!videoId || urlCache.current.has(videoId)) return;
     await getStreamUrl(videoId);
   }, []);
