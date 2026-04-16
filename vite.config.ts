@@ -9,7 +9,7 @@ export default defineConfig({
   base: '/Tax-Refund/',
   server: {
     host: true,
-    port: 10000,
+    port: 5173,
     strictPort: false,
   },
 })

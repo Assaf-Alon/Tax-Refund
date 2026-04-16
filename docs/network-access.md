@@ -10,13 +10,13 @@ Due to limitations in WSL2's mirroring driver and interference from host-side se
 ## 1. WSL Configuration (Linux)
 
 ### Vite Setup
-Vite is configured to listen on a high port (10000) to avoid collisions with Windows system services.
+Vite is configured to listen on a high port (5173) to avoid collisions with Windows system services.
 
 **File**: `vite.config.ts`
 ```typescript
 server: {
   host: true,
-  port: 10000,
+  port: 5173,
   strictPort: true
 }
 ```
@@ -42,7 +42,7 @@ New-NetFirewallRule -DisplayName "Vite External Access (9999)" -Direction Inboun
 Bridges the physical IP to the working WSL loopback.
 ```powershell
 # Replace 192.168.1.241 with your current IP if it changes
-netsh interface portproxy add v4tov4 listenport=9999 listenaddress=192.168.1.241 connectport=10000 connectaddress=127.0.0.1
+netsh interface portproxy add v4tov4 listenport=9999 listenaddress=192.168.1.241 connectport=5173 connectaddress=127.0.0.1
 ```
 
 ---
