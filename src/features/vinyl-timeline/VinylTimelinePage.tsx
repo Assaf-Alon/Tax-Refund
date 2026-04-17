@@ -19,6 +19,7 @@ import { DraggableVinylCard } from './components/DraggableVinylCard';
 import { Timeline } from './components/Timeline';
 import { VinylResultModal } from '../../shared/components/Vinyl/VinylResultModal';
 import { VinylConnectivityError } from '../../shared/components/Vinyl/VinylConnectivityError';
+import { VinylStageProgress } from '../../shared/components/Vinyl/VinylStageProgress';
 
 export const VinylTimelinePage: React.FC = () => {
   const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame, skipCurrentMystery, prepareInitialSongs, consumeListen, endGame } = useVinylGame();
@@ -427,16 +428,11 @@ export const VinylTimelinePage: React.FC = () => {
                  <span className="text-3xl font-black tabular-nums tracking-tighter leading-none">{state.players[state.currentPlayerIndex].score}</span>
               </div>
               {state.mode === 'survivor' && (
-                <div className="flex items-center gap-1.5 mt-4">
-                  {[...Array(3)].map((_, i) => (
-                    <div 
-                      key={i} 
-                      className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
-                        i < state.players[state.currentPlayerIndex].lives ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'bg-slate-800'
-                      }`} 
-                    />
-                  ))}
-                </div>
+                <VinylStageProgress 
+                  totalStages={3}
+                  currentStage={state.players[state.currentPlayerIndex].lives}
+                  className="mt-4"
+                />
               )}
            </div>
         </div>
