@@ -53,4 +53,11 @@ export const RIDDLE_REGISTRY: RiddleMeta[] = [
         totalStages: 5,
         stageLabels: ['Welcome', 'Crossclimb', 'Pinpoint', 'Queens', 'Completed'],
     },
+    {
+        id: 'its-a-hit',
+        name: "It's a Hit!",
+        path: '/its-a-hit',
+        totalStages: 5,
+        stageLabels: ['Entrance', 'The Lake', 'Train Station', 'Lovers Bench', 'Completed'],
+    },
 ];

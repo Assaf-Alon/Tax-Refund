@@ -141,7 +141,12 @@ export const useAudioStream = () => {
       const total = end - start;
       const current = Math.max(0, time - start);
       setProgress(Math.min(100, (current / total) * 100));
-      if (time >= end) { stop(); handleEnded(); }
+      
+      // If end is very large (e.g. 999999), don't auto-stop
+      if (end < 3600 && time >= end) { 
+        stop(); 
+        handleEnded(); 
+      }
     }
   };
 
@@ -155,19 +160,8 @@ export const useAudioStream = () => {
       try { ytPlayerRef.current.pauseVideo(); } catch { }
     } else if (audioRef.current) { audioRef.current.pause(); }
     if (progressIntervalRef.current) { clearInterval(progressIntervalRef.current); progressIntervalRef.current = null; }
-    setStatus('paused');
+    setStatusSync('paused');
   }, []);
-
-  const togglePlayback = useCallback(() => {
-    if (statusRef.current === 'playing') { stop(); } 
-    else {
-      if (engineRef.current === 'youtube' && ytPlayerRef.current?.playVideo) {
-        try { ytPlayerRef.current.playVideo(); } catch { setLastError("YT Play Blocked"); }
-      } else if (audioRef.current) {
-        audioRef.current.play().catch(() => setLastError("Audio Blocked: Tap again"));
-      }
-    }
-  }, [stop]);
 
   const getStreamUrl = async (videoId: string, force = false): Promise<string | null> => {
     if (!force) {
@@ -226,7 +220,7 @@ export const useAudioStream = () => {
     Log.info(`Preparing ${videoId} (Retry: ${retryCount})`);
     isLoadingRef.current = videoId;
     activeIdRef.current = videoId;
-    statusRef.current = 'loading'; // IMMEDIATE UPDATE for error suppression
+    statusRef.current = 'loading';
     setStatus('loading');
     setLastError(null);
     setCurrentVideoId(videoId);
@@ -337,24 +331,50 @@ export const useAudioStream = () => {
     }
   }, []);
 
+  const setStatusSync = (s: PlayerStatus) => {
+    statusRef.current = s;
+    setStatus(s);
+  };
+
   const playExcerpt = useCallback((videoId: string, start: number, end: number, onEnd?: () => void) => {
-    if (videoId !== currentVideoId || statusRef.current === 'error') return;
+    if (statusRef.current === 'error') return;
     onEndRef.current = onEnd || null;
-    excerptBounds.current = { start, end };
+    
+    // Default to a very large end time if none provided or it's 0
+    const effectiveEnd = (end === 0 || end === undefined) ? 999999 : end;
+    excerptBounds.current = { start, end: effectiveEnd };
+    
     if (engineRef.current === 'youtube' && ytPlayerRef.current) {
         try {
+            setCurrentVideoId(videoId);
             ytPlayerRef.current.seekTo(start, true);
             ytPlayerRef.current.playVideo();
+            setStatusSync('playing');
             if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
             progressIntervalRef.current = window.setInterval(() => {
                 if (ytPlayerRef.current?.getCurrentTime) handleTimeUpdate(ytPlayerRef.current.getCurrentTime());
             }, 100);
-        } catch { setStatus('error'); }
+        } catch { setStatusSync('error'); }
     } else if (audioRef.current) {
+        setCurrentVideoId(videoId);
         audioRef.current.currentTime = start;
-        audioRef.current.play().catch(() => Log.warn("Native blocked"));
+        audioRef.current.play().then(() => setStatusSync('playing')).catch(() => Log.warn("Native blocked"));
     }
   }, [currentVideoId]);
 
-  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch: async (id: string) => { if (!import.meta.env.PROD && id) await getStreamUrl(id); }, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatus('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
+  const togglePlayback = useCallback(() => {
+    const s = statusRef.current;
+    if (s === 'ready' || s === 'paused' || s === 'ended') {
+      if (engineRef.current === 'youtube' && ytPlayerRef.current?.playVideo) {
+        ytPlayerRef.current.playVideo();
+      } else if (audioRef.current) {
+        audioRef.current.play();
+      }
+      setStatusSync('playing');
+    } else if (s === 'playing') {
+      stop();
+    }
+  }, [stop]);
+
+  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch: async (id: string) => { if (!import.meta.env.PROD && id) await getStreamUrl(id); }, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatusSync('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
 };

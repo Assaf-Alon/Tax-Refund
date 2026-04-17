@@ -17,10 +17,10 @@ interface VinylCardProps {
   className?: string;
   /** Optional text to show instead of the song name/year in mystery/hinted modes */
   customLabel?: string;
-  /** Revealed words for riddle extraction logic */
-  revealWord?: string;
   /** Whether the song has been identified in a confidence check */
   isIdentified?: boolean;
+  /** Whether to show the thumbnail even in mystery mode */
+  showThumbnail?: boolean;
 }
 
 export const VinylCard: React.FC<VinylCardProps> = ({ 
@@ -29,8 +29,8 @@ export const VinylCard: React.FC<VinylCardProps> = ({
   isPlaying = false,
   className = "",
   customLabel,
-  revealWord,
-  isIdentified = false
+  isIdentified = false,
+  showThumbnail = false
 }) => {
   const isRevealed = displayMode === 'revealed';
 
@@ -42,8 +42,8 @@ export const VinylCard: React.FC<VinylCardProps> = ({
         <div className="absolute inset-0 backface-hidden flex flex-col items-center justify-center rounded-2xl glass-morphism shadow-2xl overflow-hidden border border-white/10 bg-slate-900">
           {!isRevealed && (
             <>
-              <div className="relative w-48 h-48 mb-4">
-                 {/* Vinyl Record */}
+              <div className={`relative w-48 h-48 mb-4 ${isPlaying ? 'animate-spin-slow' : ''}`}>
+                 {/* Vinyl Record Background */}
                  <div className="absolute inset-0 rounded-full bg-black shadow-inner flex items-center justify-center">
                     <div className="w-16 h-16 rounded-full border-2 border-slate-800 bg-slate-900 flex items-center justify-center">
                        <div className="w-2 h-2 rounded-full bg-slate-400" />
@@ -54,9 +54,19 @@ export const VinylCard: React.FC<VinylCardProps> = ({
                     <div className="absolute inset-14 rounded-full border border-white/5" />
                  </div>
                  
-                 {/* Spinning Disc UI */}
-                 <div className={`absolute inset-0 flex items-center justify-center ${isPlaying ? 'animate-spin-slow' : ''}`}>
-                    <Disc size={64} className="text-indigo-500/50" />
+                 {/* Center Content (Thumbnail or Disc Icon) */}
+                 <div className="absolute inset-0 flex items-center justify-center">
+                    {(showThumbnail || isRevealed) && song?.youtubeId ? (
+                      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-slate-700 shadow-lg">
+                        <img 
+                          src={`https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg`} 
+                          alt="Thumbnail" 
+                          className="w-full h-full object-cover opacity-80" 
+                        />
+                      </div>
+                    ) : (
+                      <Disc size={64} className="text-indigo-500/50" />
+                    )}
                  </div>
               </div>
               
@@ -87,7 +97,6 @@ export const VinylCard: React.FC<VinylCardProps> = ({
               <div 
                 className="absolute inset-0 opacity-20 blur-xl scale-110"
                 style={{ 
-                   // Use @ts-ignore if backgroundImage type becomes an issue in some envs
                   backgroundImage: `url(https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg)`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
@@ -96,14 +105,20 @@ export const VinylCard: React.FC<VinylCardProps> = ({
             )}
 
             <div className="relative flex-1 p-6 flex flex-col items-center justify-center">
-              {/* High-Res Center Cover */}
+              {/* High-Res Center Cover (Spinning Vinyl) */}
               {song?.youtubeId && (
-                <div className="w-40 h-40 mb-6 rounded-lg overflow-hidden shadow-2xl border border-white/10 shrink-0">
-                  <img 
-                    src={`https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg`} 
-                    alt={song.name}
-                    className="w-full h-full object-cover"
-                  />
+                <div className={`w-40 h-40 mb-6 rounded-full bg-slate-900 border-4 border-slate-800 shadow-2xl flex items-center justify-center relative transition-transform duration-1000 ${isPlaying ? 'animate-spin-slow' : ''}`}>
+                   {/* Vinyl Grooves Pattern */}
+                   <div className="absolute inset-0 rounded-full bg-[repeating-radial-gradient(circle,transparent,transparent_2px,rgba(255,255,255,0.05)_3px)] opacity-30" />
+                   
+                   {/* Inner Label / Artwork */}
+                   <div className="w-24 h-24 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center overflow-hidden z-10 shadow-inner">
+                      <img 
+                        src={`https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg`} 
+                        alt={song?.name || "Song"}
+                        className="w-full h-full object-cover opacity-90 scale-110"
+                      />
+                   </div>
                 </div>
               )}
                <div className="space-y-2 text-center w-full">
@@ -111,7 +126,7 @@ export const VinylCard: React.FC<VinylCardProps> = ({
                     {song?.info || "Unknown Source"}
                   </span>
                   <h3 className="text-xl font-black text-white leading-tight line-clamp-2">
-                    {revealWord || song?.name || "Unknown Song"}
+                    {song?.name || "Unknown Record"}
                   </h3>
                </div>
             </div>
