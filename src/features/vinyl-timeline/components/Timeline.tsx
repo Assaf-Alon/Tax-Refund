@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
-import { VinylCard } from './VinylCard';
+import { VinylCard } from '../../../shared/components/Vinyl/VinylCard';
 import type { SongItem } from '../../../shared/types/music';
 
 interface TimelineProps {
@@ -46,7 +46,7 @@ export const Timeline: React.FC<TimelineProps> = ({
           <div className="relative group scale-90 sm:scale-100 flex flex-col items-center">
             <VinylCard 
               song={item} 
-              isRevealed={true}
+              displayMode="revealed"
               className="transform shadow-2xl"
             />
             {/* Year Label */}

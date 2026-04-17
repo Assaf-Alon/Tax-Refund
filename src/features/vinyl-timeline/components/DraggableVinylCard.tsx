@@ -1,23 +1,21 @@
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { VinylCard } from './VinylCard';
+import { VinylCard, type VinylCardDisplayMode } from '../../../shared/components/Vinyl/VinylCard';
 import type { SongItem } from '../../../shared/types/music';
 
 interface DraggableVinylCardProps {
   id: string | number;
   song: SongItem | null;
   isPlaying?: boolean;
-  isRevealed?: boolean;
-  isMystery?: boolean;
+  displayMode?: VinylCardDisplayMode;
 }
 
 export const DraggableVinylCard: React.FC<DraggableVinylCardProps> = ({ 
   id, 
   song, 
   isPlaying,
-  isRevealed = false,
-  isMystery = true
+  displayMode = 'mystery'
 }) => {
   const { 
     attributes, 
@@ -45,8 +43,7 @@ export const DraggableVinylCard: React.FC<DraggableVinylCardProps> = ({
     >
       <VinylCard 
         song={song} 
-        isMystery={isMystery} 
-        isRevealed={isRevealed}
+        displayMode={displayMode}
         isPlaying={isPlaying}
         className="cursor-grab active:cursor-grabbing"
       />

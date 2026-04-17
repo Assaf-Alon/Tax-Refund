@@ -9,11 +9,12 @@ import {
   type DragEndEvent,
   type DragStartEvent
 } from '@dnd-kit/core';
-import { Play, RotateCcw, Users, Music, AlertCircle, Pause, Square, Plus, Trash2, Shuffle, Zap } from 'lucide-react';
+import { RotateCcw, Users, Music, AlertCircle, Plus, Trash2, Shuffle, Zap } from 'lucide-react';
 
 import { useVinylGame } from './hooks/useVinylGame';
 import { useAudioStream } from '../../shared/hooks/useAudioStream';
-import { VinylCard } from './components/VinylCard';
+import { VinylCard } from '../../shared/components/Vinyl/VinylCard';
+import { VinylAudioController } from '../../shared/components/Vinyl/VinylAudioController';
 import { DraggableVinylCard } from './components/DraggableVinylCard';
 import { Timeline } from './components/Timeline';
 
@@ -451,50 +452,23 @@ export const VinylTimelinePage: React.FC = () => {
                       <DraggableVinylCard 
                         id={state.mysteryCard?.id || 0}
                         song={state.mysteryCard}
-                        isRevealed={state.status === 'revealing'}
-                        isMystery={state.status === 'playing'}
+                        displayMode={state.status === 'revealing' ? 'revealed' : state.status === 'playing' ? 'mystery' : 'revealed'}
                       />
                   </div>
              </div>
 
              {/* Controls */}
-             <div className="flex flex-col items-center gap-1 z-10 w-full max-w-[200px]">
-                {/* Progress Bar */}
-                <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-2">
-                   <div 
-                     className="h-full bg-rose-500 transition-all duration-300 ease-linear" 
-                     style={{ width: `${progress}%` }}
-                   />
-                </div>
-
-                <button 
-                   onClick={handlePlaySnippet}
-                   disabled={!isReady || (state.oneListenOnly && state.listenedCurrentRound && !isPlaying)}
-                   className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 z-20 ${
-                    isPlaying 
-                      ? 'bg-rose-500 text-white shadow-2xl scale-110' 
-                      : !isReady || (state.oneListenOnly && state.listenedCurrentRound) ? 'bg-slate-800 text-slate-600' : 'bg-white text-slate-950 shadow-xl'
-                  }`}
-                >
-                  {!isReady && playerStatus !== 'error' ? (
-                     <div className="w-5 h-5 border-2 border-slate-600 border-t-white rounded-full animate-spin" />
-                  ) : isPlaying ? (
-                    state.oneListenOnly ? <Square className="fill-current w-7 h-7" /> : <Pause className="fill-current w-7 h-7" />
-                  ) : playerStatus === 'error' ? (
-                    <RotateCcw className="w-7 h-7" onClick={(e) => { e.stopPropagation(); if (state.mysteryCard) prepare(state.mysteryCard.youtubeId, true); }} />
-                  ) : (
-                    <Play className={`fill-current w-7 h-7 ml-1 ${(state.oneListenOnly && state.listenedCurrentRound) ? 'opacity-20' : ''}`} />
-                  )}
-                </button>
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">
-                  {playerStatus === 'loading' ? 'Loading' : playerStatus === 'error' ? 'Tap to Retry' : isPlaying ? (state.oneListenOnly ? 'Stop' : 'Pause') : (state.oneListenOnly && state.listenedCurrentRound) ? 'Listen Used' : 'Play Snippet'}
-                </span>
-                {playerStatus === 'error' && lastError && (
-                  <span className="text-[7px] font-bold text-rose-500/60 uppercase tracking-tight text-center max-w-[150px] mt-0.5 animate-pulse">
-                    {lastError}
-                  </span>
-                )}
-             </div>
+             <VinylAudioController 
+               isPlaying={isPlaying}
+               isReady={isReady}
+               progress={progress}
+               onToggle={handlePlaySnippet}
+               playerStatus={playerStatus}
+               lastError={lastError}
+               onRetry={() => state.mysteryCard && prepare(state.mysteryCard.youtubeId, true)}
+               oneListenOnly={state.oneListenOnly}
+               listenedCurrentRound={state.listenedCurrentRound}
+             />
           </div>
 
           {/* TIMELINE */}
@@ -507,7 +481,10 @@ export const VinylTimelinePage: React.FC = () => {
           <DragOverlay>
             {activeId ? (
               <div className="w-48 h-48 scale-50 opacity-80 pointer-events-none transform-gpu transition-transform duration-200">
-                <VinylCard song={state.mysteryCard} isMystery />
+                <VinylCard 
+                  song={state.mysteryCard} 
+                  displayMode="mystery" 
+                />
               </div>
             ) : null}
           </DragOverlay>
@@ -579,7 +556,10 @@ export const VinylTimelinePage: React.FC = () => {
                  <span className="text-6xl font-black text-white tabular-nums tracking-tighter leading-none">{state.lastResult.correctYear}</span>
               </div>
               <div className="w-full max-w-sm flex flex-col items-center gap-6">
-                 <VinylCard song={state.mysteryCard} />
+                 <VinylCard 
+                    song={state.mysteryCard} 
+                    displayMode="revealed"
+                 />
                  <button 
                    onClick={proceedToNextPlayer}
                    className="w-full py-5 bg-white text-slate-950 rounded-2xl font-black italic tracking-tighter uppercase shadow-2xl hover:scale-105 transition-all"
