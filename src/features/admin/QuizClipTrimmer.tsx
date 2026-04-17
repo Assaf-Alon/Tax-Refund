@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Scissors, RotateCcw, MonitorPlay, ChevronLeft, ChevronRight, List, Download, CheckCircle, Search, Loader2, AlertTriangle, ExternalLink, Trash2, Edit2, X, Upload } from 'lucide-react';
+import { Play, Pause, Scissors, RotateCcw, MonitorPlay, ChevronLeft, ChevronRight, List, Download, CheckCircle, Search, Loader2, AlertTriangle, ExternalLink, Trash2, Edit2, X, Upload, Plus } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -32,6 +32,9 @@ export const QuizClipTrimmer: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState('');
   const [editInfo, setEditInfo] = useState('');
+  const [category, setCategory] = useState<string>('Anime');
+  const [isBulkAddOpen, setIsBulkAddOpen] = useState(false);
+  const [bulkInput, setBulkInput] = useState('');
 
   const previewIntervalRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +83,7 @@ export const QuizClipTrimmer: React.FC = () => {
       setAltStartTime((song.altStartTime ?? 0).toString());
       setAltEndTime((song.altEndTime ?? 10).toString());
       setYear(song.year || '');
+      setCategory(song.category || 'Anime');
       localStorage.setItem('trimmer_current_index', currentIndex.toString());
       setActiveTab('main');
 
@@ -100,6 +104,7 @@ export const QuizClipTrimmer: React.FC = () => {
       altStartTime: Math.floor(parseFloat(altStartTime) || 0),
       altEndTime: Math.ceil(parseFloat(altEndTime) || 0),
       year,
+      category,
       status: 'completed'
     };
     setSongs(updatedSongs);
@@ -327,6 +332,70 @@ export const QuizClipTrimmer: React.FC = () => {
     reader.readAsText(file);
   };
 
+  const handleBulkAdd = () => {
+    if (!bulkInput.trim()) return;
+
+    const lines = bulkInput.split('\n');
+    const newSongs: SongItem[] = [];
+    const timestamp = Date.now();
+
+    // Check if first line is a header
+    let startIdx = 0;
+    if (lines.length > 0) {
+      const firstLine = lines[0].toLowerCase();
+      if (firstLine.includes('artist') || firstLine.includes('song') || firstLine.includes('year') || firstLine.includes('preview')) {
+        startIdx = 1;
+      }
+    }
+
+    for (let i = startIdx; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.trim()) continue;
+
+      const parts = line.split('\t');
+      if (parts.length < 2) continue;
+
+      const artist = parts[0]?.trim() || '';
+      const songTitle = parts[1]?.trim() || '';
+      const yearStr = parts[2]?.trim() || '';
+      const startTimeVal = parts[3]?.trim() || '0';
+      const endTimeVal = parts[4]?.trim() || '15';
+      const altStartTimeVal = parts[5]?.trim() || '';
+      const altEndTimeVal = parts[6]?.trim() || '';
+      const type = parts[7]?.trim() || 'Popular';
+      const ytLink = parts[8]?.trim() || '';
+      const notes = parts[9]?.trim() || '';
+
+      const name = artist && songTitle ? `${artist} - ${songTitle}` : (artist || songTitle);
+
+      newSongs.push({
+        id: timestamp + i,
+        query: name,
+        info: notes || type,
+        name: name,
+        youtubeId: extractVideoId(ytLink) || '',
+        startTime: Math.floor(parseFloat(startTimeVal) || 0),
+        endTime: Math.ceil(parseFloat(endTimeVal) || 15),
+        altStartTime: altStartTimeVal ? Math.floor(parseFloat(altStartTimeVal)) : undefined,
+        altEndTime: altEndTimeVal ? Math.ceil(parseFloat(altEndTimeVal)) : undefined,
+        year: yearStr,
+        category: type,
+        status: 'pending'
+      });
+    }
+
+    if (newSongs.length > 0) {
+      const updatedSongs = [...songs, ...newSongs];
+      setSongs(updatedSongs);
+      localStorage.setItem('trimmer_songs', JSON.stringify(updatedSongs));
+      setBulkInput('');
+      setIsBulkAddOpen(false);
+      alert(`Successfully added ${newSongs.length} songs!`);
+    } else {
+      alert("No valid songs found in the input.");
+    }
+  };
+
   const currentSong = songs[currentIndex];
 
   const handleSearch = () => {
@@ -337,6 +406,7 @@ export const QuizClipTrimmer: React.FC = () => {
   const openEditModal = () => {
     setEditName(currentSong.name);
     setEditInfo(currentSong.info);
+    setCategory(currentSong.category || 'Anime');
     setIsEditModalOpen(true);
   };
 
@@ -347,6 +417,7 @@ export const QuizClipTrimmer: React.FC = () => {
         ...updated[currentIndex],
         name: editName,
         info: editInfo,
+        category: category,
         query: editName // Keep search query in sync
       };
       localStorage.setItem('trimmer_songs', JSON.stringify(updated));
@@ -441,6 +512,13 @@ export const QuizClipTrimmer: React.FC = () => {
             accept=".json"
             className="hidden"
           />
+          <button
+            onClick={() => setIsBulkAddOpen(true)}
+            className="w-full flex items-center justify-center gap-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 py-3 rounded-xl font-bold transition-all border border-indigo-500/20"
+          >
+            <Plus size={18} />
+            Bulk Add from Sheets
+          </button>
           <button
             onClick={handleImportClick}
             className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 py-3 rounded-xl font-bold transition-all border border-slate-700"
@@ -728,13 +806,25 @@ export const QuizClipTrimmer: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-2 ml-1">Anime / Section</label>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-2 ml-1">Notes (Anime / Section)</label>
                 <input
                   type="text"
                   value={editInfo}
                   onChange={(e) => setEditInfo(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none text-white transition-all"
                 />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-2 ml-1">Category</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none text-white transition-all appearance-none cursor-pointer"
+                >
+                  <option value="Anime">Anime</option>
+                  <option value="Popular">Popular</option>
+                  <option value="Custom">Custom</option>
+                </select>
               </div>
             </div>
 
@@ -750,6 +840,53 @@ export const QuizClipTrimmer: React.FC = () => {
                 className="flex-1 py-3 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-500 transition-all text-white shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
               >
                 Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Bulk Add Modal */}
+      {isBulkAddOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-8 shadow-2xl space-y-6 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">Bulk Add Songs</h3>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Paste from Google Sheets (TAB separated)</p>
+              </div>
+              <button onClick={() => setIsBulkAddOpen(false)} className="text-slate-500 hover:text-white transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
+                <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Expected Columns:</h4>
+                <p className="text-[10px] font-medium text-slate-400 leading-relaxed font-mono">
+                  Artist [TAB] Song [TAB] Year [TAB] Start [TAB] End [TAB] AltStart [TAB] AltEnd [TAB] Type [TAB] YT Link [TAB] Notes
+                </p>
+              </div>
+
+              <textarea
+                value={bulkInput}
+                onChange={(e) => setBulkInput(e.target.value)}
+                placeholder="Paste your rows here..."
+                className="w-full h-64 bg-slate-950 border border-slate-700 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white transition-all font-mono text-xs"
+              />
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => setIsBulkAddOpen(false)}
+                className="flex-1 py-4 rounded-xl font-bold bg-slate-800 hover:bg-slate-700 transition-all text-slate-300 uppercase tracking-widest text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBulkAdd}
+                className="flex-1 py-4 rounded-xl font-black bg-indigo-600 hover:bg-indigo-500 transition-all text-white shadow-lg shadow-indigo-600/20 active:scale-[0.98] uppercase tracking-widest text-xs"
+              >
+                Add {bulkInput.split('\n').filter(l => l.trim()).length} Songs
               </button>
             </div>
           </div>

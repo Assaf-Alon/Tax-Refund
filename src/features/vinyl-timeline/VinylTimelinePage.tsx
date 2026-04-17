@@ -44,13 +44,26 @@ export const VinylTimelinePage: React.FC = () => {
   const [oneListenOnly, setOneListenOnly] = useState(false);
   const [shuffleMode, setShuffleMode] = useState(false);
   const [hardMode, setHardMode] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['Anime']);
+  const [availableCategories, setAvailableCategories] = useState<string[]>(['Anime', 'Popular', 'Custom']);
 
   // 0. Preload pool and initial candidate on mount OR when modes change in setup
   useEffect(() => {
     if (state.status === 'setup') {
-      prepareInitialSongs(shuffleMode, hardMode);
+      prepareInitialSongs(shuffleMode, hardMode, selectedCategories);
     }
-  }, [prepareInitialSongs, state.status, shuffleMode, hardMode]);
+  }, [prepareInitialSongs, state.status, shuffleMode, hardMode, selectedCategories]);
+
+  // Load available categories on mount
+  useEffect(() => {
+    fetch('/Tax-Refund/data/anime_songs.json')
+      .then(res => res.json())
+      .then((songs: any[]) => {
+        const cats = Array.from(new Set(songs.map(s => s.category || 'Anime')));
+        setAvailableCategories(cats);
+      })
+      .catch(console.error);
+  }, []);
 
   // 1. Auto-prepare stream & reset state
   useEffect(() => {
@@ -264,11 +277,34 @@ export const VinylTimelinePage: React.FC = () => {
               </div>
             </div>
          </div>
+         <div className="flex flex-col gap-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Categories</label>
+            <div className="flex flex-wrap gap-2">
+               {availableCategories.map(cat => (
+                 <button 
+                   key={cat}
+                   onClick={() => {
+                     const next = selectedCategories.includes(cat)
+                       ? selectedCategories.filter(c => c !== cat)
+                       : [...selectedCategories, cat];
+                     if (next.length > 0) setSelectedCategories(next);
+                   }}
+                   className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border ${
+                     selectedCategories.includes(cat) 
+                       ? 'bg-rose-600 border-rose-500 text-white shadow-lg' 
+                       : 'bg-slate-950/50 border-white/5 text-slate-400 hover:text-white hover:border-white/20'
+                   }`}
+                 >
+                   {cat}
+                 </button>
+               ))}
+            </div>
+         </div>
       </div>
 
       <button
         onClick={() => {
-          setupGame(playerNames, gameMode, oneListenOnly, shuffleMode, hardMode, params.id ? parseInt(params.id) : undefined);
+          setupGame(playerNames, gameMode, oneListenOnly, shuffleMode, hardMode, selectedCategories, params.id ? parseInt(params.id) : undefined);
         }}
         className="w-full py-4 bg-rose-600 text-white rounded-xl font-black shadow-xl shadow-rose-900/20 uppercase tracking-widest flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
       >

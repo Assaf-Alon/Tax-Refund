@@ -9,6 +9,7 @@ export interface SongItem {
   altStartTime?: number;
   altEndTime?: number;
   year?: string;
+  category?: string;
   status: 'pending' | 'completed';
 }
 
@@ -40,6 +41,7 @@ export interface VinylGameState {
   playbackEnd?: number;
   nextPlaybackStart?: number;
   nextPlaybackEnd?: number;
+  selectedCategories: string[];
   lastResult?: {
     success: boolean;
     correctYear: string;

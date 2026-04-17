@@ -10,7 +10,8 @@
     "status": "completed",
     "altStartTime": 47,
     "altEndTime": 62,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 2,
@@ -23,7 +24,8 @@
     "status": "completed",
     "altStartTime": 48,
     "altEndTime": 65,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 3,
@@ -36,7 +38,8 @@
     "status": "completed",
     "altStartTime": 80,
     "altEndTime": 110,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 4,
@@ -49,7 +52,8 @@
     "status": "completed",
     "altStartTime": 59,
     "altEndTime": 85,
-    "year": "2006"
+    "year": "2006",
+    "category": "Anime"
   },
   {
     "id": 5,
@@ -62,7 +66,8 @@
     "status": "completed",
     "altStartTime": 37,
     "altEndTime": 63,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 6,
@@ -75,7 +80,8 @@
     "status": "completed",
     "altStartTime": 37,
     "altEndTime": 71,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 7,
@@ -88,7 +94,8 @@
     "status": "completed",
     "altStartTime": 78,
     "altEndTime": 114,
-    "year": "2007"
+    "year": "2007",
+    "category": "Anime"
   },
   {
     "id": 8,
@@ -101,7 +108,8 @@
     "status": "completed",
     "altStartTime": 48,
     "altEndTime": 72,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 9,
@@ -114,7 +122,8 @@
     "status": "completed",
     "altStartTime": 45,
     "altEndTime": 68,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 10,
@@ -127,7 +136,8 @@
     "status": "completed",
     "altStartTime": 46,
     "altEndTime": 67,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 11,
@@ -140,7 +150,8 @@
     "status": "completed",
     "altStartTime": 39,
     "altEndTime": 70,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 12,
@@ -153,7 +164,8 @@
     "status": "completed",
     "altStartTime": 85,
     "altEndTime": 104,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 13,
@@ -166,7 +178,8 @@
     "status": "completed",
     "altStartTime": 138,
     "altEndTime": 156,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 14,
@@ -179,7 +192,8 @@
     "status": "completed",
     "altStartTime": 145,
     "altEndTime": 170,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 15,
@@ -192,7 +206,8 @@
     "status": "completed",
     "altStartTime": 154,
     "altEndTime": 172,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 16,
@@ -205,7 +220,8 @@
     "status": "completed",
     "altStartTime": 177,
     "altEndTime": 212,
-    "year": "2025"
+    "year": "2025",
+    "category": "Anime"
   },
   {
     "id": 17,
@@ -218,7 +234,8 @@
     "status": "completed",
     "altStartTime": 111,
     "altEndTime": 135,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 18,
@@ -231,7 +248,8 @@
     "status": "completed",
     "altStartTime": 41,
     "altEndTime": 66,
-    "year": "2018"
+    "year": "2018",
+    "category": "Anime"
   },
   {
     "id": 19,
@@ -244,7 +262,8 @@
     "status": "completed",
     "altStartTime": 49,
     "altEndTime": 76,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 20,
@@ -257,7 +276,8 @@
     "status": "completed",
     "altStartTime": 112,
     "altEndTime": 136,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 21,
@@ -270,7 +290,8 @@
     "status": "completed",
     "altStartTime": 104,
     "altEndTime": 126,
-    "year": "2025"
+    "year": "2025",
+    "category": "Anime"
   },
   {
     "id": 22,
@@ -283,7 +304,8 @@
     "status": "completed",
     "altStartTime": 45,
     "altEndTime": 70,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 23,
@@ -296,7 +318,8 @@
     "status": "completed",
     "altStartTime": 154,
     "altEndTime": 174,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 24,
@@ -309,7 +332,8 @@
     "status": "completed",
     "altStartTime": 161,
     "altEndTime": 189,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 25,
@@ -322,7 +346,8 @@
     "status": "completed",
     "altStartTime": 206,
     "altEndTime": 236,
-    "year": "2009"
+    "year": "2009",
+    "category": "Anime"
   },
   {
     "id": 26,
@@ -335,7 +360,8 @@
     "status": "completed",
     "altStartTime": 50,
     "altEndTime": 77,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 27,
@@ -348,7 +374,8 @@
     "status": "completed",
     "altStartTime": 54,
     "altEndTime": 71,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 28,
@@ -361,7 +388,8 @@
     "status": "completed",
     "altStartTime": 49,
     "altEndTime": 73,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 29,
@@ -374,7 +402,8 @@
     "status": "completed",
     "altStartTime": 125,
     "altEndTime": 146,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 30,
@@ -387,7 +416,8 @@
     "status": "completed",
     "altStartTime": 182,
     "altEndTime": 210,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 31,
@@ -400,7 +430,8 @@
     "status": "completed",
     "altStartTime": 123,
     "altEndTime": 149,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 32,
@@ -413,7 +444,8 @@
     "status": "completed",
     "altStartTime": 62,
     "altEndTime": 95,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 33,
@@ -426,7 +458,8 @@
     "status": "completed",
     "altStartTime": 93,
     "altEndTime": 124,
-    "year": "2000"
+    "year": "2000",
+    "category": "Anime"
   },
   {
     "id": 34,
@@ -439,7 +472,8 @@
     "status": "completed",
     "altStartTime": 48,
     "altEndTime": 81,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 35,
@@ -452,7 +486,8 @@
     "status": "completed",
     "altStartTime": 50,
     "altEndTime": 79,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 36,
@@ -465,7 +500,8 @@
     "status": "completed",
     "altStartTime": 126,
     "altEndTime": 159,
-    "year": "2024"
+    "year": "2024",
+    "category": "Anime"
   },
   {
     "id": 37,
@@ -478,7 +514,8 @@
     "status": "completed",
     "altStartTime": 63,
     "altEndTime": 84,
-    "year": "2024"
+    "year": "2024",
+    "category": "Anime"
   },
   {
     "id": 38,
@@ -491,7 +528,8 @@
     "status": "completed",
     "altStartTime": 106,
     "altEndTime": 135,
-    "year": "2025"
+    "year": "2025",
+    "category": "Anime"
   },
   {
     "id": 39,
@@ -504,7 +542,8 @@
     "status": "completed",
     "altStartTime": 42,
     "altEndTime": 70,
-    "year": "2025"
+    "year": "2025",
+    "category": "Anime"
   },
   {
     "id": 40,
@@ -517,7 +556,8 @@
     "status": "completed",
     "altStartTime": 116,
     "altEndTime": 152,
-    "year": "2025"
+    "year": "2025",
+    "category": "Anime"
   },
   {
     "id": 41,
@@ -530,7 +570,8 @@
     "status": "completed",
     "altStartTime": 42,
     "altEndTime": 71,
-    "year": "2025"
+    "year": "2025",
+    "category": "Anime"
   },
   {
     "id": 42,
@@ -543,7 +584,8 @@
     "status": "completed",
     "altStartTime": 192,
     "altEndTime": 219,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 43,
@@ -556,7 +598,8 @@
     "status": "completed",
     "altStartTime": 53,
     "altEndTime": 85,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 44,
@@ -569,7 +612,8 @@
     "status": "completed",
     "altStartTime": 54,
     "altEndTime": 80,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 45,
@@ -582,7 +626,8 @@
     "status": "completed",
     "altStartTime": 155,
     "altEndTime": 182,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 46,
@@ -595,7 +640,8 @@
     "status": "completed",
     "altStartTime": 41,
     "altEndTime": 65,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 48,
@@ -608,7 +654,8 @@
     "status": "completed",
     "altStartTime": 205,
     "altEndTime": 234,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 49,
@@ -621,7 +668,8 @@
     "status": "completed",
     "altStartTime": 181,
     "altEndTime": 221,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 50,
@@ -634,7 +682,8 @@
     "status": "completed",
     "altStartTime": 37,
     "altEndTime": 62,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 52,
@@ -647,7 +696,8 @@
     "status": "completed",
     "altStartTime": 52,
     "altEndTime": 81,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 54,
@@ -660,7 +710,8 @@
     "status": "completed",
     "altStartTime": 30,
     "altEndTime": 53,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 55,
@@ -673,7 +724,8 @@
     "status": "completed",
     "altStartTime": 94,
     "altEndTime": 118,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 56,
@@ -686,7 +738,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 10,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 57,
@@ -699,7 +752,8 @@
     "status": "completed",
     "altStartTime": 211,
     "altEndTime": 230,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 60,
@@ -712,7 +766,8 @@
     "status": "completed",
     "altStartTime": 48,
     "altEndTime": 69,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 61,
@@ -725,7 +780,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 62,
@@ -738,7 +794,8 @@
     "status": "completed",
     "altStartTime": 199,
     "altEndTime": 223,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 64,
@@ -751,7 +808,8 @@
     "status": "completed",
     "altStartTime": 68,
     "altEndTime": 95,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 65,
@@ -764,7 +822,8 @@
     "status": "completed",
     "altStartTime": 61,
     "altEndTime": 97,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 66,
@@ -777,7 +836,8 @@
     "status": "completed",
     "altStartTime": 58,
     "altEndTime": 85,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 68,
@@ -790,7 +850,8 @@
     "status": "completed",
     "altStartTime": 54,
     "altEndTime": 73,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 70,
@@ -803,7 +864,8 @@
     "status": "completed",
     "altStartTime": 49,
     "altEndTime": 77,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 72,
@@ -816,7 +878,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 74,
@@ -829,7 +892,8 @@
     "status": "completed",
     "altStartTime": 167,
     "altEndTime": 194,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 75,
@@ -842,7 +906,8 @@
     "status": "completed",
     "altStartTime": 49,
     "altEndTime": 67,
-    "year": "2018"
+    "year": "2018",
+    "category": "Anime"
   },
   {
     "id": 76,
@@ -855,7 +920,8 @@
     "status": "completed",
     "altStartTime": 163,
     "altEndTime": 190,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 77,
@@ -868,7 +934,8 @@
     "status": "completed",
     "altStartTime": 165,
     "altEndTime": 187,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 78,
@@ -881,7 +948,8 @@
     "status": "completed",
     "altStartTime": 71,
     "altEndTime": 100,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 79,
@@ -894,7 +962,8 @@
     "status": "completed",
     "altStartTime": 135,
     "altEndTime": 166,
-    "year": "1995"
+    "year": "1995",
+    "category": "Anime"
   },
   {
     "id": 80,
@@ -907,7 +976,8 @@
     "status": "completed",
     "altStartTime": 112,
     "altEndTime": 145,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 81,
@@ -920,7 +990,8 @@
     "status": "completed",
     "altStartTime": 57,
     "altEndTime": 76,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 82,
@@ -933,7 +1004,8 @@
     "status": "completed",
     "altStartTime": 157,
     "altEndTime": 191,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 83,
@@ -946,7 +1018,8 @@
     "status": "completed",
     "altStartTime": 66,
     "altEndTime": 98,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 84,
@@ -959,7 +1032,8 @@
     "status": "completed",
     "altStartTime": 45,
     "altEndTime": 65,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 85,
@@ -972,7 +1046,8 @@
     "status": "completed",
     "altStartTime": 70,
     "altEndTime": 91,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 86,
@@ -985,7 +1060,8 @@
     "status": "completed",
     "altStartTime": 24,
     "altEndTime": 44,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 87,
@@ -998,7 +1074,8 @@
     "status": "completed",
     "altStartTime": 159,
     "altEndTime": 181,
-    "year": "2009"
+    "year": "2009",
+    "category": "Anime"
   },
   {
     "id": 88,
@@ -1011,7 +1088,8 @@
     "status": "completed",
     "altStartTime": 126,
     "altEndTime": 153,
-    "year": "2009"
+    "year": "2009",
+    "category": "Anime"
   },
   {
     "id": 89,
@@ -1024,7 +1102,8 @@
     "status": "completed",
     "altStartTime": 98,
     "altEndTime": 122,
-    "year": "2009"
+    "year": "2009",
+    "category": "Anime"
   },
   {
     "id": 90,
@@ -1037,7 +1116,8 @@
     "status": "completed",
     "altStartTime": 52,
     "altEndTime": 77,
-    "year": "2009"
+    "year": "2009",
+    "category": "Anime"
   },
   {
     "id": 91,
@@ -1050,7 +1130,8 @@
     "status": "completed",
     "altStartTime": 84,
     "altEndTime": 106,
-    "year": "2009"
+    "year": "2009",
+    "category": "Anime"
   },
   {
     "id": 92,
@@ -1063,7 +1144,8 @@
     "status": "completed",
     "altStartTime": 109,
     "altEndTime": 141,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 93,
@@ -1076,7 +1158,8 @@
     "status": "completed",
     "altStartTime": 47,
     "altEndTime": 75,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 94,
@@ -1089,7 +1172,8 @@
     "status": "completed",
     "altStartTime": 83,
     "altEndTime": 110,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 95,
@@ -1102,7 +1186,8 @@
     "status": "completed",
     "altStartTime": 51,
     "altEndTime": 76,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 96,
@@ -1115,7 +1200,8 @@
     "status": "completed",
     "altStartTime": 48,
     "altEndTime": 75,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 97,
@@ -1128,7 +1214,8 @@
     "status": "completed",
     "altStartTime": 49,
     "altEndTime": 78,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 98,
@@ -1141,7 +1228,8 @@
     "status": "completed",
     "altStartTime": 119,
     "altEndTime": 145,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 99,
@@ -1154,7 +1242,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "2007"
+    "year": "2007",
+    "category": "Anime"
   },
   {
     "id": 100,
@@ -1167,7 +1256,8 @@
     "status": "completed",
     "altStartTime": 144,
     "altEndTime": 169,
-    "year": "2007"
+    "year": "2007",
+    "category": "Anime"
   },
   {
     "id": 101,
@@ -1180,7 +1270,8 @@
     "status": "completed",
     "altStartTime": 82,
     "altEndTime": 111,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 102,
@@ -1193,7 +1284,8 @@
     "status": "completed",
     "altStartTime": 62,
     "altEndTime": 84,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 103,
@@ -1206,7 +1298,8 @@
     "status": "completed",
     "altStartTime": 107,
     "altEndTime": 135,
-    "year": "2006"
+    "year": "2006",
+    "category": "Anime"
   },
   {
     "id": 104,
@@ -1219,7 +1312,8 @@
     "status": "completed",
     "altStartTime": 61,
     "altEndTime": 84,
-    "year": "2006"
+    "year": "2006",
+    "category": "Anime"
   },
   {
     "id": 108,
@@ -1232,7 +1326,8 @@
     "status": "completed",
     "altStartTime": 170,
     "altEndTime": 197,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 109,
@@ -1245,7 +1340,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 110,
@@ -1258,7 +1354,8 @@
     "status": "completed",
     "altStartTime": 34,
     "altEndTime": 56,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 111,
@@ -1271,7 +1368,8 @@
     "status": "completed",
     "altStartTime": 95,
     "altEndTime": 118,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 112,
@@ -1284,7 +1382,8 @@
     "status": "completed",
     "altStartTime": 61,
     "altEndTime": 85,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 115,
@@ -1297,7 +1396,8 @@
     "status": "completed",
     "altStartTime": 36,
     "altEndTime": 64,
-    "year": "2025"
+    "year": "2025",
+    "category": "Anime"
   },
   {
     "id": 116,
@@ -1310,7 +1410,8 @@
     "status": "completed",
     "altStartTime": 38,
     "altEndTime": 60,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 118,
@@ -1323,7 +1424,8 @@
     "status": "completed",
     "altStartTime": 38,
     "altEndTime": 64,
-    "year": "2005"
+    "year": "2005",
+    "category": "Anime"
   },
   {
     "id": 119,
@@ -1336,7 +1438,8 @@
     "status": "completed",
     "altStartTime": 85,
     "altEndTime": 111,
-    "year": "2006"
+    "year": "2006",
+    "category": "Anime"
   },
   {
     "id": 120,
@@ -1349,7 +1452,8 @@
     "status": "completed",
     "altStartTime": 39,
     "altEndTime": 61,
-    "year": "2006"
+    "year": "2006",
+    "category": "Anime"
   },
   {
     "id": 122,
@@ -1362,7 +1466,8 @@
     "status": "completed",
     "altStartTime": 27,
     "altEndTime": 53,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 123,
@@ -1375,7 +1480,8 @@
     "status": "completed",
     "altStartTime": 63,
     "altEndTime": 92,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 124,
@@ -1388,7 +1494,8 @@
     "status": "completed",
     "altStartTime": 62,
     "altEndTime": 88,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 125,
@@ -1401,7 +1508,8 @@
     "status": "completed",
     "altStartTime": 30,
     "altEndTime": 56,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 126,
@@ -1414,7 +1522,8 @@
     "status": "completed",
     "altStartTime": 31,
     "altEndTime": 56,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 127,
@@ -1427,7 +1536,8 @@
     "status": "completed",
     "altStartTime": 43,
     "altEndTime": 71,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 128,
@@ -1440,7 +1550,8 @@
     "status": "completed",
     "altStartTime": 83,
     "altEndTime": 106,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 129,
@@ -1453,7 +1564,8 @@
     "status": "completed",
     "altStartTime": 28,
     "altEndTime": 50,
-    "year": "1999"
+    "year": "1999",
+    "category": "Anime"
   },
   {
     "id": 130,
@@ -1466,7 +1578,8 @@
     "status": "completed",
     "altStartTime": 57,
     "altEndTime": 86,
-    "year": "1999"
+    "year": "1999",
+    "category": "Anime"
   },
   {
     "id": 131,
@@ -1479,7 +1592,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "2000"
+    "year": "2000",
+    "category": "Anime"
   },
   {
     "id": 132,
@@ -1492,7 +1606,8 @@
     "status": "completed",
     "altStartTime": 58,
     "altEndTime": 91,
-    "year": "2000"
+    "year": "2000",
+    "category": "Anime"
   },
   {
     "id": 133,
@@ -1505,7 +1620,8 @@
     "status": "completed",
     "altStartTime": 43,
     "altEndTime": 77,
-    "year": "2007"
+    "year": "2007",
+    "category": "Anime"
   },
   {
     "id": 134,
@@ -1518,7 +1634,8 @@
     "status": "completed",
     "altStartTime": 42,
     "altEndTime": 67,
-    "year": "2009"
+    "year": "2009",
+    "category": "Anime"
   },
   {
     "id": 135,
@@ -1531,7 +1648,8 @@
     "status": "completed",
     "altStartTime": 61,
     "altEndTime": 93,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 136,
@@ -1544,7 +1662,8 @@
     "status": "completed",
     "altStartTime": 37,
     "altEndTime": 60,
-    "year": "2004"
+    "year": "2004",
+    "category": "Anime"
   },
   {
     "id": 137,
@@ -1557,7 +1676,8 @@
     "status": "completed",
     "altStartTime": 33,
     "altEndTime": 52,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 138,
@@ -1570,7 +1690,8 @@
     "status": "completed",
     "altStartTime": 57,
     "altEndTime": 83,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 139,
@@ -1583,7 +1704,8 @@
     "status": "completed",
     "altStartTime": 53,
     "altEndTime": 85,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 140,
@@ -1596,7 +1718,8 @@
     "status": "completed",
     "altStartTime": 57,
     "altEndTime": 81,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 141,
@@ -1609,7 +1732,8 @@
     "status": "completed",
     "altStartTime": 98,
     "altEndTime": 120,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 142,
@@ -1622,7 +1746,8 @@
     "status": "completed",
     "altStartTime": 17,
     "altEndTime": 40,
-    "year": "2009"
+    "year": "2009",
+    "category": "Anime"
   },
   {
     "id": 143,
@@ -1635,7 +1760,8 @@
     "status": "completed",
     "altStartTime": 116,
     "altEndTime": 143,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 144,
@@ -1648,7 +1774,8 @@
     "status": "completed",
     "altStartTime": 46,
     "altEndTime": 67,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 145,
@@ -1661,7 +1788,8 @@
     "status": "completed",
     "altStartTime": 120,
     "altEndTime": 140,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 146,
@@ -1674,7 +1802,8 @@
     "status": "completed",
     "altStartTime": 43,
     "altEndTime": 69,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 147,
@@ -1687,7 +1816,8 @@
     "status": "completed",
     "altStartTime": 28,
     "altEndTime": 57,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 148,
@@ -1700,7 +1830,8 @@
     "status": "completed",
     "altStartTime": 37,
     "altEndTime": 61,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 149,
@@ -1713,7 +1844,8 @@
     "status": "completed",
     "altStartTime": 50,
     "altEndTime": 79,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 150,
@@ -1726,7 +1858,8 @@
     "status": "completed",
     "altStartTime": 35,
     "altEndTime": 54,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 151,
@@ -1739,7 +1872,8 @@
     "status": "completed",
     "altStartTime": 53,
     "altEndTime": 79,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 152,
@@ -1752,7 +1886,8 @@
     "status": "completed",
     "altStartTime": 48,
     "altEndTime": 79,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 153,
@@ -1765,7 +1900,8 @@
     "status": "completed",
     "altStartTime": 128,
     "altEndTime": 153,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 154,
@@ -1778,7 +1914,8 @@
     "status": "completed",
     "altStartTime": 35,
     "altEndTime": 61,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 155,
@@ -1791,7 +1928,8 @@
     "status": "completed",
     "altStartTime": 54,
     "altEndTime": 79,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 156,
@@ -1804,7 +1942,8 @@
     "status": "completed",
     "altStartTime": 45,
     "altEndTime": 67,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 157,
@@ -1817,7 +1956,8 @@
     "status": "completed",
     "altStartTime": 29,
     "altEndTime": 57,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 158,
@@ -1830,7 +1970,8 @@
     "status": "completed",
     "altStartTime": 98,
     "altEndTime": 119,
-    "year": "2018"
+    "year": "2018",
+    "category": "Anime"
   },
   {
     "id": 159,
@@ -1843,7 +1984,8 @@
     "status": "completed",
     "altStartTime": 50,
     "altEndTime": 82,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 160,
@@ -1856,7 +1998,8 @@
     "status": "completed",
     "altStartTime": 59,
     "altEndTime": 87,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 161,
@@ -1869,7 +2012,8 @@
     "status": "completed",
     "altStartTime": 60,
     "altEndTime": 88,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 162,
@@ -1882,7 +2026,8 @@
     "status": "completed",
     "altStartTime": 55,
     "altEndTime": 81,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 166,
@@ -1895,7 +2040,8 @@
     "status": "completed",
     "altStartTime": 67,
     "altEndTime": 93,
-    "year": "2013"
+    "year": "2013",
+    "category": "Anime"
   },
   {
     "id": 167,
@@ -1908,7 +2054,8 @@
     "status": "completed",
     "altStartTime": 52,
     "altEndTime": 74,
-    "year": ""
+    "year": "",
+    "category": "Anime"
   },
   {
     "id": 168,
@@ -1921,7 +2068,8 @@
     "status": "completed",
     "altStartTime": 99,
     "altEndTime": 125,
-    "year": "2013"
+    "year": "2013",
+    "category": "Anime"
   },
   {
     "id": 169,
@@ -1934,7 +2082,8 @@
     "status": "completed",
     "altStartTime": 155,
     "altEndTime": 186,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 170,
@@ -1947,7 +2096,8 @@
     "status": "completed",
     "altStartTime": 57,
     "altEndTime": 81,
-    "year": "2018"
+    "year": "2018",
+    "category": "Anime"
   },
   {
     "id": 172,
@@ -1960,7 +2110,8 @@
     "status": "completed",
     "altStartTime": 63,
     "altEndTime": 86,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 173,
@@ -1973,7 +2124,8 @@
     "status": "completed",
     "altStartTime": 52,
     "altEndTime": 75,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 174,
@@ -1986,7 +2138,8 @@
     "status": "completed",
     "altStartTime": 24,
     "altEndTime": 49,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 175,
@@ -1999,7 +2152,8 @@
     "status": "completed",
     "altStartTime": 54,
     "altEndTime": 87,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 176,
@@ -2012,7 +2166,8 @@
     "status": "completed",
     "altStartTime": 47,
     "altEndTime": 88,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 177,
@@ -2025,7 +2180,8 @@
     "status": "completed",
     "altStartTime": 34,
     "altEndTime": 58,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 178,
@@ -2038,7 +2194,8 @@
     "status": "completed",
     "altStartTime": 38,
     "altEndTime": 64,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 179,
@@ -2051,7 +2208,8 @@
     "status": "completed",
     "altStartTime": 66,
     "altEndTime": 87,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 180,
@@ -2064,7 +2222,8 @@
     "status": "completed",
     "altStartTime": 57,
     "altEndTime": 79,
-    "year": "1971"
+    "year": "1971",
+    "category": "Anime"
   },
   {
     "id": 181,
@@ -2077,7 +2236,8 @@
     "status": "completed",
     "altStartTime": 46,
     "altEndTime": 69,
-    "year": "2013"
+    "year": "2013",
+    "category": "Anime"
   },
   {
     "id": 182,
@@ -2090,7 +2250,8 @@
     "status": "completed",
     "altStartTime": 57,
     "altEndTime": 78,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 183,
@@ -2103,7 +2264,8 @@
     "status": "completed",
     "altStartTime": 28,
     "altEndTime": 57,
-    "year": "1986"
+    "year": "1986",
+    "category": "Anime"
   },
   {
     "id": 185,
@@ -2116,7 +2278,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "1987"
+    "year": "1987",
+    "category": "Anime"
   },
   {
     "id": 186,
@@ -2129,7 +2292,8 @@
     "status": "completed",
     "altStartTime": 43,
     "altEndTime": 68,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 187,
@@ -2142,7 +2306,8 @@
     "status": "completed",
     "altStartTime": 29,
     "altEndTime": 59,
-    "year": "1996"
+    "year": "1996",
+    "category": "Anime"
   },
   {
     "id": 189,
@@ -2155,7 +2320,8 @@
     "status": "completed",
     "altStartTime": 50,
     "altEndTime": 80,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 190,
@@ -2168,7 +2334,8 @@
     "status": "completed",
     "altStartTime": 49,
     "altEndTime": 72,
-    "year": "2018"
+    "year": "2018",
+    "category": "Anime"
   },
   {
     "id": 191,
@@ -2181,7 +2348,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "1995"
+    "year": "1995",
+    "category": "Anime"
   },
   {
     "id": 192,
@@ -2194,7 +2362,8 @@
     "status": "completed",
     "altStartTime": 57,
     "altEndTime": 85,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 194,
@@ -2207,7 +2376,8 @@
     "status": "completed",
     "altStartTime": 48,
     "altEndTime": 67,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 196,
@@ -2220,7 +2390,8 @@
     "status": "completed",
     "altStartTime": 43,
     "altEndTime": 72,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 197,
@@ -2233,7 +2404,8 @@
     "status": "completed",
     "altStartTime": 56,
     "altEndTime": 83,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 198,
@@ -2246,7 +2418,8 @@
     "status": "completed",
     "altStartTime": 50,
     "altEndTime": 78,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 199,
@@ -2259,7 +2432,8 @@
     "status": "completed",
     "altStartTime": 48,
     "altEndTime": 77,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 200,
@@ -2272,7 +2446,8 @@
     "status": "completed",
     "altStartTime": 25,
     "altEndTime": 47,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 201,
@@ -2285,7 +2460,8 @@
     "status": "completed",
     "altStartTime": 41,
     "altEndTime": 67,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 202,
@@ -2298,7 +2474,8 @@
     "status": "completed",
     "altStartTime": 47,
     "altEndTime": 74,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 203,
@@ -2311,7 +2488,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 204,
@@ -2324,7 +2502,8 @@
     "status": "completed",
     "altStartTime": 53,
     "altEndTime": 72,
-    "year": "2025"
+    "year": "2025",
+    "category": "Anime"
   },
   {
     "id": 205,
@@ -2337,7 +2516,8 @@
     "status": "completed",
     "altStartTime": 49,
     "altEndTime": 77,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 206,
@@ -2350,7 +2530,8 @@
     "status": "completed",
     "altStartTime": 51,
     "altEndTime": 80,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 207,
@@ -2363,7 +2544,8 @@
     "status": "completed",
     "altStartTime": 67,
     "altEndTime": 91,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 208,
@@ -2376,7 +2558,8 @@
     "status": "completed",
     "altStartTime": 43,
     "altEndTime": 70,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 209,
@@ -2389,7 +2572,8 @@
     "status": "completed",
     "altStartTime": 173,
     "altEndTime": 196,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 210,
@@ -2402,7 +2586,8 @@
     "status": "completed",
     "altStartTime": 68,
     "altEndTime": 89,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 211,
@@ -2415,7 +2600,8 @@
     "status": "completed",
     "altStartTime": 49,
     "altEndTime": 71,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 212,
@@ -2428,7 +2614,8 @@
     "status": "completed",
     "altStartTime": 55,
     "altEndTime": 82,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 213,
@@ -2441,7 +2628,8 @@
     "status": "completed",
     "altStartTime": 59,
     "altEndTime": 83,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 214,
@@ -2454,7 +2642,8 @@
     "status": "completed",
     "altStartTime": 48,
     "altEndTime": 70,
-    "year": "2018"
+    "year": "2018",
+    "category": "Anime"
   },
   {
     "id": 215,
@@ -2467,7 +2656,8 @@
     "status": "completed",
     "altStartTime": 45,
     "altEndTime": 64,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 216,
@@ -2480,7 +2670,8 @@
     "status": "completed",
     "altStartTime": 172,
     "altEndTime": 194,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 217,
@@ -2493,7 +2684,8 @@
     "status": "completed",
     "altStartTime": 51,
     "altEndTime": 73,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 218,
@@ -2506,7 +2698,8 @@
     "status": "completed",
     "altStartTime": 28,
     "altEndTime": 55,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 219,
@@ -2519,7 +2712,8 @@
     "status": "completed",
     "altStartTime": 84,
     "altEndTime": 109,
-    "year": "2013"
+    "year": "2013",
+    "category": "Anime"
   },
   {
     "id": 220,
@@ -2532,7 +2726,8 @@
     "status": "completed",
     "altStartTime": 58,
     "altEndTime": 86,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 221,
@@ -2545,7 +2740,8 @@
     "status": "completed",
     "altStartTime": 36,
     "altEndTime": 57,
-    "year": "2013"
+    "year": "2013",
+    "category": "Anime"
   },
   {
     "id": 222,
@@ -2558,7 +2754,8 @@
     "status": "completed",
     "altStartTime": 39,
     "altEndTime": 65,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 223,
@@ -2571,7 +2768,8 @@
     "status": "completed",
     "altStartTime": 240,
     "altEndTime": 264,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 224,
@@ -2584,7 +2782,8 @@
     "status": "completed",
     "altStartTime": 37,
     "altEndTime": 60,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 225,
@@ -2597,7 +2796,8 @@
     "status": "completed",
     "altStartTime": 59,
     "altEndTime": 81,
-    "year": "2004"
+    "year": "2004",
+    "category": "Anime"
   },
   {
     "id": 226,
@@ -2610,7 +2810,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 227,
@@ -2623,7 +2824,8 @@
     "status": "completed",
     "altStartTime": 29,
     "altEndTime": 46,
-    "year": "2019"
+    "year": "2019",
+    "category": "Anime"
   },
   {
     "id": 228,
@@ -2636,7 +2838,8 @@
     "status": "completed",
     "altStartTime": 36,
     "altEndTime": 70,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 229,
@@ -2649,7 +2852,8 @@
     "status": "completed",
     "altStartTime": 39,
     "altEndTime": 66,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 230,
@@ -2662,7 +2866,8 @@
     "status": "completed",
     "altStartTime": 186,
     "altEndTime": 216,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 231,
@@ -2675,7 +2880,8 @@
     "status": "completed",
     "altStartTime": 63,
     "altEndTime": 88,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 232,
@@ -2688,7 +2894,8 @@
     "status": "completed",
     "altStartTime": 144,
     "altEndTime": 173,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 233,
@@ -2701,7 +2908,8 @@
     "status": "completed",
     "altStartTime": 30,
     "altEndTime": 53,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 234,
@@ -2714,7 +2922,8 @@
     "status": "completed",
     "altStartTime": 25,
     "altEndTime": 51,
-    "year": "2011"
+    "year": "2011",
+    "category": "Anime"
   },
   {
     "id": 235,
@@ -2727,7 +2936,8 @@
     "status": "completed",
     "altStartTime": 42,
     "altEndTime": 62,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   },
   {
     "id": 236,
@@ -2740,7 +2950,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 24,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 237,
@@ -2753,7 +2964,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 34,
-    "year": "2013"
+    "year": "2013",
+    "category": "Anime"
   },
   {
     "id": 238,
@@ -2766,7 +2978,8 @@
     "status": "completed",
     "altStartTime": 26,
     "altEndTime": 49,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 239,
@@ -2779,7 +2992,8 @@
     "status": "completed",
     "altStartTime": 143,
     "altEndTime": 167,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 240,
@@ -2792,7 +3006,8 @@
     "status": "completed",
     "altStartTime": 46,
     "altEndTime": 70,
-    "year": "2012"
+    "year": "2012",
+    "category": "Anime"
   },
   {
     "id": 241,
@@ -2805,7 +3020,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 24,
-    "year": "2013"
+    "year": "2013",
+    "category": "Anime"
   },
   {
     "id": 242,
@@ -2818,7 +3034,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 22,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 243,
@@ -2831,7 +3048,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 244,
@@ -2844,7 +3062,8 @@
     "status": "completed",
     "altStartTime": 163,
     "altEndTime": 188,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 245,
@@ -2857,7 +3076,8 @@
     "status": "completed",
     "altStartTime": 152,
     "altEndTime": 171,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 246,
@@ -2870,7 +3090,8 @@
     "status": "completed",
     "altStartTime": 33,
     "altEndTime": 56,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 247,
@@ -2883,7 +3104,8 @@
     "status": "completed",
     "altStartTime": 33,
     "altEndTime": 56,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 248,
@@ -2896,7 +3118,8 @@
     "status": "completed",
     "altStartTime": 171,
     "altEndTime": 201,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 249,
@@ -2909,7 +3132,8 @@
     "status": "completed",
     "altStartTime": 26,
     "altEndTime": 47,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 250,
@@ -2922,7 +3146,8 @@
     "status": "completed",
     "altStartTime": 36,
     "altEndTime": 57,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 251,
@@ -2935,7 +3160,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 18,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 252,
@@ -2948,7 +3174,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 22,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 253,
@@ -2961,7 +3188,8 @@
     "status": "completed",
     "altStartTime": 37,
     "altEndTime": 60,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 254,
@@ -2974,7 +3202,8 @@
     "status": "completed",
     "altStartTime": 258,
     "altEndTime": 277,
-    "year": "2020"
+    "year": "2020",
+    "category": "Anime"
   },
   {
     "id": 255,
@@ -2987,7 +3216,8 @@
     "status": "completed",
     "altStartTime": 44,
     "altEndTime": 69,
-    "year": "2006"
+    "year": "2006",
+    "category": "Anime"
   },
   {
     "id": 256,
@@ -3000,7 +3230,8 @@
     "status": "completed",
     "altStartTime": 108,
     "altEndTime": 134,
-    "year": "2008"
+    "year": "2008",
+    "category": "Anime"
   },
   {
     "id": 258,
@@ -3013,7 +3244,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 27,
-    "year": "2006"
+    "year": "2006",
+    "category": "Anime"
   },
   {
     "id": 259,
@@ -3026,7 +3258,8 @@
     "status": "completed",
     "altStartTime": 32,
     "altEndTime": 49,
-    "year": "2007"
+    "year": "2007",
+    "category": "Anime"
   },
   {
     "id": 260,
@@ -3039,7 +3272,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 22,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 261,
@@ -3052,7 +3286,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 263,
@@ -3065,7 +3300,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 18,
-    "year": "2016"
+    "year": "2016",
+    "category": "Anime"
   },
   {
     "id": 264,
@@ -3078,7 +3314,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "2010"
+    "year": "2010",
+    "category": "Anime"
   },
   {
     "id": 265,
@@ -3091,7 +3328,8 @@
     "status": "completed",
     "altStartTime": 68,
     "altEndTime": 87,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 266,
@@ -3104,7 +3342,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 22,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 267,
@@ -3117,7 +3356,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 16,
-    "year": "2022"
+    "year": "2022",
+    "category": "Anime"
   },
   {
     "id": 268,
@@ -3130,7 +3370,8 @@
     "status": "completed",
     "altStartTime": 54,
     "altEndTime": 77,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 269,
@@ -3143,7 +3384,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 21,
-    "year": "2024"
+    "year": "2024",
+    "category": "Anime"
   },
   {
     "id": 270,
@@ -3156,7 +3398,8 @@
     "status": "completed",
     "altStartTime": 48,
     "altEndTime": 75,
-    "year": "2021"
+    "year": "2021",
+    "category": "Anime"
   },
   {
     "id": 271,
@@ -3169,7 +3412,8 @@
     "status": "completed",
     "altStartTime": 53,
     "altEndTime": 74,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 272,
@@ -3182,7 +3426,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 0,
-    "year": "2024"
+    "year": "2024",
+    "category": "Anime"
   },
   {
     "id": 273,
@@ -3195,7 +3440,8 @@
     "status": "completed",
     "altStartTime": 47,
     "altEndTime": 73,
-    "year": "2023"
+    "year": "2023",
+    "category": "Anime"
   },
   {
     "id": 274,
@@ -3208,7 +3454,8 @@
     "status": "completed",
     "altStartTime": 64,
     "altEndTime": 92,
-    "year": "2018"
+    "year": "2018",
+    "category": "Anime"
   },
   {
     "id": 275,
@@ -3221,7 +3468,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 19,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 277,
@@ -3234,7 +3482,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 28,
-    "year": "2017"
+    "year": "2017",
+    "category": "Anime"
   },
   {
     "id": 278,
@@ -3247,7 +3496,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 21,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 279,
@@ -3260,7 +3510,8 @@
     "status": "completed",
     "altStartTime": 57,
     "altEndTime": 80,
-    "year": "2013"
+    "year": "2013",
+    "category": "Anime"
   },
   {
     "id": 281,
@@ -3273,7 +3524,8 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 18,
-    "year": "2015"
+    "year": "2015",
+    "category": "Anime"
   },
   {
     "id": 282,
@@ -3286,6 +3538,7 @@
     "status": "completed",
     "altStartTime": 0,
     "altEndTime": 20,
-    "year": "2014"
+    "year": "2014",
+    "category": "Anime"
   }
 ]

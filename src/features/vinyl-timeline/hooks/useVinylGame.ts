@@ -18,6 +18,7 @@ const INITIAL_STATE: VinylGameState = {
   hardMode: false,
   listenedCurrentRound: false,
   candidateMystery: null,
+  selectedCategories: ['Anime'],
 };
 
 export const calculatePlaybackRange = (song: SongItem, shuffle: boolean, hard: boolean) => {
@@ -50,7 +51,8 @@ const getInitialState = (): VinylGameState => {
         ...INITIAL_STATE,
         ...parsed,
         shuffleMode: parsed.shuffleMode ?? false,
-        hardMode: parsed.hardMode ?? false
+        hardMode: parsed.hardMode ?? false,
+        selectedCategories: parsed.selectedCategories ?? ['Anime']
       };
     } catch (e) {
       console.error("Failed to load game state", e);
@@ -134,16 +136,26 @@ export const useVinylGame = () => {
     oneListenOnly: boolean = false,
     shuffleMode: boolean = false,
     hardMode: boolean = false,
+    selectedCategories: string[] = ['Anime'],
     startSongId?: number
   ) => {
     try {
-      // 1. Load data (only if not pre-loaded)
-      let currentPool = state.pool;
-      if (currentPool.length === 0) {
-        const res = await fetch('/Tax-Refund/data/anime_songs.json');
-        const allSongs: SongItem[] = await res.json();
-        currentPool = allSongs.filter(s => s.status === 'completed' && s.year);
+      // 1. Load data
+      const res = await fetch('/Tax-Refund/data/anime_songs.json');
+      const allSongs: SongItem[] = await res.json();
+      
+      const filteredPool = allSongs.filter(s => 
+        s.status === 'completed' && 
+        s.year && 
+        selectedCategories.includes(s.category || 'Anime')
+      );
+
+      if (filteredPool.length === 0) {
+        alert("No songs found for selected categories!");
+        return;
       }
+
+      const currentPool = filteredPool;
 
       // 2. Setup players
       const validNames = playerNames.length > 0 ? playerNames : [''];
@@ -180,6 +192,7 @@ export const useVinylGame = () => {
         oneListenOnly,
         shuffleMode,
         hardMode,
+        selectedCategories,
         pool: currentPool
       }));
 
@@ -300,17 +313,21 @@ export const useVinylGame = () => {
     );
   }, [state, startRound]);
 
-  const prepareInitialSongs = useCallback(async (shuffle?: boolean, hard?: boolean) => {
+  const prepareInitialSongs = useCallback(async (shuffle?: boolean, hard?: boolean, categories?: string[]) => {
     try {
       const res = await fetch('/Tax-Refund/data/anime_songs.json');
       const allSongs: SongItem[] = await res.json();
-      const pool = allSongs.filter(s => s.status === 'completed' && s.year);
       
-      // If we already have a candidate and the modes haven't changed, we can skip if we want,
-      // but the requirement says "When selection changes, load a different section".
-      // So we always recalculate the range.
+      const sCats = categories || state.selectedCategories;
+      const pool = allSongs.filter(s => 
+        s.status === 'completed' && 
+        s.year && 
+        sCats.includes(s.category || 'Anime')
+      );
       
-      const mystery = state.candidateMystery || pool[Math.floor(Math.random() * pool.length)];
+      if (pool.length === 0) return;
+
+      const mystery = pool[Math.floor(Math.random() * pool.length)];
       
       // Use provided modes or current state
       const sMode = shuffle !== undefined ? shuffle : state.shuffleMode;
@@ -321,6 +338,7 @@ export const useVinylGame = () => {
       setState(s => ({
         ...s,
         pool,
+        selectedCategories: sCats,
         candidateMystery: mystery,
         playbackStart: range.start,
         playbackEnd: range.end
@@ -328,7 +346,7 @@ export const useVinylGame = () => {
     } catch (e) {
       console.error("Failed to preload songs", e);
     }
-  }, [state.candidateMystery, state.shuffleMode, state.hardMode]);
+  }, [state.selectedCategories, state.shuffleMode, state.hardMode]);
 
   return {
     state,
