@@ -45,7 +45,7 @@ export const VinylTimelinePage: React.FC = () => {
   const [shuffleMode, setShuffleMode] = useState(false);
   const [hardMode, setHardMode] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['Anime']);
-  const [availableCategories, setAvailableCategories] = useState<string[]>(['Anime', 'Popular', 'Custom']);
+  const [availableCategories, setAvailableCategories] = useState<{name: string, count: number}[]>([]);
 
   // 0. Preload pool and initial candidate on mount OR when modes change in setup
   useEffect(() => {
@@ -54,13 +54,25 @@ export const VinylTimelinePage: React.FC = () => {
     }
   }, [prepareInitialSongs, state.status, shuffleMode, hardMode, selectedCategories]);
 
-  // Load available categories on mount
   useEffect(() => {
     fetch('/Tax-Refund/data/songs.json')
       .then(res => res.json())
       .then((songs: any[]) => {
-        const cats = Array.from(new Set(songs.map(s => s.category || 'Anime')));
+        const counts: Record<string, number> = {};
+        songs.forEach(s => {
+          if (s.status !== 'completed' || !s.year) return;
+          const cat = s.category || 'Anime';
+          counts[cat] = (counts[cat] || 0) + 1;
+        });
+        
+        const cats = Object.entries(counts).map(([name, count]) => ({ name, count }));
         setAvailableCategories(cats);
+        
+        // Ensure starting categories exist
+        const validSelected = selectedCategories.filter(sc => counts[sc]);
+        if (validSelected.length === 0 && cats.length > 0) {
+          setSelectedCategories([cats[0].name]);
+        }
       })
       .catch(console.error);
   }, []);
@@ -277,25 +289,42 @@ export const VinylTimelinePage: React.FC = () => {
               </div>
             </div>
          </div>
-         <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Categories</label>
-            <div className="flex flex-wrap gap-2">
+         <div className="flex flex-col gap-3">
+            <div className="flex justify-between items-center ml-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Song Categories</label>
+              <button 
+                onClick={() => {
+                  if (selectedCategories.length === availableCategories.length) {
+                    setSelectedCategories([availableCategories[0]?.name || 'Anime']);
+                  } else {
+                    setSelectedCategories(availableCategories.map(c => c.name));
+                  }
+                }}
+                className="text-[8px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
+              >
+                {selectedCategories.length === availableCategories.length ? 'Reset' : 'Select All'}
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
                {availableCategories.map(cat => (
                  <button 
-                   key={cat}
+                   key={cat.name}
                    onClick={() => {
-                     const next = selectedCategories.includes(cat)
-                       ? selectedCategories.filter(c => c !== cat)
-                       : [...selectedCategories, cat];
+                     const next = selectedCategories.includes(cat.name)
+                       ? selectedCategories.filter(c => c !== cat.name)
+                       : [...selectedCategories, cat.name];
                      if (next.length > 0) setSelectedCategories(next);
                    }}
-                   className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border ${
-                     selectedCategories.includes(cat) 
+                   className={`px-4 py-3 rounded-2xl flex flex-col items-start gap-1 transition-all border ${
+                     selectedCategories.includes(cat.name) 
                        ? 'bg-rose-600 border-rose-500 text-white shadow-lg' 
                        : 'bg-slate-950/50 border-white/5 text-slate-400 hover:text-white hover:border-white/20'
                    }`}
                  >
-                   {cat}
+                   <span className="text-[10px] font-black uppercase tracking-tight">{cat.name}</span>
+                   <span className={`text-[8px] font-bold uppercase opacity-60 ${selectedCategories.includes(cat.name) ? 'text-white' : 'text-slate-500'}`}>
+                    {cat.count} Songs
+                   </span>
                  </button>
                ))}
             </div>
