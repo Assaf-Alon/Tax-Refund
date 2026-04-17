@@ -32,7 +32,7 @@
 ## 3. Implementation Plan (How)
 
 ### A. Data Layer
-*   **Sources:** Primarily `public/data/anime_songs.json`. Designed to scale to other category-specific JSON files.
+*   **Sources:** Primarily `public/data/songs.json`. Designed to scale to other category-specific JSON files.
 *   **Model Extension:** Songs must have a `category` field (e.g., "anime", "popular"). Only songs with `status: "completed"` are included in the active pool.
 
 ### B. Game Modes & Settings

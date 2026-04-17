@@ -35,7 +35,7 @@ Located in `src/features/vinyl-timeline/`.
 Manages a rigorous state machine:
 1. **Setup**:
    - **Player Entry**: A pre-game screen to enter player names (defaults to "Player 1", "Player 2" if left blank).
-   - **Data**: Loads `anime_songs.json`, filters `status === 'completed'`.
+   - **Data**: Loads `songs.json`, filters `status === 'completed'`.
    - **Persistence**: Game state (current players, scores, timeline) should be persisted in `localStorage` under `vinyl_game_state` to survive accidental refreshes.
    - **Anchor**: Selects an "Anchor Year" (median of the current pool ± 2 years).
 2. **The Loop**:

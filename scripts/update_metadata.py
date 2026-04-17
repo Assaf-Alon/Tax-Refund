@@ -3,7 +3,7 @@ import subprocess
 import sys
 import os
 
-JSON_PATH = "public/data/anime_songs.json"
+JSON_PATH = "public/data/songs.json"
 
 def get_release_year(youtube_id):
     if not youtube_id:

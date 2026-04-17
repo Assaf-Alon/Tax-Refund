@@ -42,7 +42,7 @@ def find_songs_for_phrase(phrase, data_path):
 
 def main():
     phrase = "Lovers Bench"
-    data_path = "public/data/anime_songs.json"
+    data_path = "public/data/songs.json"
     
     if not os.path.exists(data_path):
         print(f"Error: {data_path} not found.")

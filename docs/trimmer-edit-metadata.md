@@ -14,7 +14,7 @@ This document outlines the implementation of a metadata editing feature for the 
 
 ## 2. Why this approach?
 
-- **Context**: The source data (`anime_songs.json`) sometimes contains incorrect or poorly formatted metadata. Users need a way to fix this "on the fly" to ensure the final exported data is accurate.
+- **Context**: The source data (`songs.json`) sometimes contains incorrect or poorly formatted metadata. Users need a way to fix this "on the fly" to ensure the final exported data is accurate.
 - **Approach**: A modal window provides a focused environment for editing without cluttering the main trimming interface. 
 - **Search Sync**: Keeping the `query` in sync with the `name` ensures that if a user corrects a song name, the next time they click "Search", they get more relevant YouTube results.
 - **Re-fetch**: Triggering a re-fetch of the release year after metadata changes ensures the UI stays consistent and attempts to reconcile the new metadata with the current video.

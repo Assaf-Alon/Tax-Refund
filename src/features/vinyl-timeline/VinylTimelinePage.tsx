@@ -56,7 +56,7 @@ export const VinylTimelinePage: React.FC = () => {
 
   // Load available categories on mount
   useEffect(() => {
-    fetch('/Tax-Refund/data/anime_songs.json')
+    fetch('/Tax-Refund/data/songs.json')
       .then(res => res.json())
       .then((songs: any[]) => {
         const cats = Array.from(new Set(songs.map(s => s.category || 'Anime')));

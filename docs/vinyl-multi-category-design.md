@@ -30,7 +30,7 @@ This document outlines the changes needed to support multiple song categories (A
 
 ### Phase 1: Shared Types & Data
 1.  Update `src/shared/types/music.ts` to add `category?: string` to `SongItem`.
-2.  Update `public/data/anime_songs.json` to include `"category": "Anime"` for existing songs.
+2.  Update `public/data/songs.json` to include `"category": "Anime"` for existing songs.
 
 ### Phase 2: Admin Tool Enhancements (`QuizClipTrimmer.tsx`)
 1.  **Category Input**: Add a `category` field to the `Edit Metadata` modal and the `saveCurrentProgress` logic.

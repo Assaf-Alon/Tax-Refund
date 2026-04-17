@@ -141,7 +141,7 @@ export const useVinylGame = () => {
   ) => {
     try {
       // 1. Load data
-      const res = await fetch('/Tax-Refund/data/anime_songs.json');
+      const res = await fetch('/Tax-Refund/data/songs.json');
       const allSongs: SongItem[] = await res.json();
       
       const filteredPool = allSongs.filter(s => 
@@ -315,7 +315,7 @@ export const useVinylGame = () => {
 
   const prepareInitialSongs = useCallback(async (shuffle?: boolean, hard?: boolean, categories?: string[]) => {
     try {
-      const res = await fetch('/Tax-Refund/data/anime_songs.json');
+      const res = await fetch('/Tax-Refund/data/songs.json');
       const allSongs: SongItem[] = await res.json();
       
       const sCats = categories || state.selectedCategories;

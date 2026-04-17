@@ -48,7 +48,7 @@ export const QuizClipTrimmer: React.FC = () => {
       const lastIdx = localStorage.getItem('trimmer_current_index');
       if (lastIdx) setCurrentIndex(parseInt(lastIdx));
     } else {
-      fetch('/Tax-Refund/data/anime_songs.json')
+      fetch('/Tax-Refund/data/songs.json')
         .then(res => res.json())
         .then(data => {
           setSongs(data as SongItem[]);
