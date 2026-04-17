@@ -349,7 +349,7 @@ export const useAudioStream = () => {
             setCurrentVideoId(videoId);
             ytPlayerRef.current.seekTo(start, true);
             ytPlayerRef.current.playVideo();
-            setStatusSync('playing');
+            // REMOVE setStatusSync('playing') - Let onStateChange handle it for gesture-safe feedback
             if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
             progressIntervalRef.current = window.setInterval(() => {
                 if (ytPlayerRef.current?.getCurrentTime) handleTimeUpdate(ytPlayerRef.current.getCurrentTime());
@@ -358,7 +358,7 @@ export const useAudioStream = () => {
     } else if (audioRef.current) {
         setCurrentVideoId(videoId);
         audioRef.current.currentTime = start;
-        audioRef.current.play().then(() => setStatusSync('playing')).catch(() => Log.warn("Native blocked"));
+        audioRef.current.play().catch(() => Log.warn("Native blocked"));
     }
   }, [currentVideoId]);
 
@@ -370,7 +370,7 @@ export const useAudioStream = () => {
       } else if (audioRef.current) {
         audioRef.current.play();
       }
-      setStatusSync('playing');
+      // REMOVE setStatusSync('playing') - Event driven for accuracy
     } else if (s === 'playing') {
       stop();
     }

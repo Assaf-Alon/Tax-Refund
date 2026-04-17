@@ -105,8 +105,7 @@ export const ItsAHitRiddle: React.FC = () => {
     togglePlayback,
     stop,
     progress,
-    lastError,
-    prefetch
+    lastError
   } = useAudioStream();
 
   // Load progress and songs
@@ -143,9 +142,9 @@ export const ItsAHitRiddle: React.FC = () => {
     setIsRevealed(false);
     setActiveSong(null);
 
-    // PRE-FETCH: Start loading stream URLs for all songs in the stage to reduce latency
+    // PRE-PREPARE: Fully initialize player instances to ensure gesture-safe instant play
     filtered.forEach(song => {
-      prefetch(song.youtubeId);
+      prepare(song.youtubeId);
     });
   };
 
