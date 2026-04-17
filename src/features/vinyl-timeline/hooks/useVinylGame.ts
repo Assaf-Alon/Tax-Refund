@@ -193,15 +193,14 @@ export const useVinylGame = () => {
         shuffleMode,
         hardMode,
         selectedCategories,
-        pool: currentPool
+        pool: currentPool,
+        candidateMystery: null, // Clear candidate to prevent using a potentially stale one that's about to be updated
       }));
 
-      // Use the preloaded candidate if it exists
-      const range = state.candidateMystery && state.playbackStart !== undefined && state.playbackEnd !== undefined
-        ? { start: state.playbackStart, end: state.playbackEnd }
-        : undefined;
+      // In setupGame, we always pick a fresh anchor and first mystery from the pool we just loaded
+      // to ensure consistency with the selected categories.
 
-      startRound(currentPool, initialUsedIds, players, 0, initialTimeline, shuffleMode, hardMode, state.candidateMystery || undefined, range);
+      startRound(currentPool, initialUsedIds, players, 0, initialTimeline, shuffleMode, hardMode, undefined, undefined);
     } catch (error) {
       console.error("Failed to setup game:", error);
     }
@@ -335,18 +334,21 @@ export const useVinylGame = () => {
       
       const range = calculatePlaybackRange(mystery, sMode, hMode);
       
-      setState(s => ({
-        ...s,
-        pool,
-        selectedCategories: sCats,
-        candidateMystery: mystery,
-        playbackStart: range.start,
-        playbackEnd: range.end
-      }));
+      setState(s => {
+        if (s.status !== 'setup') return s;
+        return {
+          ...s,
+          pool,
+          selectedCategories: sCats,
+          candidateMystery: mystery,
+          playbackStart: range.start,
+          playbackEnd: range.end
+        };
+      });
     } catch (e) {
       console.error("Failed to preload songs", e);
     }
-  }, [state.selectedCategories, state.shuffleMode, state.hardMode]);
+  }, []); // Remove dependency on state to avoid re-renders triggering new fetches needlessly
 
   return {
     state,

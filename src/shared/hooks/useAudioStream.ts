@@ -257,19 +257,37 @@ export const useAudioStream = () => {
           }, 6000);
 
           const initPlayer = () => {
-            if (hasTimedOut) return;
+            if (hasTimedOut || activeIdRef.current !== videoId) return;
+            
+            // 1. If player exists and is healthy, just cue the new video
             if (ytPlayerRef.current?.cueVideoById) {
                 try {
                     ytPlayerRef.current.cueVideoById(videoId);
-                    setEngine('youtube'); setStatus('ready');
-                    clearTimeout(timeout); resolve(); return;
-                } catch {}
+                    // Double check we haven't been superseded during the function call
+                    if (activeIdRef.current === videoId) {
+                      setEngine('youtube'); 
+                      setStatus('ready');
+                      clearTimeout(timeout); 
+                      resolve();
+                    }
+                    return;
+                } catch (e) {
+                    Log.warn("cueVideoById failed, recreating player", e);
+                }
             }
+
+            // 2. If we're here, we need a new player instance. 
+            // CLEANUP: Destroy existing player if it exists on the same element to avoid ghost iframes and phasing
+            if (ytPlayerRef.current?.destroy) {
+               try { ytPlayerRef.current.destroy(); } catch {}
+               ytPlayerRef.current = null;
+            }
+
             ytPlayerRef.current = new window.YT.Player(ytContainerRef.current?.id, {
                 height: '0', 
                 width: '0', 
                 videoId: videoId,
-                host: 'https://www.youtube.com', // HARDENED FOR PROD
+                host: 'https://www.youtube.com',
                 playerVars: { 
                     'autoplay': 0, 
                     'controls': 0, 
@@ -282,14 +300,23 @@ export const useAudioStream = () => {
                     'widget_referrer': window.location.origin
                 },
                 events: {
-                    'onReady': () => { if (!hasTimedOut) { clearTimeout(timeout); setEngine('youtube'); setStatus('ready'); resolve(); } },
+                    'onReady': () => { 
+                      if (!hasTimedOut && activeIdRef.current === videoId) { 
+                        clearTimeout(timeout); 
+                        setEngine('youtube'); 
+                        setStatus('ready'); 
+                        resolve(); 
+                      } 
+                    },
                     'onStateChange': (event: any) => {
+                        if (activeIdRef.current !== videoId) return;
                         const s = event.data;
                         if (s === window.YT.PlayerState.PLAYING) setStatus('playing');
                         if (s === window.YT.PlayerState.PAUSED) setStatus('paused');
                         if (s === window.YT.PlayerState.ENDED) handleEnded();
                     },
                     'onError': (e: any) => { 
+                       if (activeIdRef.current !== videoId) return;
                        Log.warn(`YT Error ${e.data}`); 
                        clearTimeout(timeout); 
                        if (retryCount < 1) {
