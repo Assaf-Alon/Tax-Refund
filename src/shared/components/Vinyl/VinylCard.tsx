@@ -1,5 +1,5 @@
 import React from 'react';
-import { Disc, Music } from 'lucide-react';
+import { Disc } from 'lucide-react';
 import type { SongItem } from '../../types/music';
 
 /**
@@ -95,10 +95,10 @@ export const VinylCard: React.FC<VinylCardProps> = ({
               />
             )}
 
-            <div className="relative flex-1 p-6 flex flex-col items-center">
+            <div className="relative flex-1 p-6 flex flex-col items-center justify-center">
               {/* High-Res Center Cover */}
               {song?.youtubeId && (
-                <div className="w-40 h-40 mb-4 rounded-lg overflow-hidden shadow-2xl border border-white/10 shrink-0">
+                <div className="w-40 h-40 mb-6 rounded-lg overflow-hidden shadow-2xl border border-white/10 shrink-0">
                   <img 
                     src={`https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg`} 
                     alt={song.name}
@@ -106,25 +106,13 @@ export const VinylCard: React.FC<VinylCardProps> = ({
                   />
                 </div>
               )}
-               <div className="space-y-1 text-center w-full">
+               <div className="space-y-2 text-center w-full">
                   <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-tight">
                     {song?.info || "Unknown Source"}
                   </span>
-                  <h3 className="text-lg font-black text-white leading-tight line-clamp-2">
+                  <h3 className="text-xl font-black text-white leading-tight line-clamp-2">
                     {revealWord || song?.name || "Unknown Song"}
                   </h3>
-               </div>
-            </div>
-
-            <div className="relative p-6 bg-slate-900/50 border-t border-white/5 flex items-center justify-between">
-               <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">Released</span>
-                  <span className="text-2xl font-black text-white font-mono tracking-tighter">
-                    {song?.year || "????"}
-                  </span>
-               </div>
-               <div className="w-10 h-10 rounded-full bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30">
-                  <Music size={18} className="text-indigo-400" />
                </div>
             </div>
           </div>

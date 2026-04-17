@@ -9,7 +9,7 @@ import {
   type DragEndEvent,
   type DragStartEvent
 } from '@dnd-kit/core';
-import { RotateCcw, Users, Music, AlertCircle, Plus, Trash2, Shuffle, Zap } from 'lucide-react';
+import { RotateCcw, Users, Music, Plus, Trash2, Shuffle, Zap } from 'lucide-react';
 
 import { useVinylGame } from './hooks/useVinylGame';
 import { useAudioStream } from '../../shared/hooks/useAudioStream';
@@ -17,6 +17,8 @@ import { VinylCard } from '../../shared/components/Vinyl/VinylCard';
 import { VinylAudioController } from '../../shared/components/Vinyl/VinylAudioController';
 import { DraggableVinylCard } from './components/DraggableVinylCard';
 import { Timeline } from './components/Timeline';
+import { VinylResultModal } from '../../shared/components/Vinyl/VinylResultModal';
+import { VinylConnectivityError } from '../../shared/components/Vinyl/VinylConnectivityError';
 
 export const VinylTimelinePage: React.FC = () => {
   const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame, skipCurrentMystery, prepareInitialSongs, consumeListen, endGame } = useVinylGame();
@@ -490,85 +492,21 @@ export const VinylTimelinePage: React.FC = () => {
           </DragOverlay>
         </DndContext>
 
-        {/* OVERLAYS */}
-        {playerStatus === 'error' && state.mysteryCard && (
-           <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in zoom-in-95 duration-300">
-              <div className="w-full max-w-sm p-8 bg-slate-900 border border-rose-500/30 rounded-[2.5rem] flex flex-col items-center text-center shadow-2xl">
-                 <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-6 border border-rose-500/20">
-                    <AlertCircle className="text-rose-500 w-8 h-8" />
-                 </div>
-                 
-                 <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">Connection Blocked</h3>
-                 
-                 <div className="p-4 bg-black/40 rounded-2xl border border-white/5 w-full mb-6 text-left">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Failing Song:</p>
-                    <p className="text-sm font-bold text-white mb-1 line-clamp-1">{state.mysteryCard.name}</p>
-                    <p className="text-[8px] font-medium text-slate-500 break-all opacity-40 mb-3">
-                       ID: {state.mysteryCard.youtubeId}
-                    </p>
-                    
-                    {lastError && (
-                       <div className="mt-2 pt-2 border-t border-white/5">
-                          <p className="text-[10px] font-black text-rose-500/80 uppercase tracking-widest mb-1">Technical Detail:</p>
-                          <p className="text-[10px] font-bold text-rose-200/60 leading-tight">
-                             {lastError}
-                          </p>
-                       </div>
-                    )}
-                 </div>
+        <VinylConnectivityError 
+          isOpen={playerStatus === 'error' && !!state.mysteryCard}
+          song={state.mysteryCard}
+          lastError={lastError}
+          onRetry={() => state.mysteryCard && prepare(state.mysteryCard.youtubeId, true)}
+          onSkip={skipCurrentMystery}
+        />
 
-                 <p className="text-[10px] font-bold text-slate-400 uppercase leading-relaxed mb-8">
-                    YouTube is blocking this specific stream. You can retry or skip this song to keep the game going.
-                 </p>
-
-                 <div className="flex flex-col gap-3 w-full">
-                    <button 
-                      onClick={() => prepare(state.mysteryCard!.youtubeId, true)}
-                      className="w-full py-4 bg-white text-slate-950 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
-                    >
-                       Try Reconnecting
-                    </button>
-                    <button 
-                      onClick={skipCurrentMystery}
-                      className="w-full py-4 bg-rose-600/10 text-rose-500 border border-rose-500/20 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-rose-500/20 transition-all"
-                    >
-                       Skip This Card
-                    </button>
-                 </div>
-              </div>
-           </div>
-        )}
-
-        {state.status === 'revealing' && state.lastResult && showResultModal && (
-           <div className={`fixed inset-0 z-[100] flex flex-col items-center justify-center p-8 animate-in fade-in duration-500 ${
-             state.lastResult.success ? 'bg-emerald-950/95' : 'bg-rose-950/95'
-           } backdrop-blur-xl`}>
-              <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center mb-6 shadow-2xl animate-bounce border ${
-                state.lastResult.success ? 'bg-emerald-500 border-emerald-400' : 'bg-rose-500 border-rose-400'
-              }`}>
-                 {state.lastResult.success ? <Music className="text-white w-10 h-10" /> : <Music className="text-white w-10 h-10 opacity-50" />}
-              </div>
-              <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter mb-2 text-center">
-                 {state.lastResult.success ? 'Brilliant!' : 'Nope!'}
-              </h2>
-              <div className="flex flex-col items-center gap-1 mb-10">
-                 <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Correct Year</span>
-                 <span className="text-6xl font-black text-white tabular-nums tracking-tighter leading-none">{state.lastResult.correctYear}</span>
-              </div>
-              <div className="w-full max-w-sm flex flex-col items-center gap-6">
-                 <VinylCard 
-                    song={state.mysteryCard} 
-                    displayMode="revealed"
-                 />
-                 <button 
-                   onClick={proceedToNextPlayer}
-                   className="w-full py-5 bg-white text-slate-950 rounded-2xl font-black italic tracking-tighter uppercase shadow-2xl hover:scale-105 transition-all"
-                 >
-                   Continue
-                 </button>
-              </div>
-           </div>
-        )}
+        <VinylResultModal 
+          isOpen={state.status === 'revealing' && !!state.lastResult && showResultModal}
+          isSuccess={state.lastResult?.success || false}
+          correctYear={state.lastResult?.correctYear || ''}
+          song={state.mysteryCard}
+          onContinue={proceedToNextPlayer}
+        />
     </div>
   );
 };
