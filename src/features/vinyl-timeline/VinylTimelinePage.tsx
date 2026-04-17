@@ -332,7 +332,10 @@ export const VinylTimelinePage: React.FC = () => {
           </div>
 
           <button 
-            onClick={() => setupGame(playerNames, gameMode, oneListenOnly, shuffleMode, hardMode, selectedCategories)}
+            onClick={() => {
+              setIsSoloContinuing(false);
+              setupGame(playerNames, gameMode, oneListenOnly, shuffleMode, hardMode, selectedCategories);
+            }}
             className="w-full py-5 bg-white text-slate-950 rounded-2xl font-black italic tracking-tighter uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all"
           >
             Start Game
@@ -342,34 +345,16 @@ export const VinylTimelinePage: React.FC = () => {
     );
   }
 
+  const handleReset = () => {
+    setIsSoloContinuing(false);
+    resetGame();
+  };
+
   // GAME OVER SCREEN
   if (state.status === 'gameOver') {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-700">
-         {/* Survivor Mode Winner Overlay */}
-         {!isSoloContinuing && state.players.filter(p => p.lives > 0).length === 1 && (
-           <div className="fixed inset-0 z-[110] bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-1000">
-               <div className="w-20 h-20 rounded-2xl bg-amber-500 flex items-center justify-center mb-6 shadow-amber-500/20 shadow-2xl border border-amber-400/50">
-                  <Zap className="text-white w-10 h-10 fill-current" />
-               </div>
-               <h3 className="text-xl font-black text-slate-500 uppercase tracking-widest mb-1">Survivor Found</h3>
-               <h2 className="text-5xl font-black text-white italic tracking-tighter uppercase mb-8">{state.players.find(p => p.lives > 0)?.name} Wins!</h2>
-               <div className="flex flex-col gap-3 w-full max-w-xs">
-                  <button 
-                    onClick={() => setIsSoloContinuing(true)}
-                    className="w-full py-5 bg-white text-slate-950 rounded-2xl font-black italic tracking-tighter uppercase shadow-2xl hover:scale-105 transition-all"
-                  >
-                    Keep Playing Solo
-                  </button>
-                  <button 
-                    onClick={endGame}
-                    className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black italic tracking-tighter uppercase border border-white/10 hover:bg-slate-800 transition-all"
-                  >
-                    End Game
-                  </button>
-               </div>
-           </div>
-         )}
+         {/* Removed redundant overlay block since it was moved above */}
 
          <div className="w-24 h-24 rounded-3xl bg-indigo-600 flex items-center justify-center mb-8 shadow-2xl shadow-indigo-500/40 border border-indigo-400 rotate-6">
             <Music className="text-white w-12 h-12" />
@@ -393,7 +378,7 @@ export const VinylTimelinePage: React.FC = () => {
          </div>
 
          <button 
-           onClick={resetGame}
+           onClick={handleReset}
            className="px-12 py-5 bg-white text-slate-950 rounded-2xl font-black italic tracking-tighter uppercase shadow-2xl hover:scale-110 transition-all active:rotate-0 -rotate-2"
          >
            Play Again
@@ -402,8 +387,51 @@ export const VinylTimelinePage: React.FC = () => {
     );
   }
 
+  const alivePlayers = state.players.filter(p => p.lives > 0);
+  const nextPlayerIdx = (state.currentPlayerIndex + 1) % state.players.length;
+  // Simple "Up next" calculation (skipping dead players)
+  let nextUpIdx = nextPlayerIdx;
+  if (alivePlayers.length > 0) {
+    while (state.players[nextUpIdx].lives <= 0 && nextUpIdx !== state.currentPlayerIndex) {
+      nextUpIdx = (nextUpIdx + 1) % state.players.length;
+    }
+  }
+  const nextUpName = state.players.length > 1 && nextUpIdx !== state.currentPlayerIndex ? state.players[nextUpIdx].name : undefined;
+
+  // Survivor winner check (Only show AFTER the result modal is dismissed)
+  const showSurvivorOverlay = state.mode === 'survivor' && 
+                            alivePlayers.length === 1 && 
+                            state.players.length > 1 && 
+                            !isSoloContinuing &&
+                            state.status !== 'revealing';
+
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center overflow-x-hidden pb-32">
+        {/* Survivor Mode Winner Overlay (Moved here so it shows up mid-game) */}
+        {showSurvivorOverlay && (
+          <div className="fixed inset-0 z-[200] bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-1000">
+              <div className="w-20 h-20 rounded-2xl bg-amber-500 flex items-center justify-center mb-6 shadow-amber-500/20 shadow-2xl border border-amber-400/50">
+                 <Zap className="text-white w-10 h-10 fill-current" />
+              </div>
+              <h3 className="text-xl font-black text-slate-500 uppercase tracking-widest mb-1">Survivor Found</h3>
+              <h2 className="text-5xl font-black text-white italic tracking-tighter uppercase mb-8">{alivePlayers[0]?.name} Wins!</h2>
+              <div className="flex flex-col gap-3 w-full max-w-xs">
+                 <button 
+                   onClick={() => setIsSoloContinuing(true)}
+                   className="w-full py-5 bg-white text-slate-950 rounded-2xl font-black italic tracking-tighter uppercase shadow-2xl hover:scale-105 transition-all"
+                 >
+                   Keep Playing Solo
+                 </button>
+                 <button 
+                   onClick={endGame}
+                   className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black italic tracking-tighter uppercase border border-white/10 hover:bg-slate-800 transition-all"
+                 >
+                   End Game
+                 </button>
+              </div>
+          </div>
+        )}
+
         {/* HEADER / STATUS */}
         <div className="w-full flex items-center justify-between px-6 py-8 sm:px-12 sm:py-12 relative z-50">
            <div className="flex flex-col">
@@ -501,6 +529,7 @@ export const VinylTimelinePage: React.FC = () => {
           isSuccess={state.lastResult?.success || false}
           correctYear={state.lastResult?.correctYear || ''}
           song={state.mysteryCard}
+          subHeader={nextUpName ? `Up next: ${nextUpName}` : undefined}
           onContinue={proceedToNextPlayer}
         />
     </div>

@@ -10,6 +10,7 @@ interface VinylResultModalProps {
   song: SongItem | null;
   onContinue: () => void;
   title?: string;
+  subHeader?: string;
   buttonLabel?: string;
 }
 
@@ -20,6 +21,7 @@ export const VinylResultModal: React.FC<VinylResultModalProps> = ({
   song,
   onContinue,
   title,
+  subHeader,
   buttonLabel = "Continue"
 }) => {
   if (!isOpen) return null;
@@ -34,9 +36,16 @@ export const VinylResultModal: React.FC<VinylResultModalProps> = ({
          <Music className="text-white w-10 h-10" />
       </div>
       
-      <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter mb-2 text-center">
-         {title || (isSuccess ? 'Brilliant!' : 'Nope!')}
-      </h2>
+      <div className="flex flex-col items-center gap-2 mb-8">
+        <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter text-center">
+           {title || (isSuccess ? 'Brilliant!' : 'Nope!')}
+        </h2>
+        {subHeader && (
+          <span className="text-xs font-black text-white/60 uppercase tracking-[0.3em] animate-pulse">
+            {subHeader}
+          </span>
+        )}
+      </div>
       
       <div className="flex flex-col items-center gap-1 mb-10">
          <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Correct Year</span>
