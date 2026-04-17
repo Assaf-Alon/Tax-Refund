@@ -208,7 +208,7 @@ export const useVinylGame = () => {
   }, [startRound, state.pool, state.candidateMystery, state.playbackStart, state.playbackEnd]);
 
   const checkPlacement = useCallback((targetIndex: number) => {
-    if (!state.mysteryCard || state.status !== 'playing') return;
+    if (!state.mysteryCard || state.status !== 'playing' || isNaN(targetIndex)) return;
 
     const { timeline, mysteryCard } = state;
     const mysteryYear = parseInt(mysteryCard.year!);

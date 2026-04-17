@@ -9,8 +9,7 @@ import {
   type DragEndEvent,
   type DragStartEvent
 } from '@dnd-kit/core';
-import { useParams } from 'react-router-dom';
-import { Play, RotateCcw, Users, Music, AlertCircle, Pause, Square, Plus, Trash2, UserPlus, Shuffle, Zap } from 'lucide-react';
+import { Play, RotateCcw, Users, Music, AlertCircle, Pause, Square, Plus, Trash2, Shuffle, Zap } from 'lucide-react';
 
 import { useVinylGame } from './hooks/useVinylGame';
 import { useAudioStream } from '../../shared/hooks/useAudioStream';
@@ -19,7 +18,6 @@ import { DraggableVinylCard } from './components/DraggableVinylCard';
 import { Timeline } from './components/Timeline';
 
 export const VinylTimelinePage: React.FC = () => {
-  const params = useParams();
   const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame, skipCurrentMystery, prepareInitialSongs, consumeListen, endGame } = useVinylGame();
   
   const { 
@@ -30,6 +28,7 @@ export const VinylTimelinePage: React.FC = () => {
     playExcerpt,
     togglePlayback,
     progress,
+    lastError,
     prefetch,
     reset
   } = useAudioStream();
@@ -153,231 +152,290 @@ export const VinylTimelinePage: React.FC = () => {
         }
       );
     }
-  }, [state?.mysteryCard, state.playbackStart, state.playbackEnd, isReady, isPlaying, playExcerpt, togglePlayback, state.oneListenOnly, state.listenedCurrentRound, consumeListen]);
+  }, [state.mysteryCard, state.playbackStart, state.playbackEnd, state.oneListenOnly, state.listenedCurrentRound, isReady, isPlaying, togglePlayback, playExcerpt, consumeListen]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as number);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    const { over } = event;
     setActiveId(null);
-    if (event.over) {
-      checkPlacement(parseInt(event.over.id as string));
+
+    if (over) {
+      const separatorIdx = parseInt(String(over.id));
+      if (!isNaN(separatorIdx)) {
+        checkPlacement(separatorIdx);
+      }
     }
   };
 
-  const getNextLivingPlayer = useCallback(() => {
-    if (!state.players.length) return null;
-    let nextIdx = (state.currentPlayerIndex + 1) % state.players.length;
-    // Walk through players until we find one with lives or reach start
-    while (state.players[nextIdx].lives <= 0 && nextIdx !== state.currentPlayerIndex) {
-      nextIdx = (nextIdx + 1) % state.players.length;
-    }
-    return state.players[nextIdx];
-  }, [state.players, state.currentPlayerIndex]);
-
-  const livingPlayersCount = state.players.filter(p => p.lives > 0).length;
-  const isMatchEnding = !isSoloContinuing && state.players.length > 1 && livingPlayersCount <= 1;
-
-  const renderSetup = () => (
-    <div className="w-full max-w-lg mt-8 p-6 bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl">
-      <div className="flex items-center gap-4 mb-6">
-        <div className="w-10 h-10 bg-rose-500 rounded-xl flex items-center justify-center">
-          <Users className="text-white w-5 h-5" />
-        </div>
-        <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Setup Game</h2>
-      </div>
-
-      <div className="space-y-3 mb-6">
-        {playerNames.map((name, i) => (
-          <div key={i} className="flex gap-2 group">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => {
-                  const next = [...playerNames];
-                  next[i] = e.target.value;
-                  setPlayerNames(next);
-                }}
-                placeholder={`Player ${i + 1}`}
-                className="w-full bg-slate-950/50 border border-white/5 rounded-xl px-5 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-rose-500 font-medium transition-colors"
-              />
+  if (state.status === 'setup') {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center p-4">
+        <div className="w-full max-w-md mt-12 bg-slate-900/50 border border-white/5 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/20">
+               <Music className="text-white w-8 h-8" />
             </div>
-            {playerNames.length > 1 && (
+            <h1 className="text-2xl font-black italic tracking-tighter uppercase">Vinyl Timeline</h1>
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1 text-center">Put the records in the right order</p>
+          </div>
+
+          <div className="space-y-4 mb-8">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">The Players</label>
+            {playerNames.map((name, i) => (
+              <div key={i} className="group relative flex items-center gap-2">
+                <div className="absolute left-4 z-10">
+                   <Users size={14} className="text-slate-500 group-focus-within:text-white transition-colors" />
+                </div>
+                <input 
+                  value={name}
+                  onChange={(e) => {
+                    const next = [...playerNames];
+                    next[i] = e.target.value;
+                    setPlayerNames(next);
+                  }}
+                  placeholder={`Player ${i + 1}`}
+                  className="w-full bg-slate-950/50 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-sm font-bold placeholder:text-slate-700 focus:outline-none focus:border-white/20 focus:bg-slate-950 transition-all"
+                />
+                {playerNames.length > 1 && (
+                  <button 
+                    onClick={() => setPlayerNames(playerNames.filter((_, idx) => idx !== i))}
+                    className="p-3 text-slate-600 hover:text-rose-500 transition-colors"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
+              </div>
+            ))}
+            
+            {playerNames.length < 5 && (
               <button 
-                onClick={() => setPlayerNames(playerNames.filter((_, idx) => idx !== i))}
-                className="w-12 h-12 flex items-center justify-center bg-slate-800/50 hover:bg-rose-500/20 text-slate-500 hover:text-rose-500 rounded-xl transition-all"
+                onClick={() => setPlayerNames([...playerNames, ''])}
+                className="w-full py-3 flex items-center justify-center gap-2 border border-dashed border-white/10 rounded-xl text-slate-500 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest"
               >
-                <Trash2 size={18} />
+                <Plus size={16} />
+                <span>Add Player</span>
               </button>
             )}
           </div>
-        ))}
-        
-        {playerNames.length < 5 && (
-          <button 
-            onClick={() => setPlayerNames([...playerNames, ''])}
-            className="w-full py-3 flex items-center justify-center gap-2 border border-dashed border-white/10 rounded-xl text-slate-500 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest"
-          >
-            <Plus size={16} />
-            <span>Add Player</span>
-          </button>
-        )}
-      </div>
 
-      {/* Settings Section */}
-      <div className="space-y-4 mb-8 pt-4 border-t border-white/5">
-         <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Game Mode</label>
-            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-950/50 rounded-2xl border border-white/5">
-                <button 
-                  onClick={() => setGameMode('survivor')}
-                  className={`py-3 rounded-xl text-[10px] font-black uppercase transition-all ${gameMode === 'survivor' ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
-                >
-                  Survivor
-                </button>
-                <button 
-                  onClick={() => setGameMode('points')}
-                  className={`py-3 rounded-xl text-[10px] font-black uppercase transition-all ${gameMode === 'points' ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
-                >
-                  Points
-                </button>
-            </div>
-         </div>
-
-         <div className="flex items-center justify-between p-4 bg-slate-950/50 rounded-2xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group"
-              onClick={() => setOneListenOnly(!oneListenOnly)}>
-            <div className="flex flex-col">
-               <span className="text-[10px] font-black text-white uppercase flex items-center gap-2">
-                 One Listen Only
-                 <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-               </span>
-               <span className="text-[8px] font-medium text-slate-500 uppercase tracking-tighter">Snippet plays once per turn</span>
-            </div>
-            <div className={`w-10 h-5 rounded-full relative transition-colors ${oneListenOnly ? 'bg-rose-600' : 'bg-slate-800'}`}>
-               <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${oneListenOnly ? 'left-6' : 'left-1'}`} />
-            </div>
-         </div>
-
-         <div className="grid grid-cols-2 gap-4">
-            <div className={`flex flex-col gap-2 p-4 bg-slate-950/50 rounded-2xl border transition-all cursor-pointer group ${shuffleMode ? 'border-rose-500/50 bg-rose-500/5' : 'border-white/5'}`}
-                 onClick={() => setShuffleMode(!shuffleMode)}>
-              <div className="flex items-center justify-between">
-                <Shuffle size={14} className={shuffleMode ? 'text-rose-500' : 'text-slate-500'} />
-                <div className={`w-10 h-5 rounded-full relative transition-colors ${shuffleMode ? 'bg-rose-600' : 'bg-slate-800'}`}>
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${shuffleMode ? 'left-6' : 'left-1'}`} />
+          {/* Settings Section */}
+          <div className="space-y-6 mb-8 pt-6 border-t border-white/5">
+             <div className="flex flex-col gap-3">
+                <div className="flex justify-between items-center ml-1">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Song Categories</label>
+                  <button 
+                    onClick={() => {
+                      if (selectedCategories.length === availableCategories.length) {
+                        setSelectedCategories([availableCategories[0]?.name || 'Anime']);
+                      } else {
+                        setSelectedCategories(availableCategories.map(c => c.name));
+                      }
+                    }}
+                    className="text-[8px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
+                  >
+                    {selectedCategories.length === availableCategories.length ? 'Reset' : 'Select All'}
+                  </button>
                 </div>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black text-white uppercase">Shuffle</span>
-                <span className="text-[8px] font-medium text-slate-500 uppercase tracking-tighter">Random 20s Clip</span>
-              </div>
-            </div>
-
-            <div className={`flex flex-col gap-2 p-4 bg-slate-950/50 rounded-2xl border transition-all cursor-pointer group ${hardMode ? 'border-rose-500/50 bg-rose-500/5' : 'border-white/5'}`}
-                 onClick={() => setHardMode(!hardMode)}>
-              <div className="flex items-center justify-between">
-                <Zap size={14} className={hardMode ? 'text-rose-500' : 'text-slate-500'} />
-                <div className={`w-10 h-5 rounded-full relative transition-colors ${hardMode ? 'bg-rose-600' : 'bg-slate-800'}`}>
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${hardMode ? 'left-6' : 'left-1'}`} />
+                <div className="grid grid-cols-2 gap-2">
+                   {availableCategories.map(cat => (
+                     <button 
+                       key={cat.name}
+                       onClick={() => {
+                         const next = selectedCategories.includes(cat.name)
+                           ? selectedCategories.filter(c => c !== cat.name)
+                           : [...selectedCategories, cat.name];
+                         if (next.length > 0) setSelectedCategories(next);
+                       }}
+                       className={`px-4 py-3 rounded-2xl flex flex-col items-start gap-1 transition-all border ${
+                         selectedCategories.includes(cat.name) 
+                           ? 'bg-rose-600 border-rose-500 text-white shadow-lg' 
+                           : 'bg-slate-950/50 border-white/5 text-slate-400 hover:text-white hover:border-white/20'
+                       }`}
+                     >
+                       <span className="text-[10px] font-black uppercase tracking-tight">{cat.name}</span>
+                       <span className={`text-[8px] font-bold uppercase opacity-60 ${selectedCategories.includes(cat.name) ? 'text-white' : 'text-slate-500'}`}>
+                        {cat.count} Songs
+                       </span>
+                     </button>
+                   ))}
                 </div>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black text-white uppercase">Hard Mode</span>
-                <span className="text-[8px] font-medium text-slate-500 uppercase tracking-tighter">10s Snippet Only</span>
-              </div>
-            </div>
-         </div>
-         <div className="flex flex-col gap-3">
-            <div className="flex justify-between items-center ml-1">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Song Categories</label>
-              <button 
-                onClick={() => {
-                  if (selectedCategories.length === availableCategories.length) {
-                    setSelectedCategories([availableCategories[0]?.name || 'Anime']);
-                  } else {
-                    setSelectedCategories(availableCategories.map(c => c.name));
-                  }
-                }}
-                className="text-[8px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
-              >
-                {selectedCategories.length === availableCategories.length ? 'Reset' : 'Select All'}
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-               {availableCategories.map(cat => (
-                 <button 
-                   key={cat.name}
-                   onClick={() => {
-                     const next = selectedCategories.includes(cat.name)
-                       ? selectedCategories.filter(c => c !== cat.name)
-                       : [...selectedCategories, cat.name];
-                     if (next.length > 0) setSelectedCategories(next);
-                   }}
-                   className={`px-4 py-3 rounded-2xl flex flex-col items-start gap-1 transition-all border ${
-                     selectedCategories.includes(cat.name) 
-                       ? 'bg-rose-600 border-rose-500 text-white shadow-lg' 
-                       : 'bg-slate-950/50 border-white/5 text-slate-400 hover:text-white hover:border-white/20'
-                   }`}
-                 >
-                   <span className="text-[10px] font-black uppercase tracking-tight">{cat.name}</span>
-                   <span className={`text-[8px] font-bold uppercase opacity-60 ${selectedCategories.includes(cat.name) ? 'text-white' : 'text-slate-500'}`}>
-                    {cat.count} Songs
+             </div>
+
+             <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Game Mode</label>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-950/50 rounded-2xl border border-white/5">
+                    <button 
+                      onClick={() => setGameMode('survivor')}
+                      className={`py-3 rounded-xl text-[10px] font-black uppercase transition-all ${gameMode === 'survivor' ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                    >
+                      Survivor
+                    </button>
+                    <button 
+                      onClick={() => setGameMode('points')}
+                      className={`py-3 rounded-xl text-[10px] font-black uppercase transition-all ${gameMode === 'points' ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                    >
+                      Points
+                    </button>
+                </div>
+             </div>
+
+             <div className="flex items-center justify-between p-4 bg-slate-950/50 rounded-2xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group"
+                  onClick={() => setOneListenOnly(!oneListenOnly)}>
+                <div className="flex flex-col">
+                   <span className="text-[10px] font-black text-white uppercase flex items-center gap-2">
+                     One Listen Only
+                     <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
                    </span>
-                 </button>
-               ))}
-            </div>
-         </div>
+                   <span className="text-[8px] font-medium text-slate-500 uppercase tracking-tighter">Snippet plays once per turn</span>
+                </div>
+                <div className={`w-10 h-5 rounded-full relative transition-colors ${oneListenOnly ? 'bg-rose-600' : 'bg-slate-800'}`}>
+                   <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${oneListenOnly ? 'left-6' : 'left-1'}`} />
+                </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-4">
+                <div className={`flex flex-col gap-2 p-4 bg-slate-950/50 rounded-2xl border transition-all cursor-pointer group ${shuffleMode ? 'border-rose-500/50 bg-rose-500/5' : 'border-white/5'}`}
+                     onClick={() => setShuffleMode(!shuffleMode)}>
+                  <div className="flex items-center justify-between">
+                    <Shuffle size={14} className={shuffleMode ? 'text-rose-500' : 'text-slate-500'} />
+                    <div className={`w-10 h-5 rounded-full relative transition-colors ${shuffleMode ? 'bg-rose-600' : 'bg-slate-800'}`}>
+                      <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${shuffleMode ? 'left-6' : 'left-1'}`} />
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-white uppercase">Shuffle</span>
+                    <span className="text-[8px] font-medium text-slate-500 uppercase tracking-tighter">Random 20s Clip</span>
+                  </div>
+                </div>
+
+                <div className={`flex flex-col gap-2 p-4 bg-slate-950/50 rounded-2xl border transition-all cursor-pointer group ${hardMode ? 'border-rose-500/50 bg-rose-500/5' : 'border-white/5'}`}
+                     onClick={() => setHardMode(!hardMode)}>
+                  <div className="flex items-center justify-between">
+                    <Zap size={14} className={hardMode ? 'text-rose-500' : 'text-slate-500'} />
+                    <div className={`w-10 h-5 rounded-full relative transition-colors ${hardMode ? 'bg-rose-600' : 'bg-slate-800'}`}>
+                      <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${hardMode ? 'left-6' : 'left-1'}`} />
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-white uppercase">Hard Mode</span>
+                    <span className="text-[8px] font-medium text-slate-500 uppercase tracking-tighter">10s Snippet Only</span>
+                  </div>
+                </div>
+             </div>
+          </div>
+
+          <button 
+            onClick={() => setupGame(playerNames, gameMode, oneListenOnly, shuffleMode, hardMode, selectedCategories)}
+            className="w-full py-5 bg-white text-slate-950 rounded-2xl font-black italic tracking-tighter uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all"
+          >
+            Start Game
+          </button>
+        </div>
       </div>
+    );
+  }
 
-      <button
-        onClick={() => {
-          setupGame(playerNames, gameMode, oneListenOnly, shuffleMode, hardMode, selectedCategories, params.id ? parseInt(params.id) : undefined);
-        }}
-        className="w-full py-4 bg-rose-600 text-white rounded-xl font-black shadow-xl shadow-rose-900/20 uppercase tracking-widest flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
-      >
-        <UserPlus size={20} />
-        START JOURNEY
-      </button>
-    </div>
-  );
-
-  const renderPlaying = () => {
-    if (!state?.mysteryCard) return null;
-    const activePlayer = state.players[state.currentPlayerIndex] || { name: 'Player', lives: 0, score: 0 };
-
+  // GAME OVER SCREEN
+  if (state.status === 'gameOver') {
     return (
-      <div className="w-full flex flex-col items-center gap-6 mt-4 pb-20">
-        
-        {/* HUD */}
-        <div className="flex items-center gap-4 bg-slate-900/40 px-6 py-3 rounded-full border border-white/5 shadow-xl scale-90 sm:scale-100">
-           <div className="flex flex-col">
-              <span className="text-[8px] font-black text-slate-500 uppercase">Turn</span>
-              <span className="text-white font-bold text-sm uppercase">{activePlayer.name}</span>
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-700">
+         {/* Survivor Mode Winner Overlay */}
+         {!isSoloContinuing && state.players.filter(p => p.lives > 0).length === 1 && (
+           <div className="fixed inset-0 z-[110] bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-1000">
+               <div className="w-20 h-20 rounded-2xl bg-amber-500 flex items-center justify-center mb-6 shadow-amber-500/20 shadow-2xl border border-amber-400/50">
+                  <Zap className="text-white w-10 h-10 fill-current" />
+               </div>
+               <h3 className="text-xl font-black text-slate-500 uppercase tracking-widest mb-1">Survivor Found</h3>
+               <h2 className="text-5xl font-black text-white italic tracking-tighter uppercase mb-8">{state.players.find(p => p.lives > 0)?.name} Wins!</h2>
+               <div className="flex flex-col gap-3 w-full max-w-xs">
+                  <button 
+                    onClick={() => setIsSoloContinuing(true)}
+                    className="w-full py-5 bg-white text-slate-950 rounded-2xl font-black italic tracking-tighter uppercase shadow-2xl hover:scale-105 transition-all"
+                  >
+                    Keep Playing Solo
+                  </button>
+                  <button 
+                    onClick={endGame}
+                    className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black italic tracking-tighter uppercase border border-white/10 hover:bg-slate-800 transition-all"
+                  >
+                    End Game
+                  </button>
+               </div>
            </div>
-           <div className="w-px h-6 bg-white/10" />
-           <div className="flex gap-1">
-              {state.mode === 'survivor' ? (
-                [...Array(3)].map((_, i) => (
-                   <div key={i} className={`w-2 h-2 rounded-full ${i < activePlayer.lives ? 'bg-rose-500 shadow-lg shadow-rose-500/50' : 'bg-slate-800'}`} />
-                ))
-              ) : (
-                <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
-                   <span className="text-[8px] font-black text-emerald-400 uppercase tracking-tighter">Unlimited Lives</span>
+         )}
+
+         <div className="w-24 h-24 rounded-3xl bg-indigo-600 flex items-center justify-center mb-8 shadow-2xl shadow-indigo-500/40 border border-indigo-400 rotate-6">
+            <Music className="text-white w-12 h-12" />
+         </div>
+         <h1 className="text-6xl font-black italic tracking-tighter uppercase mb-2">Game Over</h1>
+         <p className="text-slate-500 font-bold uppercase tracking-widest mb-12">The music has stopped</p>
+
+         <div className="w-full max-w-sm space-y-4 mb-12">
+            {state.players.sort((a,b) => b.score - a.score).map((p, i) => (
+              <div key={p.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${i === 0 ? 'bg-white text-slate-950 border-white scale-110 shadow-2xl z-10' : 'bg-slate-900/50 border-white/5 text-slate-400'}`}>
+                <div className="flex items-center gap-4">
+                  <span className={`text-xl font-black font-mono ${i === 0 ? 'text-indigo-600' : 'text-slate-700'}`}>#{i+1}</span>
+                  <span className="font-black uppercase tracking-tight">{p.name}</span>
+                </div>
+                <div className="flex flex-col items-end">
+                   <span className="text-xs font-bold opacity-50 uppercase tracking-widest">Score</span>
+                   <span className="text-lg font-black">{p.score}</span>
+                </div>
+              </div>
+            ))}
+         </div>
+
+         <button 
+           onClick={resetGame}
+           className="px-12 py-5 bg-white text-slate-950 rounded-2xl font-black italic tracking-tighter uppercase shadow-2xl hover:scale-110 transition-all active:rotate-0 -rotate-2"
+         >
+           Play Again
+         </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center overflow-x-hidden pb-32">
+        {/* HEADER / STATUS */}
+        <div className="w-full flex items-center justify-between px-6 py-8 sm:px-12 sm:py-12 relative z-50">
+           <div className="flex flex-col">
+              <span className="text-[10px] font-black text-rose-500 uppercase tracking-[0.2em] mb-1">Current Player</span>
+              <h2 className="text-3xl font-black italic tracking-tighter uppercase">
+                {state.players[state.currentPlayerIndex].name}
+              </h2>
+           </div>
+
+           <div className="flex items-center gap-6">
+              <button 
+                onClick={resetGame}
+                className="p-3 rounded-xl bg-slate-900 border border-white/5 text-slate-500 hover:text-white hover:border-white/10 transition-all flex items-center gap-2 group"
+                title="Restart Game"
+              >
+                <RotateCcw size={16} className="group-hover:rotate-[-45deg] transition-transform" />
+                <span className="hidden sm:block text-[10px] font-black uppercase tracking-widest">Restart</span>
+              </button>
+
+              <div className="flex flex-col items-end">
+                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Score</span>
+                 <span className="text-3xl font-black tabular-nums tracking-tighter leading-none">{state.players[state.currentPlayerIndex].score}</span>
+              </div>
+              {state.mode === 'survivor' && (
+                <div className="flex items-center gap-1.5 mt-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
+                        i < state.players[state.currentPlayerIndex].lives ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'bg-slate-800'
+                      }`} 
+                    />
+                  ))}
                 </div>
               )}
            </div>
-           <div className="w-px h-6 bg-white/10" />
-           <span className="text-emerald-400 font-black text-sm tabular-nums">{activePlayer.score.toLocaleString()}</span>
-           <div className="w-px h-6 bg-white/10" />
-           <button 
-             onClick={resetGame}
-             className="text-slate-500 hover:text-rose-500 transition-colors tooltip tooltip-bottom"
-             data-tip="Reset Game"
-           >
-              <RotateCcw size={14} />
-           </button>
         </div>
 
         <DndContext 
@@ -387,11 +445,11 @@ export const VinylTimelinePage: React.FC = () => {
         >
           {/* COMPACT PLAYER AREA */}
           <div className="relative flex flex-col items-center gap-4 w-full px-4">
-             {/* Draggable Area - Increased height for mobile to prevent overlap */}
+             {/* Draggable Area */}
              <div className="w-full flex justify-center h-64 sm:h-72 mb-4">
                   <div className="scale-75 sm:scale-100 origin-center">
                       <DraggableVinylCard 
-                        id={state.mysteryCard.id}
+                        id={state.mysteryCard?.id || 0}
                         song={state.mysteryCard}
                         isRevealed={state.status === 'revealing'}
                         isMystery={state.status === 'playing'}
@@ -399,7 +457,7 @@ export const VinylTimelinePage: React.FC = () => {
                   </div>
              </div>
 
-             {/* Mobile-Friendly Control */}
+             {/* Controls */}
              <div className="flex flex-col items-center gap-1 z-10 w-full max-w-[200px]">
                 {/* Progress Bar */}
                 <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-2">
@@ -423,7 +481,7 @@ export const VinylTimelinePage: React.FC = () => {
                   ) : isPlaying ? (
                     state.oneListenOnly ? <Square className="fill-current w-7 h-7" /> : <Pause className="fill-current w-7 h-7" />
                   ) : playerStatus === 'error' ? (
-                    <RotateCcw className="w-7 h-7" onClick={(e) => { e.stopPropagation(); prepare(state.mysteryCard!.youtubeId, true); }} />
+                    <RotateCcw className="w-7 h-7" onClick={(e) => { e.stopPropagation(); if (state.mysteryCard) prepare(state.mysteryCard.youtubeId, true); }} />
                   ) : (
                     <Play className={`fill-current w-7 h-7 ml-1 ${(state.oneListenOnly && state.listenedCurrentRound) ? 'opacity-20' : ''}`} />
                   )}
@@ -431,6 +489,11 @@ export const VinylTimelinePage: React.FC = () => {
                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">
                   {playerStatus === 'loading' ? 'Loading' : playerStatus === 'error' ? 'Tap to Retry' : isPlaying ? (state.oneListenOnly ? 'Stop' : 'Pause') : (state.oneListenOnly && state.listenedCurrentRound) ? 'Listen Used' : 'Play Snippet'}
                 </span>
+                {playerStatus === 'error' && lastError && (
+                  <span className="text-[7px] font-bold text-rose-500/60 uppercase tracking-tight text-center max-w-[150px] mt-0.5 animate-pulse">
+                    {lastError}
+                  </span>
+                )}
              </div>
           </div>
 
@@ -460,12 +523,21 @@ export const VinylTimelinePage: React.FC = () => {
                  
                  <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">Connection Blocked</h3>
                  
-                 <div className="p-4 bg-black/40 rounded-2xl border border-white/5 w-full mb-6">
+                 <div className="p-4 bg-black/40 rounded-2xl border border-white/5 w-full mb-6 text-left">
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Failing Song:</p>
-                    <p className="text-sm font-bold text-white mb-2">{state.mysteryCard.name}</p>
-                    <p className="text-[8px] font-medium text-slate-500 break-all opacity-50">
-                       https://youtube.com/watch?v={state.mysteryCard.youtubeId}
+                    <p className="text-sm font-bold text-white mb-1 line-clamp-1">{state.mysteryCard.name}</p>
+                    <p className="text-[8px] font-medium text-slate-500 break-all opacity-40 mb-3">
+                       ID: {state.mysteryCard.youtubeId}
                     </p>
+                    
+                    {lastError && (
+                       <div className="mt-2 pt-2 border-t border-white/5">
+                          <p className="text-[10px] font-black text-rose-500/80 uppercase tracking-widest mb-1">Technical Detail:</p>
+                          <p className="text-[10px] font-bold text-rose-200/60 leading-tight">
+                             {lastError}
+                          </p>
+                       </div>
+                    )}
                  </div>
 
                  <p className="text-[10px] font-bold text-slate-400 uppercase leading-relaxed mb-8">
@@ -494,104 +566,27 @@ export const VinylTimelinePage: React.FC = () => {
            <div className={`fixed inset-0 z-[100] flex flex-col items-center justify-center p-8 animate-in fade-in duration-500 ${
              state.lastResult.success ? 'bg-emerald-950/95' : 'bg-rose-950/95'
            } backdrop-blur-xl`}>
-              
-              {/* STATUS ICON */}
               <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center mb-6 shadow-2xl animate-bounce border ${
                 state.lastResult.success ? 'bg-emerald-500 border-emerald-400' : 'bg-rose-500 border-rose-400'
               }`}>
                  {state.lastResult.success ? <Music className="text-white w-10 h-10" /> : <Music className="text-white w-10 h-10 opacity-50" />}
               </div>
-
               <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter mb-2 text-center">
                  {state.lastResult.success ? 'Brilliant!' : 'Nope!'}
               </h2>
-              
               <div className="flex flex-col items-center gap-1 mb-10">
                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Correct Year</span>
                  <span className="text-6xl font-black text-white tabular-nums tracking-tighter leading-none">{state.lastResult.correctYear}</span>
               </div>
-
-              {/* SONG METADATA */}
-              <div className="flex flex-col items-center gap-4 mb-10 text-center px-6 max-w-md">
-                 <div className="flex flex-col items-center gap-1">
-                    <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Artist & Title</span>
-                    <h3 className="text-2xl font-black text-white leading-tight italic">
-                       {state.mysteryCard.name}
-                    </h3>
-                 </div>
-                 <div className="w-10 h-px bg-white/10" />
-                 <div className="flex flex-col items-center gap-1">
-                    <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Source / Placement</span>
-                    <p className="text-sm font-bold text-rose-500 uppercase tracking-widest">
-                       {state.mysteryCard.info}
-                    </p>
-                 </div>
+              <div className="w-full max-w-sm flex flex-col items-center gap-6">
+                 <VinylCard song={state.mysteryCard} />
+                 <button 
+                   onClick={proceedToNextPlayer}
+                   className="w-full py-5 bg-white text-slate-950 rounded-2xl font-black italic tracking-tighter uppercase shadow-2xl hover:scale-105 transition-all"
+                 >
+                   Continue
+                 </button>
               </div>
-
-              {/* HANDOVER / NEXT INFO */}
-              <div className="w-full max-w-sm p-8 bg-black/20 border border-white/5 rounded-[2.5rem] flex flex-col items-center gap-4 mb-10 shadow-inner">
-                 {state.players.length > 1 ? (
-                   <>
-                     <div className="flex flex-col items-center gap-1">
-                        <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Pass the device to</span>
-                        <h3 className="text-3xl font-black text-white uppercase tracking-tighter">{getNextLivingPlayer()?.name}</h3>
-                     </div>
-                     <div className="w-full h-px bg-white/5 my-2" />
-                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">
-                        {isMatchEnding ? 'Match Point!' : 'Next Turn'}
-                     </p>
-                   </>
-                 ) : (
-                   <div className="flex flex-col items-center gap-1">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Phase Result</span>
-                      <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
-                         {state.lastResult.success ? '+100 Points' : 'Life Lost'}
-                      </h3>
-                   </div>
-                 )}
-              </div>
-
-              {/* ACTIONS */}
-              <div className="w-full max-w-xs flex flex-col gap-3">
-                 {isMatchEnding ? (
-                    <>
-                      <button 
-                        onClick={() => setIsSoloContinuing(true)}
-                        className="w-full py-4 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600/30 transition-all"
-                      >
-                         Keep Playing Solo
-                      </button>
-                      <button 
-                         onClick={endGame} 
-                         className="w-full py-5 bg-white text-slate-950 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-2xl"
-                      >
-                         End Match
-                      </button>
-                    </>
-                 ) : (
-                    <button 
-                      onClick={proceedToNextPlayer}
-                      className="w-full py-6 bg-white text-slate-950 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl"
-                    >
-                       {state.players.length > 1 ? `I'm ${getNextLivingPlayer()?.name}!` : 'Next Card'}
-                    </button>
-                 )}
-              </div>
-           </div>
-        )}
-      </div>
-    );
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col items-center overflow-x-hidden">
-        {state?.status === 'setup' && renderSetup()}
-        {(state?.status === 'playing' || state?.status === 'revealing') && renderPlaying()}
-        {state?.status === 'gameOver' && (
-           <div className="p-10 flex flex-col items-center text-center">
-              <Music className="text-rose-500 w-12 h-12 mb-6" />
-              <h1 className="text-4xl font-black uppercase italic text-white italic">Game Over!</h1>
-              <button onClick={resetGame} className="mt-8 px-10 py-5 bg-white text-black rounded-xl font-black uppercase tracking-widest">Restart</button>
            </div>
         )}
     </div>
