@@ -4,6 +4,7 @@ export interface RiddleStage {
   hint: string;
   songIds: number[];
   nextLocationAnswer: string; // The decoded location players should type to proceed
+  entryKeyword: string; // Keyword required to unlock the riddle at this location
 }
 
 export const IT_STAGE_DATA: RiddleStage[] = [
@@ -18,6 +19,7 @@ export const IT_STAGE_DATA: RiddleStage[] = [
       74   // E - Eir Aoi - Innocence - 2012 - Sword Art Online
     ], 
     nextLocationAnswer: 'lake',
+    entryKeyword: 'anime',
   },
   {
     id: 'lake',
@@ -31,6 +33,7 @@ export const IT_STAGE_DATA: RiddleStage[] = [
       1776416445029  // N - Linkin Park - Numb - 2003
     ],
     nextLocationAnswer: 'train',
+    entryKeyword: 'popular',
   },
   {
     id: 'train',
@@ -50,6 +53,7 @@ export const IT_STAGE_DATA: RiddleStage[] = [
       38   // H - Lilas Ikuta - Hyakka Ryouran - 2025 - The Apothecary Diaries
     ], 
     nextLocationAnswer: 'lovers bench',
+    entryKeyword: 'anime again',
   },
   {
     id: 'bench',
@@ -62,5 +66,6 @@ export const IT_STAGE_DATA: RiddleStage[] = [
       1776432103951  // L - Poets of the Fall - Cradled in Love - 2012
     ], 
     nextLocationAnswer: 'hill',
+    entryKeyword: 'poets',
   }
 ];

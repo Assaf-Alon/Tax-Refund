@@ -25,6 +25,7 @@ import { isChronological } from '../../../shared/utils/vinyl-logic';
 import { getRiddleProgress, updateRiddleProgress } from '../../../shared/logic/gameState';
 import { CongratsStage } from '../../../shared/stages/CongratsStage';
 import { TextAnswerStage } from '../../../shared/stages/TextAnswerStage';
+import { DevSkipButton } from '../../admin/DevSkipButton';
 import { IT_STAGE_DATA } from './data/stages';
 import { HP_THEME as theme } from './theme';
 import type { SongItem } from '../../../shared/types/music';
@@ -37,6 +38,7 @@ interface SortableItemProps {
   displayMode: 'mystery' | 'revealed';
   isActive?: boolean;
   isPlaying?: boolean;
+  validationStatus?: 'correct' | 'incorrect' | null;
   onSelect: (song: SongItem) => void;
 }
 
@@ -46,6 +48,7 @@ const SortableVinylItem: React.FC<SortableItemProps> = ({
   displayMode, 
   isActive, 
   isPlaying, 
+  validationStatus,
   onSelect
 }) => {
   const {
@@ -80,7 +83,12 @@ const SortableVinylItem: React.FC<SortableItemProps> = ({
           displayMode={displayMode}
           isPlaying={isPlaying && isActive}
           showThumbnail={true}
-          className={`${isActive ? 'ring-2 ring-emerald-500 ring-offset-4 ring-offset-slate-950' : ''} transition-all duration-300 scale-90 sm:scale-100`}
+          className={`
+            ${isActive ? 'ring-2 ring-emerald-500 ring-offset-4 ring-offset-slate-950' : ''} 
+            ${validationStatus === 'correct' ? 'ring-4 ring-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.4)]' : ''}
+            ${validationStatus === 'incorrect' ? 'ring-4 ring-rose-500 shadow-[0_0_30px_rgba(244,63,94,0.4)]' : ''}
+            transition-all duration-300 scale-90 sm:scale-100
+          `}
         />
       </div>
     </div>
@@ -95,6 +103,10 @@ export const ItsAHitRiddle: React.FC = () => {
   const [isRevealed, setIsRevealed] = useState(false);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isStageUnlocked, setIsStageUnlocked] = useState(false);
+  const [isCongratsUnlocked, setIsCongratsUnlocked] = useState(false);
+  const [validationResults, setValidationResults] = useState<Record<number, 'correct' | 'incorrect'>>({});
+  const [isButtonShaking, setIsButtonShaking] = useState(false);
 
   const { 
     status: playerStatus,
@@ -141,6 +153,9 @@ export const ItsAHitRiddle: React.FC = () => {
     setUserOrder(shuffled);
     setIsRevealed(false);
     setActiveSong(null);
+    setIsStageUnlocked(false);
+    setValidationResults({});
+    setIsButtonShaking(false);
 
     // PRE-PREPARE: Fully initialize player instances to ensure gesture-safe instant play
     filtered.forEach(song => {
@@ -169,6 +184,7 @@ export const ItsAHitRiddle: React.FC = () => {
   const handleDragStart = (event: DragStartEvent) => {
     if (isRevealed) return;
     setActiveDragId(event.active.id as string);
+    setValidationResults({}); // Clear highlights when user starts moving
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -187,8 +203,23 @@ export const ItsAHitRiddle: React.FC = () => {
   const checkOrder = () => {
     if (isChronological(userOrder)) {
       setIsRevealed(true);
+      setValidationResults({});
     } else {
-      alert("The order is incorrect. Listen carefully to the release years!");
+      // Calculate correct order based on stage data
+      if (!currentStage) return;
+      
+      const results: Record<number, 'correct' | 'incorrect'> = {};
+      userOrder.forEach((song, idx) => {
+        if (song.id === currentStage.songIds[idx]) {
+          results[song.id] = 'correct';
+        } else {
+          results[song.id] = 'incorrect';
+        }
+      });
+      
+      setValidationResults(results);
+      setIsButtonShaking(true);
+      setTimeout(() => setIsButtonShaking(false), 1000);
     }
   };
 
@@ -224,6 +255,26 @@ export const ItsAHitRiddle: React.FC = () => {
     }
   };
 
+  const handleDevSkip = () => {
+    if (currentStageIdx === null) return;
+    
+    // If at the end but congrats is locked, unlock congrats
+    if (currentStageIdx === IT_STAGE_DATA.length) {
+      if (!isCongratsUnlocked) {
+        setIsCongratsUnlocked(true);
+      }
+      return;
+    }
+
+    // If current stage is locked, unlock it
+    if (!isStageUnlocked) {
+      setIsStageUnlocked(true);
+    } else {
+      // If current stage is unlocked, skip to next stage
+      nextStage();
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8">
@@ -234,11 +285,39 @@ export const ItsAHitRiddle: React.FC = () => {
   }
 
   if (currentStageIdx === IT_STAGE_DATA.length) {
+    if (!isCongratsUnlocked) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8">
+          <TextAnswerStage 
+            title="Final Verification"
+            prompt="You have reached the final destination. Enter the keyword found at the Hill to claim your victory."
+            acceptedAnswers={['Raanana']}
+            onAdvance={() => setIsCongratsUnlocked(true)}
+            errorMessage="That keyword doesn't match the Hill..."
+            placeholder="Enter final keyword..."
+            submitButtonLabel="Verify Arrival"
+            theme={{
+              title: "text-2xl font-black uppercase tracking-widest text-white mb-4",
+              promptText: "text-sm text-slate-400 mb-8 max-w-xs mx-auto leading-relaxed",
+              input: "w-full max-w-xs bg-black/40 border border-emerald-500/20 p-4 text-center focus:border-emerald-500 focus:outline-none transition-colors rounded-2xl text-emerald-500 font-bold tracking-widest uppercase mb-4",
+              submitButton: theme.button.primary + " w-full max-w-xs text-sm py-4",
+              errorText: "text-rose-500 text-[10px] font-bold mt-2"
+            }}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8">
         <CongratsStage 
           title="It's a Hit!"
-          subtitle="You've mastered the charts and reached the final hill."
+          subtitle={
+            <div className="flex flex-col gap-4">
+              <p>You've mastered the charts and reached the final hill.</p>
+              <p className="text-emerald-500 font-bold text-sm">Up next - Raanana Park! Might want to check out the lake there as well...</p>
+            </div>
+          }
           theme={theme.congrats}
         >
           <button 
@@ -246,6 +325,7 @@ export const ItsAHitRiddle: React.FC = () => {
               setCurrentStageIdx(0);
               updateRiddleProgress(RIDDLE_ID, 0);
               loadStage(0, songs);
+              setIsCongratsUnlocked(false);
             }}
             className={theme.button.secondary}
           >
@@ -257,6 +337,35 @@ export const ItsAHitRiddle: React.FC = () => {
   }
 
   if (!currentStage) return null;
+
+  if (!isStageUnlocked) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8">
+        <div className="flex flex-col items-center mb-12">
+           <MapPin size={24} className="text-emerald-500 mb-4" />
+           <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">{currentStage.locationName}</h1>
+           <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Arrive at location to unlock</p>
+        </div>
+
+        <TextAnswerStage 
+          title="Check-In Required"
+          prompt={`Enter the keyword found at ${currentStage.locationName} to begin the riddle.`}
+          acceptedAnswers={[currentStage.entryKeyword]}
+          onAdvance={() => setIsStageUnlocked(true)}
+          errorMessage="Incorrect keyword. Are you at the right spot?"
+          placeholder="Enter location keyword..."
+          submitButtonLabel="Unlock Riddle"
+          theme={{
+            title: "text-sm font-black uppercase tracking-widest text-white mb-2",
+            promptText: "text-[10px] text-slate-400 mb-6 max-w-[200px] mx-auto leading-relaxed",
+            input: "w-full max-w-xs bg-black/40 border border-emerald-500/20 p-4 text-center focus:border-emerald-500 focus:outline-none transition-colors rounded-2xl text-emerald-500 font-bold tracking-widest uppercase mb-4",
+            submitButton: theme.button.primary + " w-full max-w-xs text-sm py-4",
+            errorText: "text-rose-500 text-[10px] font-bold mt-2"
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center overflow-x-hidden pb-32">
@@ -304,6 +413,7 @@ export const ItsAHitRiddle: React.FC = () => {
                     displayMode={isRevealed ? 'revealed' : 'mystery'}
                     isActive={activeSong?.id === song.id}
                     isPlaying={isPlaying}
+                    validationStatus={validationResults[song.id]}
                     onSelect={handleSelectSong}
                   />
                 );
@@ -331,7 +441,16 @@ export const ItsAHitRiddle: React.FC = () => {
               onRetry={() => activeSong && prepare(activeSong.youtubeId, true)} 
               hidePlayButton 
             />
-            <button onClick={checkOrder} className={theme.button.primary}>Verify Chronology</button>
+            <button 
+              onClick={checkOrder} 
+              className={`
+                ${theme.button.primary} 
+                ${isButtonShaking ? 'animate-shake bg-rose-600 hover:bg-rose-600 shadow-rose-500/40' : ''}
+                transition-colors duration-200
+              `}
+            >
+              Verify Chronology
+            </button>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-12 w-full max-w-md animate-in zoom-in duration-700">
@@ -344,9 +463,9 @@ export const ItsAHitRiddle: React.FC = () => {
                 <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-6">Location Key Unlocked</p>
                 <div className="flex flex-col gap-2 mb-8">
                    {[...userOrder].sort((a,b) => (parseInt(a.year||'0') - parseInt(b.year||'0'))).map((s) => (
-                      <div key={s.id} className="text-xs text-emerald-500/80 font-medium">
-                         ✓ {s.year} {s.name}
-                      </div>
+                       <div key={s.id} className="text-xs text-emerald-500/80 font-medium">
+                          ✓ {s.year} {s.name}{s.category === 'Anime' ? ` - ${s.info}` : ''}
+                       </div>
                    ))}
                 </div>
                 
@@ -371,6 +490,13 @@ export const ItsAHitRiddle: React.FC = () => {
         )}
       </div>
       <button onClick={() => window.history.back()} className="fixed bottom-8 left-8 p-4 rounded-full bg-slate-900/80 border border-white/5 text-slate-500 hover:text-white transition-all backdrop-blur-xl"><ArrowLeft size={20} /></button>
+      
+      <DevSkipButton 
+        riddleId={RIDDLE_ID} 
+        currentStage={currentStageIdx ?? 0} 
+        totalStages={IT_STAGE_DATA.length + 1} 
+        onSkip={handleDevSkip} 
+      />
     </div>
   );
 };
