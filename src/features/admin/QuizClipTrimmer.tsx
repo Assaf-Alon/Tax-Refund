@@ -271,7 +271,11 @@ export const QuizClipTrimmer: React.FC = () => {
 
     // Get fresh data from localStorage
     const currentSongs = JSON.parse(localStorage.getItem('trimmer_songs') || '[]');
-    const blob = new Blob([JSON.stringify(currentSongs, null, 2)], { type: 'application/json' });
+    const cleanedSongs = currentSongs.map((s: SongItem) => ({
+      ...s,
+      info: s.info === 'N/A' ? '' : s.info
+    }));
+    const blob = new Blob([JSON.stringify(cleanedSongs, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
     const downloadAnchorNode = document.createElement('a');
@@ -335,43 +339,65 @@ export const QuizClipTrimmer: React.FC = () => {
   const handleBulkAdd = () => {
     if (!bulkInput.trim()) return;
 
-    const lines = bulkInput.split('\n');
+    const lines = bulkInput.split('\n').filter(l => l.trim());
+    if (lines.length === 0) return;
+
+    // Detect delimiter: prefer tab, then comma
+    const firstLine = lines[0];
+    const delimiter = firstLine.includes('\t') ? '\t' : (firstLine.includes(',') ? ',' : '\t');
+
     const newSongs: SongItem[] = [];
     const timestamp = Date.now();
 
     // Check if first line is a header
     let startIdx = 0;
-    if (lines.length > 0) {
-      const firstLine = lines[0].toLowerCase();
-      if (firstLine.includes('artist') || firstLine.includes('song') || firstLine.includes('year') || firstLine.includes('preview')) {
-        startIdx = 1;
-      }
+    const headerTest = firstLine.toLowerCase();
+    if (headerTest.includes('artist') || headerTest.includes('song') || headerTest.includes('year') || headerTest.includes('preview')) {
+      startIdx = 1;
     }
 
     for (let i = startIdx; i < lines.length; i++) {
       const line = lines[i];
       if (!line.trim()) continue;
 
-      const parts = line.split('\t');
+      // Simple CSV/TSV split with basic quote handling
+      let parts: string[] = [];
+      if (delimiter === '\t') {
+        parts = line.split('\t');
+      } else {
+        // Robust CSV splitting for commas (handles quoted fields)
+        const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+        parts = line.split(regex);
+      }
+
+      parts = parts.map(p => {
+        let trimmed = p.trim();
+        if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+          trimmed = trimmed.substring(1, trimmed.length - 1).replace(/""/g, '"');
+        }
+        return trimmed;
+      });
+
       if (parts.length < 2) continue;
 
-      const artist = parts[0]?.trim() || '';
-      const songTitle = parts[1]?.trim() || '';
-      const yearStr = parts[2]?.trim() || '';
-      const startTimeVal = parts[3]?.trim() || '0';
-      const endTimeVal = parts[4]?.trim() || '15';
-      const altStartTimeVal = parts[5]?.trim() || '';
-      const altEndTimeVal = parts[6]?.trim() || '';
-      const type = parts[7]?.trim() || 'Popular';
-      const ytLink = parts[8]?.trim() || '';
-      const notes = parts[9]?.trim() || '';
+      const artist = parts[0] || '';
+      const songTitle = parts[1] || '';
+      const yearStr = parts[2] || '';
+      const startTimeVal = parts[3] || '0';
+      const endTimeVal = parts[4] || '15';
+      const altStartTimeVal = parts[5] || '';
+      const altEndTimeVal = parts[6] || '';
+      const type = parts[7] || 'Popular';
+      const ytLink = parts[8] || '';
+      const notes = parts[9] || '';
+      const info = notes === 'N/A' ? '' : (notes || type);
 
       const name = artist && songTitle ? `${artist} - ${songTitle}` : (artist || songTitle);
 
       newSongs.push({
         id: timestamp + i,
         query: name,
-        info: notes || type,
+        info: info,
         name: name,
         youtubeId: extractVideoId(ytLink) || '',
         startTime: Math.floor(parseFloat(startTimeVal) || 0),
@@ -823,6 +849,7 @@ export const QuizClipTrimmer: React.FC = () => {
                 >
                   <option value="Anime">Anime</option>
                   <option value="Popular">Popular</option>
+                  <option value="Rock">Rock</option>
                   <option value="Custom">Custom</option>
                 </select>
               </div>
