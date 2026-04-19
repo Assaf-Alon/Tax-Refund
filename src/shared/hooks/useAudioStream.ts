@@ -376,5 +376,5 @@ export const useAudioStream = () => {
     }
   }, [stop]);
 
-  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch: async (id: string) => { if (!import.meta.env.PROD && id) await getStreamUrl(id); }, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatusSync('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
+  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused' || status === 'ended', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch: async (id: string) => { if (!import.meta.env.PROD && id) await getStreamUrl(id); }, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatusSync('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
 };
