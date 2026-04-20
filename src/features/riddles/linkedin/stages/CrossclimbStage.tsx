@@ -39,7 +39,7 @@ interface CrossclimbStageProps {
 const WORDS: WordData[] = [
     { id: '1', answer: 'stark', clue: 'The structural foundations of a decentralized network', isLockedInitially: true },
     { id: '2', answer: 'stack', clue: 'Full _____ Developer' },
-    { id: '3', answer: 'snack', clue: 'light bite between meetings' },
+    { id: '3', answer: 'snack', clue: 'Coffee and a _____. Light Food.' },
     { id: '4', answer: 'slack', clue: 'It does frog noises on your phone' },
     { id: '5', answer: 'black', clue: 'Your Favorite Python Formatter' },
     { id: '6', answer: 'block', clue: 'The structural foundations of a decentralized network', isLockedInitially: true },
@@ -68,7 +68,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
     draftValue, activeCharIndex, setActiveCharIndex
 }) => {
     const isLockedRow = row.isLockedInitially && phase !== 'REORDER' && phase !== 'FINAL' && phase !== 'COMPLETE';
-    
+
     const {
         attributes,
         listeners,
@@ -76,7 +76,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
         transform,
         transition,
         isDragging
-    } = useSortable({ 
+    } = useSortable({
         id: row.id,
         disabled: phase !== 'REORDER'
     });
@@ -89,7 +89,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
 
     let bgColor = 'bg-white dark:bg-gray-800/50';
     let borderColor = 'border-gray-100 dark:border-gray-800';
-    
+
     if (isLockedRow) {
         bgColor = 'bg-gray-50 dark:bg-gray-900/40';
     } else if (active) {
@@ -132,7 +132,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
                     </div>
                 </div>
             )}
-            <div 
+            <div
                 ref={setNodeRef}
                 style={style}
                 onClick={() => {
@@ -209,7 +209,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     const [solvedWords, setSolvedWords] = useState<Record<string, string>>({});
     const [activeIndex, setActiveIndex] = useState<number>(1);
     const [justCorrectId, setJustCorrectId] = useState<string | null>(null);
-    
+
     // Controlled keyboard state
     const [draftValues, setDraftValues] = useState<Record<string, string[]>>({});
     const [activeCharIndex, setActiveCharIndex] = useState<number>(0);
@@ -242,7 +242,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     };
 
     const isMiddleSolved = useMemo(() => {
-        return rows.slice(1, rows.length - 1).every(row => 
+        return rows.slice(1, rows.length - 1).every(row =>
             solvedWords[row.id]?.toLowerCase() === row.answer.toLowerCase()
         );
     }, [rows, solvedWords]);
@@ -257,19 +257,19 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     }, [rows, isMiddleSolved]);
 
     const isLadderValid = useMemo(() => {
-        const allSolved = rows.every(row => 
+        const allSolved = rows.every(row =>
             solvedWords[row.id]?.toLowerCase() === row.answer.toLowerCase()
         );
         if (!allSolved) return false;
 
-        return rows.every((row, i) => 
+        return rows.every((row, i) =>
             i === 0 || checkDistance(row.answer, rows[i - 1].answer) === 1
         );
     }, [rows, solvedWords]);
 
     const phase = isLadderValid ? 'COMPLETE' :
-                  isMiddleOrdered ? 'FINAL' :
-                  isMiddleSolved ? 'REORDER' : 'FILL';
+        isMiddleOrdered ? 'FINAL' :
+            isMiddleSolved ? 'REORDER' : 'FILL';
 
     // Dynamic terminal row swap logic
     useEffect(() => {
@@ -311,7 +311,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     const handleWordComplete = (rowId: string, value: string) => {
         const nextSolved = { ...solvedWords, [rowId]: value };
         setSolvedWords(nextSolved);
-        
+
         // Clear draft
         setDraftValues(prev => {
             const next = { ...prev };
@@ -319,7 +319,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
             return next;
         });
 
-        const nextMiddleSolved = rows.slice(1, rows.length - 1).every(row => 
+        const nextMiddleSolved = rows.slice(1, rows.length - 1).every(row =>
             nextSolved[row.id]?.toLowerCase() === row.answer.toLowerCase()
         );
         const nextMiddleOrdered = nextMiddleSolved && (() => {
@@ -329,11 +329,11 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
             }
             return true;
         })();
-        
-        const nextPhase = (nextMiddleSolved && nextSolved[rows[0].id] && nextSolved[rows[rows.length-1].id]) ? 'COMPLETE' :
-                          nextMiddleOrdered ? 'FINAL' : 
-                          nextMiddleSolved ? 'REORDER' : 'FILL';
-        
+
+        const nextPhase = (nextMiddleSolved && nextSolved[rows[0].id] && nextSolved[rows[rows.length - 1].id]) ? 'COMPLETE' :
+            nextMiddleOrdered ? 'FINAL' :
+                nextMiddleSolved ? 'REORDER' : 'FILL';
+
         const nextIdx = rows.findIndex((row, _idx) => {
             const isLocked = row.isLockedInitially && nextPhase !== 'FINAL' && nextPhase !== 'COMPLETE';
             if (isLocked) return false;
@@ -423,12 +423,12 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-        
+
         if (over && active.id !== over.id) {
             setRows((items) => {
                 const oldIndex = items.findIndex((i) => i.id === active.id);
                 const newIndex = items.findIndex((i) => i.id === over.id);
-                
+
                 const newItems = arrayMove(items, oldIndex, newIndex);
                 setActiveIndex(newIndex);
                 setActiveCharIndex(0);
@@ -459,11 +459,11 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     return (
         <div className="flex flex-col items-center w-full font-sans p-2 animate-in fade-in duration-700 pb-[300px] h-[100dvh] overflow-hidden">
             <div className="w-full max-w-sm bg-white dark:bg-[#1b1f23] rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col items-center max-h-[calc(100dvh-300px)] shrink-0 mb-4">
-            <div className="w-full p-3 text-center">
-                <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">CrossClimb</h2>
-            </div>
+                <div className="w-full p-3 text-center">
+                    <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">CrossClimb</h2>
+                </div>
 
-            <div className="p-4 pt-0 w-full flex flex-col items-center space-y-1">
+                <div className="p-4 pt-0 w-full flex flex-col items-center space-y-1">
                     <div className="w-full flex justify-between items-center mb-2">
                         <div className="h-4 w-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
                         <div className="h-4 w-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
@@ -473,13 +473,13 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                         <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-100 dark:bg-gray-800 -z-10" />
                         <div className="absolute right-4 top-0 bottom-0 w-0.5 bg-gray-100 dark:bg-gray-800 -z-10" />
 
-                        <DndContext 
+                        <DndContext
                             sensors={sensors}
                             collisionDetection={closestCenter}
                             onDragEnd={handleDragEnd}
                             modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
                         >
-                            <SortableContext 
+                            <SortableContext
                                 items={rows.map(r => r.id)}
                                 strategy={verticalListSortingStrategy}
                             >
@@ -495,7 +495,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                                         setActiveIndex={setActiveIndex}
                                         checkDistance={checkDistance}
                                         prevRow={idx > 0 ? rows[idx - 1] : undefined}
-                                        prevRowSolved={idx > 0 ? solvedWords[rows[idx-1].id]?.toLowerCase() === rows[idx-1].answer.toLowerCase() : false}
+                                        prevRowSolved={idx > 0 ? solvedWords[rows[idx - 1].id]?.toLowerCase() === rows[idx - 1].answer.toLowerCase() : false}
                                         isJustCorrect={justCorrectId === row.id}
                                         draftValue={draftValues[row.id] || []}
                                         activeCharIndex={activeCharIndex}
@@ -510,13 +510,13 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                 <div className="w-full px-6 py-2 mt-0">
                     <div className="p-3 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 text-center border border-gray-100/50 dark:border-gray-800/50">
                         <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium leading-relaxed italic">
-                            {phase === 'COMPLETE' 
-                                ? "Ladder sequence complete! Well done." 
+                            {phase === 'COMPLETE'
+                                ? "Ladder sequence complete! Well done."
                                 : phase === 'FINAL'
                                     ? "Ladder sorted! Solve the final two rows."
-                                : phase === 'REORDER' 
-                                    ? "Middle words solved! Drag rows into a valid chain." 
-                                    : "Type middle words first, then drag to sort."}
+                                    : phase === 'REORDER'
+                                        ? "Middle words solved! Drag rows into a valid chain."
+                                        : "Type middle words first, then drag to sort."}
                         </p>
                     </div>
                 </div>
@@ -525,7 +525,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
             {/* Fixed Bottom Keyboard & Hint Area */}
             <div className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-500 ${phase === 'REORDER' ? 'translate-y-full' : 'translate-y-0'}`}>
                 <div className="bg-white/90 dark:bg-[#1b1f23]/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 p-2 pt-4 pb-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col items-center gap-4">
-                    
+
                     {/* Compact Hint Bar */}
                     <div className="w-full max-w-xl flex items-center gap-4 px-4">
                         {phase !== 'FINAL' && phase !== 'COMPLETE' ? (
@@ -535,7 +535,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                                 </svg>
                             </button>
                         ) : <div className="w-9" />}
-                        
+
                         <div className="flex-1 text-center">
                             <p className="text-blue-500 dark:text-blue-400 text-[9px] font-black uppercase tracking-[0.2em] mb-0.5 opacity-80">
                                 {phase === 'FINAL' || phase === 'COMPLETE' ? 'UNIVERSAL HINT' : `ROW ${activeIndex + 1} HINT`}
@@ -555,7 +555,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                     </div>
 
                     {/* Virtual Keyboard */}
-                    <VirtualKeyboard 
+                    <VirtualKeyboard
                         onKey={handleKey}
                         onBackspace={handleBackspace}
                         onEnter={handleEnter}

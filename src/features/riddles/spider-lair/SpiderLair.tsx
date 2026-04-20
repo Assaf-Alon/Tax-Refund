@@ -13,10 +13,12 @@ import spiderDanceCover from './assets/Spider Dance Cover.mp3';
 import { useAudio } from '../../../shared/utils/useAudio';
 import { DevSkipButton } from '../../admin/DevSkipButton';
 import { useFavicon } from '../../../hooks/useFavicon';
+import { useTitle } from '../../../hooks/useTitle';
 
 const RIDDLE_ID = 'spider-lair';
 
 export const SpiderLair: React.FC = () => {
+    useTitle("The Spider's Lair");
     useFavicon(`${import.meta.env.BASE_URL}sl-48.png`);
 
     const [stage, setStage] = useState<number>(0);

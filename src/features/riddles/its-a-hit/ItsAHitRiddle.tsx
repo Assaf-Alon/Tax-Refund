@@ -29,6 +29,8 @@ import { DevSkipButton } from '../../admin/DevSkipButton';
 import { IT_STAGE_DATA } from './data/stages';
 import { HP_THEME as theme } from './theme';
 import type { SongItem } from '../../../shared/types/music';
+import { useTitle } from '../../../hooks/useTitle';
+import { useFavicon } from '../../../hooks/useFavicon';
 
 const RIDDLE_ID = 'its-a-hit';
 
@@ -96,6 +98,9 @@ const SortableVinylItem: React.FC<SortableItemProps> = ({
 };
 
 export const ItsAHitRiddle: React.FC = () => {
+  useTitle("Sonic Sequencer");
+  useFavicon(`${import.meta.env.BASE_URL}ih-48.png`);
+
   const [currentStageIdx, setCurrentStageIdx] = useState<number | null>(null);
   const [songs, setSongs] = useState<SongItem[]>([]);
   const [userOrder, setUserOrder] = useState<SongItem[]>([]);
@@ -311,7 +316,7 @@ export const ItsAHitRiddle: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8">
         <CongratsStage 
-          title="It's a Hit!"
+          title="Sonic Sequencer"
           subtitle={
             <div className="flex flex-col gap-4">
               <p>You've mastered the charts and reached the final hill.</p>
@@ -375,7 +380,7 @@ export const ItsAHitRiddle: React.FC = () => {
              <MapPin size={12} className="text-emerald-500" />
              <span className={theme.text.subtitle}>{currentStage.locationName}</span>
           </div>
-          <h1 className={theme.text.title}>It's a Hit!</h1>
+          <h1 className={theme.text.title}>Sonic Sequencer</h1>
         </div>
 
         <div className="flex items-center gap-4">

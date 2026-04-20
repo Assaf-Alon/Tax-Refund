@@ -9,10 +9,15 @@ declare global {
 }
 
 import type { SongItem } from '../../shared/types/music';
+import { useTitle } from '../../hooks/useTitle';
+import { useFavicon } from '../../hooks/useFavicon';
 
 
 
 export const QuizClipTrimmer: React.FC = () => {
+  useTitle('Clip Trimmer');
+  useFavicon(`${import.meta.env.BASE_URL}tm-48.png`);
+
   const [songs, setSongs] = useState<SongItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [videoUrl, setVideoUrl] = useState('');

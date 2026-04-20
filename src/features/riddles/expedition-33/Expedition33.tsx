@@ -6,6 +6,7 @@ import { CongratsStage } from '../../../shared/stages/CongratsStage';
 import { DevSkipButton } from '../../admin/DevSkipButton';
 import { useAudio } from '../../../shared/utils/useAudio';
 import { useFavicon } from '../../../hooks/useFavicon';
+import { useTitle } from '../../../hooks/useTitle';
 
 import { EsquieStage } from './stages/EsquieStage';
 import { ReactiveParryStage } from './stages/ReactiveParryStage';
@@ -23,6 +24,7 @@ import { SHARED_TEXT_THEME, WELCOME_THEME, CONGRATS_THEME } from './theme';
 const RIDDLE_ID = 'expedition-33';
 
 export const Expedition33: React.FC = () => {
+    useTitle("XP33");
     // Optionally use a custom favicon if desired, else it defaults smoothly
     useFavicon(`${import.meta.env.BASE_URL}xp33-256.png`);
 

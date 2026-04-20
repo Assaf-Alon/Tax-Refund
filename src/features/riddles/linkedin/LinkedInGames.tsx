@@ -8,6 +8,7 @@ import { QueensStage } from './stages/QueensStage';
 import { LeaderboardStage } from './stages/LeaderboardStage';
 import { LINKEDIN_WELCOME_THEME, LINKEDIN_CONGRATS_THEME } from './theme';
 import { useFavicon } from '../../../hooks/useFavicon';
+import { useTitle } from '../../../hooks/useTitle';
 import { updateRiddleMetrics, getRiddleProgress, updateRiddleProgress } from '../../../shared/logic/gameState';
 
 const RIDDLE_ID = 'linkedin-games';
@@ -46,6 +47,7 @@ const ProgressHUD: React.FC<{ currentStage: number }> = ({ currentStage }) => {
 };
 
 export const LinkedInGames: React.FC = () => {
+    useTitle("Professional Puzzles");
     useFavicon(`${import.meta.env.BASE_URL}li-48.png`);
 
     const [stage, setStage] = useState<number>(0);

@@ -2,10 +2,15 @@ import { useState, useEffect } from 'react';
 import { loadState } from '../../shared/logic/gameState';
 import { AdminDashboard } from './AdminDashboard';
 import { PinPad } from '../../shared/ui/PinPad';
+import { useTitle } from '../../hooks/useTitle';
+import { useFavicon } from '../../hooks/useFavicon';
 
 const ADMIN_PIN = '0000';
 
 export const PinGate: React.FC = () => {
+    useTitle('System Admin');
+    useFavicon(`${import.meta.env.BASE_URL}ad-48.png`);
+
     const isDev = import.meta.env.DEV;
     const state = loadState();
     const bypassEnabled = isDev && state.adminSettings.bypassPinOnLocalhost;

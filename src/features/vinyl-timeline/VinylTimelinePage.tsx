@@ -20,8 +20,13 @@ import { Timeline } from './components/Timeline';
 import { VinylResultModal } from '../../shared/components/Vinyl/VinylResultModal';
 import { VinylConnectivityError } from '../../shared/components/Vinyl/VinylConnectivityError';
 import { VinylStageProgress } from '../../shared/components/Vinyl/VinylStageProgress';
+import { useTitle } from '../../hooks/useTitle';
+import { useFavicon } from '../../hooks/useFavicon';
 
 export const VinylTimelinePage: React.FC = () => {
+  useTitle('Analog Chronometer');
+  useFavicon(`${import.meta.env.BASE_URL}vt-48.png`);
+
   const { state, setupGame, checkPlacement, proceedToNextPlayer, resetGame, skipCurrentMystery, prepareInitialSongs, consumeListen, endGame } = useVinylGame();
   
   const { 
@@ -182,7 +187,7 @@ export const VinylTimelinePage: React.FC = () => {
             <div className="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/20">
                <Music className="text-white w-8 h-8" />
             </div>
-            <h1 className="text-2xl font-black italic tracking-tighter uppercase">Vinyl Timeline</h1>
+            <h1 className="text-2xl font-black italic tracking-tighter uppercase">Analog Chronometer</h1>
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1 text-center">Put the records in the right order</p>
           </div>
 

@@ -2,8 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import './Translator.css';
 import translatorOverlay from './translator.png';
+import { useTitle } from '../../hooks/useTitle';
+import { useFavicon } from '../../hooks/useFavicon';
 
 export const Translator: React.FC = () => {
+  useTitle('Nomai Translator');
+  useFavicon(`${import.meta.env.BASE_URL}tr-48.png`);
+
   const [hasPermission, setHasPermission] = useState(false);
   const [hasAcknowledgedPrompt, setHasAcknowledgedPrompt] = useState(false);
   const [translatedText, setTranslatedText] = useState('Scanning for Nomai text...');

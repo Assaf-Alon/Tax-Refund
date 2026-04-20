@@ -12,6 +12,7 @@ import outerWildsLogo from './assets/OuterWildsLogo.png';
 import outerWildsTheme from './assets/Outer Wilds.mp3';
 import { useAudio } from '../../../shared/utils/useAudio';
 import { useFavicon } from '../../../hooks/useFavicon';
+import { useTitle } from '../../../hooks/useTitle';
 
 const DelayedTranslatorLink: React.FC<{ delay: number }> = ({ delay }) => {
     const [showTranslatorLink, setShowTranslatorLink] = useState(false);
@@ -51,6 +52,7 @@ import { SHARED_TEXT_THEME, WELCOME_THEME, CONGRATS_THEME } from './theme';
 const RIDDLE_ID = 'outer-wilds';
 
 export const OuterWilds: React.FC = () => {
+    useTitle("Eye Signal Locator");
     useFavicon(`${import.meta.env.BASE_URL}ow-48.png`);
 
     const [stage, setStage] = useState<number>(0);
@@ -179,16 +181,16 @@ export const OuterWilds: React.FC = () => {
             case 10:
                 return (
                     <CongratsStage
-                        title="Mission Accomplished"
-                        subtitle="You've mapped the stars."
+                        title="Signal Synchronized"
+                        subtitle="The loop is broken."
                         theme={CONGRATS_THEME}
                     />
                 );
             default:
                 return (
                     <CongratsStage
-                        title="Mission Accomplished"
-                        subtitle="You've mapped the stars."
+                        title="Signal Synchronized"
+                        subtitle="The loop is broken."
                         theme={CONGRATS_THEME}
                     />
                 );

@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getRiddleProgress, updateRiddleProgress } from '../../shared/logic/gameState';
+import { useTitle } from '../../hooks/useTitle';
+import { useFavicon } from '../../hooks/useFavicon';
 
 const RIDDLE_ID = 'the-cave';
 
 export const TheCave: React.FC = () => {
+    useTitle('Pilot Module');
+    useFavicon(`${import.meta.env.BASE_URL}tc-48.png`);
+
     const [stage, setStage] = useState<number>(0);
     const [inputValue, setInputValue] = useState('');
     const [error, setError] = useState('');
@@ -44,7 +49,7 @@ export const TheCave: React.FC = () => {
     if (stage === 0) {
         return (
             <div className="text-center space-y-8">
-                <h1 className="text-4xl font-bold text-green-500 drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]">The Cave Entrance</h1>
+                <h1 className="text-4xl font-bold text-green-500 drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]">Pilot Module</h1>
                 <p className="max-w-md mx-auto">You stand before a gaping maw in the earth. A cold draft chills your bones.</p>
                 <button
                     onClick={handleEntrance}

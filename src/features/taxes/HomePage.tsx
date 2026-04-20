@@ -1,6 +1,11 @@
 import React from 'react';
+import { useTitle } from '../../hooks/useTitle';
+import { useFavicon } from '../../hooks/useFavicon';
 
 export const HomePage: React.FC = () => {
+    useTitle('Tax Refund Portal');
+    useFavicon(`${import.meta.env.BASE_URL}tax-48.png`);
+
     return (
         <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800">Welcome to the Tax Refund Portal</h2>
