@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Info, X } from 'lucide-react';
 import {
     DndContext,
     closestCenter,
@@ -67,7 +68,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
     row, idx, phase, active, isSolved, handleWordComplete, setActiveIndex, checkDistance, prevRow, prevRowSolved, isJustCorrect,
     draftValue, activeCharIndex, setActiveCharIndex
 }) => {
-    const isLockedRow = row.isLockedInitially && phase !== 'REORDER' && phase !== 'FINAL' && phase !== 'COMPLETE';
+    const isLockedRow = row.isLockedInitially && phase !== 'FINAL' && phase !== 'COMPLETE';
 
     const {
         attributes,
@@ -194,6 +195,15 @@ const SortableRow: React.FC<SortableRowProps> = ({
     );
 };
 
+const checkDistance = (word1: string, word2: string) => {
+    let diff = 0;
+    const len = Math.max(word1.length, word2.length);
+    for (let i = 0; i < len; i++) {
+        if ((word1[i] || '').toLowerCase() !== (word2[i] || '').toLowerCase()) diff++;
+    }
+    return diff;
+};
+
 export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     onAdvance,
 }) => {
@@ -214,6 +224,8 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     const [draftValues, setDraftValues] = useState<Record<string, string[]>>({});
     const [activeCharIndex, setActiveCharIndex] = useState<number>(0);
     const [startTime] = useState(Date.now());
+    const [showDisclaimer, setShowDisclaimer] = useState(false);
+    const [hasTriggeredDisclaimer, setHasTriggeredDisclaimer] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -232,22 +244,13 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
         })
     );
 
-    const checkDistance = (word1: string, word2: string) => {
-        let diff = 0;
-        const len = Math.max(word1.length, word2.length);
-        for (let i = 0; i < len; i++) {
-            if ((word1[i] || '').toLowerCase() !== (word2[i] || '').toLowerCase()) diff++;
-        }
-        return diff;
-    };
-
     const isMiddleSolved = useMemo(() => {
         return rows.slice(1, rows.length - 1).every(row =>
             solvedWords[row.id]?.toLowerCase() === row.answer.toLowerCase()
         );
     }, [rows, solvedWords]);
 
-    const isMiddleOrdered = useMemo(() => {
+    const isInternalMiddleChainValid = useMemo(() => {
         if (!isMiddleSolved) return false;
         const middle = rows.slice(1, rows.length - 1);
         for (let i = 1; i < middle.length; i++) {
@@ -255,6 +258,27 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
         }
         return true;
     }, [rows, isMiddleSolved]);
+
+    const isMiddleOrdered = useMemo(() => {
+        if (!isInternalMiddleChainValid) return false;
+
+        const firstMiddle = rows[1];
+        const lastMiddle = rows[rows.length - 2];
+        const topTerm = rows[0];
+        const bottomTerm = rows[rows.length - 1];
+
+        // We check if the middle chain connects to the terminals either way (normal or flipped)
+        const normalConnect = checkDistance(topTerm.answer, firstMiddle.answer) === 1 &&
+            checkDistance(bottomTerm.answer, lastMiddle.answer) === 1;
+        const swappedConnect = checkDistance(bottomTerm.answer, firstMiddle.answer) === 1 &&
+            checkDistance(topTerm.answer, lastMiddle.answer) === 1;
+
+        return normalConnect || swappedConnect;
+    }, [rows, isInternalMiddleChainValid]);
+
+    const isFloatingChain = useMemo(() => {
+        return isInternalMiddleChainValid && !isMiddleOrdered;
+    }, [isInternalMiddleChainValid, isMiddleOrdered]);
 
     const isLadderValid = useMemo(() => {
         const allSolved = rows.every(row =>
@@ -276,8 +300,14 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
         if (isMiddleOrdered) {
             const firstMiddle = rows[1];
             const topRow = rows[0];
-            // If top row (stark/store) doesn't connect to the first middle row, swap terminal constants
-            if (checkDistance(topRow.answer, firstMiddle.answer) !== 1) {
+            const bottomRow = rows[rows.length - 1];
+
+            const topConnects = checkDistance(topRow.answer, firstMiddle.answer) === 1;
+            const bottomConnects = checkDistance(bottomRow.answer, firstMiddle.answer) === 1;
+
+            // Only swap if top doesn't connect but bottom DOES connect
+            // This prevents the infinite swap loop when neither connects
+            if (!topConnects && bottomConnects) {
                 setRows(prev => {
                     const next = [...prev];
                     [next[0], next[next.length - 1]] = [next[next.length - 1], next[0]];
@@ -285,7 +315,14 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                 });
             }
         }
-    }, [isMiddleOrdered, rows, checkDistance]);
+    }, [isMiddleOrdered, rows]);
+
+    useEffect(() => {
+        if (phase === 'FINAL' && !hasTriggeredDisclaimer) {
+            setShowDisclaimer(true);
+            setHasTriggeredDisclaimer(true);
+        }
+    }, [phase, hasTriggeredDisclaimer]);
 
     useEffect(() => {
         if (phase === 'COMPLETE') {
@@ -451,7 +488,7 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
     const currentHint = useMemo(() => {
         if (phase === 'FINAL' || phase === 'COMPLETE') {
             const baseClue = WORDS.find(w => w.isLockedInitially)?.clue || '';
-            return ` The top + bottom rows = ${baseClue}. Keep in mind: The first word may be at the bottom. `;
+            return ` The top + bottom rows = ${baseClue}. `;
         }
         return rows[activeIndex]?.clue || '';
     }, [phase, activeIndex, rows]);
@@ -515,7 +552,9 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                                 : phase === 'FINAL'
                                     ? "Ladder sorted! Solve the final two rows."
                                     : phase === 'REORDER'
-                                        ? "Middle words solved! Drag rows into a valid chain."
+                                        ? isFloatingChain
+                                            ? "You've built a valid chain, but I'm too stupid to connect it to the endcaps. Forgive me and try a different order!"
+                                            : "Middle words solved! Drag rows into a valid chain."
                                         : "Type middle words first, then drag to sort."}
                         </p>
                     </div>
@@ -563,6 +602,33 @@ export const CrossclimbStage: React.FC<CrossclimbStageProps> = ({
                     />
                 </div>
             </div>
+
+            {/* Disclaimer Modal */}
+            {showDisclaimer && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-6 z-[60] animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-[#1b1f23] rounded-xl max-w-sm w-full shadow-2xl animate-in zoom-in-95 overflow-hidden border border-gray-200 dark:border-gray-800">
+                        <div className="bg-[#0a66c2] p-3 text-white flex justify-between items-center">
+                            <h3 className="font-bold text-sm flex items-center gap-2 uppercase tracking-wider">
+                                <Info size={16} /> Professional Context
+                            </h3>
+                            <button onClick={() => setShowDisclaimer(false)} className="hover:bg-white/20 p-1 rounded-full transition-colors">
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed italic">
+                                "Historical Artifact: This stage was designed while the player was still deep in the crypto trenches. Any professional PTSD triggered by the final words is purely coincidental."
+                            </p>
+                            <button 
+                                onClick={() => setShowDisclaimer(false)}
+                                className="w-full py-2 bg-[#0a66c2] text-white rounded-full font-bold text-sm hover:bg-[#084e96] transition-colors shadow-md"
+                            >
+                                Acknowledge & Proceed
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
