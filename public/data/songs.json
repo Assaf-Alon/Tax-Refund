@@ -5741,9 +5741,9 @@
   },
   {
     "id": 1776507825322,
-    "query": "Daoko × Kenshi Yonezu - Uchiage Hanabi",
+    "query": "Daoko x Kenshi Yonezu - Uchiage Hanabi",
     "info": "Fireworks (Movie) Theme 1",
-    "name": "Daoko × Kenshi Yonezu - Uchiage Hanabi",
+    "name": "Daoko x Kenshi Yonezu - Uchiage Hanabi",
     "youtubeId": "yuTesDwv6uA",
     "startTime": 0,
     "endTime": 25,
@@ -8284,6 +8284,34 @@
     "altStartTime": 18,
     "altEndTime": 45,
     "year": "2010",
+    "category": "Custom",
+    "status": "completed"
+  },
+  {
+    "id": 1777093627963,
+    "query": "Amatsuki - Outer Science",
+    "info": "",
+    "name": "Amatsuki - Outer Science",
+    "youtubeId": "SL7D4a6WGHk",
+    "startTime": 54,
+    "endTime": 81,
+    "altStartTime": 30,
+    "altEndTime": 51,
+    "year": "2013",
+    "category": "Custom",
+    "status": "completed"
+  },
+  {
+    "id": 1777093627964,
+    "query": "Amatsuki - Kaishin no Ichigeki",
+    "info": "",
+    "name": "Amatsuki - Kaishin no Ichigeki",
+    "youtubeId": "Zz9mlMwGdo4",
+    "startTime": 43,
+    "endTime": 66,
+    "altStartTime": 0,
+    "altEndTime": 18,
+    "year": "2018",
     "category": "Custom",
     "status": "completed"
   }
