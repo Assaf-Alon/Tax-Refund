@@ -40,15 +40,15 @@ Located in `src/features/riddles/spider-lair/stages/`. Thin components that bake
 |-------|-----------|------------------|------------------|
 | **0** | `EntranceStage` | "Enter the Webs" | (Button Click) |
 | **1** | `SpiderLairPinStage` | 4-digit PIN | `2468` |
-| **2** | `SpiderLairLyricsStage`| Spider Dance Lyrics | Line completion |
-| **3** | `SpiderLairTextAnswerStage` | "I sing, I fight, I kill..." | `skarrsinger karmelita`, `karmelita` |
+| **2** | `SpiderLairLyricsStage`| Spider Dance Lyrics ("I think it's time for a date") | Line completion |
+| **3** | `SpiderLairTextAnswerStage` | "I sing, I fight, I kill..." (shows statue initially; fight image on hint) | `skarrsinger karmelita`, `karmelita` |
 | **4** | `SpiderLairTextAnswerStage` | "How many acts are there to Silksong?" | `3` |
 | **5** | `SpiderLairTextAnswerStage` | "In what act does Pharloom get aids?" | `3` |
-| **6** | `SpiderLairTextAnswerStage` | "I use them to help against tough opponents..." | `friends`, `cogfly` |
+| **6** | `SpiderLairTextAnswerStage` | Cogfly Image / Allies in Battle | `friends`, `cogfly` |
 | **7** | `SpiderLairTextAnswerStage` | Clawmaiden Image | `silk monster`, `clawmaiden` |
 | **8** | `SpiderLairTextAnswerStage` | Slab Image | `the slab`, `slab` |
 | **9** | `SpiderLairTextAnswerStage` | Mite Image | `hitler`, `mite` |
-| **10**| `SpiderLairTextAnswerStage`| "What CLI command does Hornet often use..." | `git gud`, `git good` |
+| **10**| `SpiderLairTextAnswerStage`| Git Gud Battle Image / "What CLI command does Hornet often use..." | `git gud`, `git good` |
 | **11**| `CongratsPage` | Final Success Screen| N/A |
 
 ## Verification Plan

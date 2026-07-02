@@ -8,6 +8,10 @@ import clawmaidenImg from './assets/Clawmaiden.png';
 import { CongratsPage } from './CongratsPage';
 import slabImg from './assets/slab.png';
 import miteImg from './assets/mite.png';
+import cogflyImg from './assets/cogfly.png';
+import karmelitaStatueImg from './assets/karmelita-statue.png';
+import karmelitaFightImg from './assets/karmelita-fight.png';
+import gitGudFightImg from './assets/git-gud-fight.png';
 import spiderDanceOriginal from './assets/Toby Fox - Spider Dance.mp3';
 import spiderDanceCover from './assets/Spider Dance Cover.mp3';
 import { useAudio } from '../../../shared/utils/useAudio';
@@ -22,6 +26,7 @@ export const SpiderLair: React.FC = () => {
     useFavicon(`${import.meta.env.BASE_URL}sl-48.png`);
 
     const [stage, setStage] = useState<number>(0);
+    const [hintRevealed, setHintRevealed] = useState<boolean>(false);
 
     let audioSrc: string | null = null;
     if (stage >= 0 && stage <= 2) {
@@ -40,6 +45,7 @@ export const SpiderLair: React.FC = () => {
     const handleAdvance = () => {
         const nextStage = stage + 1;
         setStage(nextStage);
+        setHintRevealed(false); // Reset for future stages
         updateRiddleProgress(RIDDLE_ID, nextStage);
     };
 
@@ -64,8 +70,12 @@ export const SpiderLair: React.FC = () => {
                             </>
                         }
                         placeholder="Name..."
-                        acceptedAnswers={['skarrsinger karmelita', 'karmelita']}
-                        hint="A singer from Silksong... with claws."
+                        image={hintRevealed ? karmelitaFightImg : karmelitaStatueImg}
+                        imageAlt={hintRevealed ? "Karmelita Fighting" : "Karmelita Statue"}
+                        acceptedAnswers={['skarrsinger karmelita', 'skarrsinger', 'karmelita']}
+                        hint="Her name sounds kinda lika Caramel, but with a K."
+                        hintCooldown={15}
+                        onHintReveal={() => setHintRevealed(true)}
                         onAdvance={handleAdvance}
                     />
                 );
@@ -86,7 +96,7 @@ export const SpiderLair: React.FC = () => {
                         prompt="In what act does Pharloom get aids?"
                         acceptedAnswers={['3']}
                         hint="The final act holds the darkest secret..."
-                        hintCooldown={60}
+                        hintCooldown={30}
                         errorMessage="Wrong answer. The web trembles."
                         onAdvance={handleAdvance}
                     />
@@ -96,9 +106,11 @@ export const SpiderLair: React.FC = () => {
                     <SpiderLairTextAnswerStage
                         title="Allies in Battle"
                         prompt="I use them to help against tough opponents..."
+                        image={cogflyImg}
+                        imageAlt="Allies in battle"
                         acceptedAnswers={['friends', 'cogfly']}
                         hint="Small, buzzy, and loyal..."
-                        hintCooldown={60}
+                        hintCooldown={20}
                         errorMessage="That's not who helps you... 🛸"
                         onAdvance={handleAdvance}
                     />
@@ -111,7 +123,8 @@ export const SpiderLair: React.FC = () => {
                         image={clawmaidenImg}
                         imageAlt="A mysterious creature"
                         acceptedAnswers={['silk monster', 'clawmaiden']}
-                        hint="Woven from silk, born to destroy..."
+                        hint="Like the cookie monster, but it eats something else..."
+                        hintCooldown={30}
                         errorMessage="The creature stares at you, unimpressed..."
                         placeholder="Name this creature..."
                         onAdvance={handleAdvance}
@@ -123,8 +136,8 @@ export const SpiderLair: React.FC = () => {
                         title="Name This Place"
                         prompt="What's the name of the place in this image?"
                         acceptedAnswers={['the slab', 'slab']}
-                        hint="A flat, cold resting place..."
-                        hintCooldown={60}
+                        hint="Sounds kind of like 'the slap'"
+                        hintCooldown={20}
                         errorMessage="That's wrong. Try again."
                         onAdvance={handleAdvance}
                         image={slabImg}
@@ -138,7 +151,7 @@ export const SpiderLair: React.FC = () => {
                         prompt="What's the name of this f*cker?"
                         acceptedAnswers={['hitler', 'mite']}
                         hint="Small, annoying, and a Nazi"
-                        hintCooldown={60}
+                        hintCooldown={30}
                         errorMessage="Nope. Try a specific enemy of Jews..."
                         onAdvance={handleAdvance}
                         image={miteImg}
@@ -150,6 +163,8 @@ export const SpiderLair: React.FC = () => {
                     <SpiderLairTextAnswerStage
                         title="A Command to Remember"
                         prompt="What CLI command does Hornet often use when speaking to the knight?"
+                        image={gitGudFightImg}
+                        imageAlt="Hornet and Knight battle"
                         acceptedAnswers={['git gud', 'git good']}
                         hint="A version control system..."
                         hintCooldown={60}

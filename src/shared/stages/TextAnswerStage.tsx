@@ -17,6 +17,7 @@ export interface TextAnswerStageProps {
     submitButtonLabel?: string;
     theme?: TextAnswerTheme;
     exactMatchOnly?: boolean;
+    onHintReveal?: () => void;
 }
 
 export const TextAnswerStage: React.FC<TextAnswerStageProps> = ({
@@ -33,6 +34,7 @@ export const TextAnswerStage: React.FC<TextAnswerStageProps> = ({
     submitButtonLabel = 'Answer',
     theme,
     exactMatchOnly = false,
+    onHintReveal,
 }) => {
     const [inputValue, setInputValue] = useState('');
     const [error, setError] = useState('');
@@ -98,7 +100,7 @@ export const TextAnswerStage: React.FC<TextAnswerStageProps> = ({
             )}
 
             {hint && (
-                <HintButton hint={hint} cooldownSeconds={hintCooldown} />
+                <HintButton hint={hint} cooldownSeconds={hintCooldown} onReveal={onHintReveal} />
             )}
         </div>
     );

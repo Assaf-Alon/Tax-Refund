@@ -4,9 +4,6 @@ import { SPIDER_FILL_WORDS_THEME } from '../theme';
 
 const LYRICS_LINES = [
     "I think it's time for a date",
-    "I've got a craving and I think you're my taste",
-    "So won't you come out and play?",
-    "Darling it's your lucky day",
 ];
 
 interface SpiderLairLyricsStageProps {

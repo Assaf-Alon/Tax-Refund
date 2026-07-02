@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 interface HintButtonProps {
     hint: string;
     cooldownSeconds: number;
+    onReveal?: () => void;
 }
 
-export const HintButton: React.FC<HintButtonProps> = ({ hint, cooldownSeconds }) => {
+export const HintButton: React.FC<HintButtonProps> = ({ hint, cooldownSeconds, onReveal }) => {
     const [timeLeft, setTimeLeft] = useState(cooldownSeconds);
     const [showHint, setShowHint] = useState(false);
 
@@ -28,6 +29,7 @@ export const HintButton: React.FC<HintButtonProps> = ({ hint, cooldownSeconds })
     const handleClick = () => {
         if (timeLeft === 0) {
             setShowHint(true);
+            onReveal?.();
         }
     };
 

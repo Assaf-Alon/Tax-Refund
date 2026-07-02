@@ -98,11 +98,12 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
 
     // Check completion whenever values change
     useEffect(() => {
+        if (locked) return;
         const joined = effectiveValues.join('').toLowerCase();
         if (joined.length > 0 && joined === expectedValue.toLowerCase()) {
             onComplete();
         }
-    }, [effectiveValues, expectedValue, onComplete]);
+    }, [effectiveValues, expectedValue, onComplete, locked]);
 
     const findNextInput = (fromIndex: number): number => {
         for (let i = fromIndex + 1; i < chars.length; i++) {
@@ -133,9 +134,7 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
                 newValues[nextIdx] = second;
                 setInternalValues(newValues);
                 const nextNextIdx = findNextInput(nextIdx);
-                requestAnimationFrame(() => {
-                    inputRefs.current[nextNextIdx !== -1 ? nextNextIdx : nextIdx]?.focus();
-                });
+                inputRefs.current[nextNextIdx !== -1 ? nextNextIdx : nextIdx]?.focus();
                 return;
             }
         }
@@ -147,9 +146,7 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
         if (char) {
             const nextIdx = findNextInput(index);
             if (nextIdx !== -1) {
-                requestAnimationFrame(() => {
-                    inputRefs.current[nextIdx]?.focus();
-                });
+                inputRefs.current[nextIdx]?.focus();
             }
         }
     };
