@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getRiddleProgress, updateRiddleProgress } from '../../../shared/logic/gameState';
+import { getRiddleProgress, updateRiddleProgress, resetRiddleProgress } from '../../../shared/logic/gameState';
 import { WelcomeStage } from '../../../shared/stages/WelcomeStage';
 import { TextAnswerStage } from '../../../shared/stages/TextAnswerStage';
 import { CongratsStage } from '../../../shared/stages/CongratsStage';
@@ -117,7 +117,17 @@ export const Expedition33: React.FC = () => {
                         title="The Paintress Falls"
                         subtitle="You have completed the Expedition."
                         theme={CONGRATS_THEME}
-                    />
+                    >
+                        <button
+                            onClick={() => {
+                                resetRiddleProgress(RIDDLE_ID);
+                                setStage(0);
+                            }}
+                            className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-bold transition-all duration-300 shadow-md uppercase tracking-wider text-xs"
+                        >
+                            Restart Expedition
+                        </button>
+                    </CongratsStage>
                 );
             default:
                 return (
@@ -125,7 +135,17 @@ export const Expedition33: React.FC = () => {
                         title="The Paintress Falls"
                         subtitle="You have completed the Expedition."
                         theme={CONGRATS_THEME}
-                    />
+                    >
+                        <button
+                            onClick={() => {
+                                resetRiddleProgress(RIDDLE_ID);
+                                setStage(0);
+                            }}
+                            className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-bold transition-all duration-300 shadow-md uppercase tracking-wider text-xs"
+                        >
+                            Restart Expedition
+                        </button>
+                    </CongratsStage>
                 );
         }
     };

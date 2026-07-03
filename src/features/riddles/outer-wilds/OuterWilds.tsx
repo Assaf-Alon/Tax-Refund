@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getRiddleProgress, updateRiddleProgress } from '../../../shared/logic/gameState';
+import { getRiddleProgress, updateRiddleProgress, resetRiddleProgress } from '../../../shared/logic/gameState';
 import { WelcomeStage } from '../../../shared/stages/WelcomeStage';
 import { DrawSequenceStage } from '../../../shared/stages/DrawSequenceStage';
 import { TextAnswerStage } from '../../../shared/stages/TextAnswerStage';
@@ -184,7 +184,17 @@ export const OuterWilds: React.FC = () => {
                         title="Signal Synchronized"
                         subtitle="The loop is broken."
                         theme={CONGRATS_THEME}
-                    />
+                    >
+                        <button
+                            onClick={() => {
+                                resetRiddleProgress(RIDDLE_ID);
+                                setStage(0);
+                            }}
+                            className="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-full font-bold transition-all duration-300 shadow-md uppercase tracking-wider text-xs"
+                        >
+                            Restart Loop
+                        </button>
+                    </CongratsStage>
                 );
             default:
                 return (
@@ -192,7 +202,17 @@ export const OuterWilds: React.FC = () => {
                         title="Signal Synchronized"
                         subtitle="The loop is broken."
                         theme={CONGRATS_THEME}
-                    />
+                    >
+                        <button
+                            onClick={() => {
+                                resetRiddleProgress(RIDDLE_ID);
+                                setStage(0);
+                            }}
+                            className="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-full font-bold transition-all duration-300 shadow-md uppercase tracking-wider text-xs"
+                        >
+                            Restart Loop
+                        </button>
+                    </CongratsStage>
                 );
         }
     };

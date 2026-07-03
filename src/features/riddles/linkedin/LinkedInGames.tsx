@@ -9,7 +9,7 @@ import { LeaderboardStage } from './stages/LeaderboardStage';
 import { LINKEDIN_WELCOME_THEME, LINKEDIN_CONGRATS_THEME } from './theme';
 import { useFavicon } from '../../../hooks/useFavicon';
 import { useTitle } from '../../../hooks/useTitle';
-import { updateRiddleMetrics, getRiddleProgress, updateRiddleProgress } from '../../../shared/logic/gameState';
+import { updateRiddleMetrics, getRiddleProgress, updateRiddleProgress, resetRiddleProgress } from '../../../shared/logic/gameState';
 
 const RIDDLE_ID = 'linkedin-games';
 
@@ -147,10 +147,14 @@ export const LinkedInGames: React.FC = () => {
                             {/* Exit Button */}
                             <div className="animate-in fade-in duration-1000 delay-1000">
                                 <button 
-                                    onClick={() => window.location.href = '#/'}
+                                    onClick={() => {
+                                        resetRiddleProgress(RIDDLE_ID);
+                                        setStage(0);
+                                        setIsShowingLeaderboard(false);
+                                    }}
                                     className="px-8 py-3 bg-[#0a66c2] hover:bg-[#004182] text-white rounded-full font-bold transition-all duration-300 shadow-md"
                                 >
-                                    Return to Personal Dashboard
+                                    Start Again
                                 </button>
                             </div>
                         </div>

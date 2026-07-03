@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getRiddleProgress, updateRiddleProgress } from '../../../shared/logic/gameState';
+import { getRiddleProgress, updateRiddleProgress, resetRiddleProgress } from '../../../shared/logic/gameState';
 import { EntranceStage } from './stages/EntranceStage';
 import { SpiderLairPinStage } from './stages/SpiderLairPinStage';
 import { SpiderLairLyricsStage } from './stages/SpiderLairLyricsStage';
@@ -173,9 +173,23 @@ export const SpiderLair: React.FC = () => {
                     />
                 );
             case 11:
-                return <CongratsPage />;
+                return (
+                    <CongratsPage 
+                        onRestart={() => {
+                            resetRiddleProgress(RIDDLE_ID);
+                            setStage(0);
+                        }} 
+                    />
+                );
             default:
-                return <CongratsPage />;
+                return (
+                    <CongratsPage 
+                        onRestart={() => {
+                            resetRiddleProgress(RIDDLE_ID);
+                            setStage(0);
+                        }} 
+                    />
+                );
         }
     };
 

@@ -2,7 +2,11 @@ import React from 'react';
 import carrefourImg from './assets/Carrefour.png';
 import gitGudGif from './assets/git-gud.gif';
 
-export const CongratsPage: React.FC = () => {
+export interface CongratsPageProps {
+    onRestart: () => void;
+}
+
+export const CongratsPage: React.FC<CongratsPageProps> = ({ onRestart }) => {
     return (
         <div className="text-center space-y-8">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#ff007f] drop-shadow-[0_0_15px_rgba(255,0,127,0.8)]">
@@ -31,6 +35,15 @@ export const CongratsPage: React.FC = () => {
 
             <div className="p-4 border border-[#ff007f]/30 bg-black/40 inline-block font-mono text-xs text-[#ff007f]/70">
                 Web Status: CLEARED
+            </div>
+
+            <div className="mt-8">
+                <button
+                    onClick={onRestart}
+                    className="px-8 py-3 bg-[#b0005d] hover:bg-[#ff007f] text-white rounded-full font-bold transition-all duration-300 shadow-md uppercase tracking-wider text-xs"
+                >
+                    Enter the Lair Again
+                </button>
             </div>
         </div>
     );

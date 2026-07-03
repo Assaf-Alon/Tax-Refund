@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getRiddleProgress, updateRiddleProgress } from '../../shared/logic/gameState';
+import { getRiddleProgress, updateRiddleProgress, resetRiddleProgress } from '../../shared/logic/gameState';
 import { useTitle } from '../../hooks/useTitle';
 import { useFavicon } from '../../hooks/useFavicon';
 
@@ -110,8 +110,19 @@ export const TheCave: React.FC = () => {
         <div className="text-center space-y-6">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-green-500 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]">CONGRATULATIONS</h1>
             <p className="text-xl opacity-80">You have completed the pilot module.</p>
-            <div className="p-4 border border-green-900/50 bg-black/40 inline-block font-mono text-xs">
+            <div className="p-4 border border-green-900/50 bg-black/40 inline-block font-mono text-xs mb-8">
                 System Status: OPERATIONAL
+            </div>
+            <div>
+                <button
+                    onClick={() => {
+                        resetRiddleProgress(RIDDLE_ID);
+                        setStage(0);
+                    }}
+                    className="px-8 py-3 bg-green-900/30 border border-green-500/50 hover:bg-green-500/20 hover:border-green-400 text-green-300 transition-all duration-300 rounded uppercase tracking-widest text-sm"
+                >
+                    Restart Module
+                </button>
             </div>
         </div>
     );
