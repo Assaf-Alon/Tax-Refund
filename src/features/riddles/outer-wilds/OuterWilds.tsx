@@ -10,6 +10,11 @@ import { GhostMatterRiverStage } from './stages/GhostMatterRiverStage';
 import { QuantumEntanglementStage } from './stages/QuantumEntanglementStage';
 import outerWildsLogo from './assets/OuterWildsLogo.png';
 import outerWildsTheme from './assets/Outer Wilds.mp3';
+import feldsparImg from './assets/feldspar.jpg';
+import nomaiImg from './assets/nomai.jpg';
+import supernovaImg from './assets/Supernova.gif';
+import darkBrambleImg from './assets/dark-bramble.gif';
+import hourglassTwinsImg from './assets/hourglass-twins.png';
 import { useAudio } from '../../../shared/utils/useAudio';
 import { useFavicon } from '../../../hooks/useFavicon';
 import { useTitle } from '../../../hooks/useTitle';
@@ -56,6 +61,8 @@ export const OuterWilds: React.FC = () => {
     useFavicon(`${import.meta.env.BASE_URL}ow-48.png`);
 
     const [stage, setStage] = useState<number>(0);
+    const [ashTwinHintRevealed, setAshTwinHintRevealed] = useState<boolean>(false);
+    const [darkBrambleHintRevealed, setDarkBrambleHintRevealed] = useState<boolean>(false);
 
     // Audio should play starting from stage 0 through 10
     const audioSrc = stage >= 0 && stage < 11 ? outerWildsTheme : null;
@@ -69,6 +76,8 @@ export const OuterWilds: React.FC = () => {
     const handleAdvance = () => {
         const nextStage = stage + 1;
         setStage(nextStage);
+        setAshTwinHintRevealed(false);
+        setDarkBrambleHintRevealed(false);
         updateRiddleProgress(RIDDLE_ID, nextStage);
     };
 
@@ -91,6 +100,10 @@ export const OuterWilds: React.FC = () => {
                         prompt="The sun explodes in how many minutes?"
                         acceptedAnswers={["22"]}
                         exactMatchOnly={true}
+                        hint="Think of the length of each time loop in the game in minutes. It is a two-digit number."
+                        hintCooldown={15}
+                        image={supernovaImg}
+                        imageAlt="Supernova"
                         onAdvance={handleAdvance}
                         theme={SHARED_TEXT_THEME}
                     />
@@ -102,6 +115,10 @@ export const OuterWilds: React.FC = () => {
                         prompt="Who plays the harmonica deep inside a corrupted seed?"
                         acceptedAnswers={["feldspar"]}
                         exactMatchOnly={false}
+                        hint="The first Hearthian to ever launch into space, now stranded in Dark Bramble."
+                        hintCooldown={20}
+                        image={feldsparImg}
+                        imageAlt="Feldspar"
                         onAdvance={handleAdvance}
                         theme={SHARED_TEXT_THEME}
                     />
@@ -117,6 +134,10 @@ export const OuterWilds: React.FC = () => {
                         prompt="They arrived on The Vessel and built the Ash Twin Project. Who are they?"
                         acceptedAnswers={["nomai", "the nomai"]}
                         exactMatchOnly={false}
+                        hint="Three-eyed nomadic species who preceded the Hearthians."
+                        hintCooldown={20}
+                        image={nomaiImg}
+                        imageAlt="Nomai"
                         onAdvance={handleAdvance}
                         theme={SHARED_TEXT_THEME}
                     />
@@ -128,6 +149,11 @@ export const OuterWilds: React.FC = () => {
                         prompt="What powers the Ash Twin Project?"
                         acceptedAnswers={["supernova", "the sun", "the sun exploding", "sun", "a supernova"]}
                         exactMatchOnly={false}
+                        hint="The energy required to send memories back in time. It requires a star to die."
+                        hintCooldown={30}
+                        image={ashTwinHintRevealed ? supernovaImg : hourglassTwinsImg}
+                        imageAlt={ashTwinHintRevealed ? "Supernova" : "Hourglass Twins"}
+                        onHintReveal={() => setAshTwinHintRevealed(true)}
                         onAdvance={handleAdvance}
                         theme={SHARED_TEXT_THEME}
                     />
@@ -147,6 +173,11 @@ export const OuterWilds: React.FC = () => {
                         prompt="F*ck this planet."
                         acceptedAnswers={["dark bramble"]}
                         exactMatchOnly={false}
+                        hint="Where anglerfish await in the fog."
+                        hintCooldown={10}
+                        image={darkBrambleHintRevealed ? darkBrambleImg : undefined}
+                        imageAlt="Dark Bramble"
+                        onHintReveal={() => setDarkBrambleHintRevealed(true)}
                         onAdvance={handleAdvance}
                         theme={SHARED_TEXT_THEME}
                     />

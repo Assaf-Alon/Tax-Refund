@@ -102,9 +102,8 @@ export const Translator: React.FC = () => {
     <div className="translator-feature">
       {!hasAcknowledgedPrompt ? (
         <div id="permission-ui">
-          <h2>Location Required</h2>
-          {/* TODO - UPDATE LOCATION */}
-          <p>Go behind the building.</p>
+          <h2>Location Required!!</h2>
+          <p>Go to the other side of the building. Near the Super Pharm square. Search for a tree with a hint...</p>
           <button id="start-btn" onClick={() => setHasAcknowledgedPrompt(true)}>OK</button>
         </div>
       ) : !hasPermission ? (
