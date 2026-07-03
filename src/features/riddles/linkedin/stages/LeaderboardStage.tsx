@@ -14,6 +14,7 @@ interface Competitor {
     time: number;
     isUser?: boolean;
     rank: number;
+    avatarUrl?: string;
 }
 
 const AvatarSilhouette: React.FC<{ size?: number; className?: string }> = ({ size = 32, className = "" }) => (
@@ -24,6 +25,34 @@ const AvatarSilhouette: React.FC<{ size?: number; className?: string }> = ({ siz
     </div>
 );
 
+const MEMBER_SINCE_YEARS: Record<string, number> = {
+    "Assaf Alon": 2018,
+    "Meshi Peled": 2019,
+    "Zero": 2006,
+    "Ishigami Senku": 2019,
+    "Bill Gates": 2016,
+    "Steve Jobs": 2011,
+    "Shaul Almagor": 2015,
+    "Roy Peled": 2022,
+    "Yves (Eve) Godin": 2017,
+    "Jeffrey Bezos": 2017,
+    "L.": 2006
+};
+
+const getMemberSinceYear = (name: string): number => {
+    const normalized = name.trim();
+    if (MEMBER_SINCE_YEARS[normalized] !== undefined) {
+        return MEMBER_SINCE_YEARS[normalized];
+    }
+    // Check partial matches for flexibility
+    for (const key of Object.keys(MEMBER_SINCE_YEARS)) {
+        if (normalized.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(normalized.toLowerCase())) {
+            return MEMBER_SINCE_YEARS[key];
+        }
+    }
+    return 2024;
+};
+
 export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, userTime, onNext, isLastGame }) => {
     const formatTime = (seconds: number) => {
         if (isNaN(seconds) || seconds <= 0) return "--s";
@@ -33,25 +62,35 @@ export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, us
     };
 
     const competitors: Competitor[] = useMemo(() => {
-        const names = [
-            "Sarah Jenkins", "Michael Chen", "Elena Rodriguez", "David Smith", 
-            "Aisha Khan", "James Wilson", "Maria Garcia", "Robert Taylor"
-        ];
-        
-        // Shuffle names partially for some variety
-        const shuffled = [...names].sort(() => Math.random() - 0.5);
-
-        // If userTime is 0 or NaN (welcome screen bug), use a default set of values for flavor
         const displayTime = (isNaN(userTime) || userTime <= 0) ? 60 : userTime;
 
-        return [
-            { name: shuffled[0], time: displayTime * 0.88, rank: 1 },
-            { name: "You", time: userTime, rank: 2, isUser: true },
-            { name: shuffled[1], time: displayTime * 1.15, rank: 3 },
-            { name: shuffled[2], time: displayTime * 1.42, rank: 4 },
-            { name: shuffled[3], time: displayTime * 1.68, rank: 5 },
-        ];
-    }, [userTime]);
+        if (gameName === "Crossclimb") {
+            return [
+                { name: "Roy Peled", time: displayTime * 0.85, rank: 1, avatarUrl: "/images/leaderboard/roy-peled.jpg" },
+                { name: "Meshi Peled", time: userTime, rank: 2, isUser: true, avatarUrl: "/images/leaderboard/meshi-peled.jpg" },
+                { name: "Ishigami Senku", time: displayTime * 1.15, rank: 3, avatarUrl: "/images/leaderboard/ishigami-senku.png" },
+                { name: "Bill Gates", time: displayTime * 1.42, rank: 4, avatarUrl: "/images/leaderboard/bill-gates.png" },
+                { name: "Assaf Alon", time: displayTime * 1.68, rank: 5, avatarUrl: "/images/leaderboard/assaf-alon.jpg" },
+            ];
+        } else if (gameName === "Pinpoint") {
+            return [
+                { name: "Roy Peled", time: displayTime * 0.85, rank: 1, avatarUrl: "/images/leaderboard/roy-peled.jpg" },
+                { name: "Meshi Peled", time: userTime, rank: 2, isUser: true, avatarUrl: "/images/leaderboard/meshi-peled.jpg" },
+                { name: "Zero", time: displayTime * 1.15, rank: 3, avatarUrl: "/images/leaderboard/zero.png" },
+                { name: "Bill Gates", time: displayTime * 1.42, rank: 4, avatarUrl: "/images/leaderboard/bill-gates.png" },
+                { name: "Yves (Eve) Godin", time: displayTime * 1.68, rank: 5, avatarUrl: "/images/leaderboard/yves-godin.png" },
+            ];
+        } else {
+            // Queens or fallback
+            return [
+                { name: "Roy Peled", time: displayTime * 0.85, rank: 1, avatarUrl: "/images/leaderboard/roy-peled.jpg" },
+                { name: "Meshi Peled", time: userTime, rank: 2, isUser: true, avatarUrl: "/images/leaderboard/meshi-peled.jpg" },
+                { name: "L.", time: displayTime * 1.15, rank: 3, avatarUrl: "/images/leaderboard/l.png" },
+                { name: "Jeffrey Bezos", time: displayTime * 1.42, rank: 4, avatarUrl: "/images/leaderboard/jeff-bezos.png" },
+                { name: "Shaul Almagor", time: displayTime * 1.68, rank: 5, avatarUrl: "/images/leaderboard/shaul-almagor.jpg" },
+            ];
+        }
+    }, [gameName, userTime]);
 
     const easterEgg = useMemo(() => {
         return getEasterEgg(gameName, userTime);
@@ -74,20 +113,29 @@ export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, us
                     {competitors.map((c) => (
                         <div key={c.rank} className={`flex items-center gap-4 p-4 transition-colors ${c.isUser ? 'bg-[#f0f7ff] dark:bg-blue-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}>
                             <div className="w-8 flex justify-center font-bold text-lg">
-                                {c.rank === 1 ? <Medal className="text-[#c1a03e] w-6 h-6" /> : 
-                                 c.rank === 2 ? <Medal className="text-[#a4aab2] w-6 h-6" /> : 
-                                 c.rank === 3 ? <Medal className="text-[#b27248] w-6 h-6" /> : 
-                                 <span className="text-gray-400 dark:text-gray-600 font-sans text-base">{c.rank}</span>}
+                                {c.rank === 1 ? <Medal className="text-[#c1a03e] w-6 h-6" /> :
+                                    c.rank === 2 ? <Medal className="text-[#a4aab2] w-6 h-6" /> :
+                                        c.rank === 3 ? <Medal className="text-[#b27248] w-6 h-6" /> :
+                                            <span className="text-gray-400 dark:text-gray-600 font-sans text-base">{c.rank}</span>}
                             </div>
 
-                            <AvatarSilhouette className={c.isUser ? "border-2 border-blue-500" : ""} />
+                            {c.avatarUrl ? (
+                                <img
+                                    src={`${import.meta.env.BASE_URL.replace(/\/$/, '')}${c.avatarUrl}`}
+                                    alt={c.name}
+                                    className={`rounded-full object-cover shrink-0 ${c.isUser ? "border-2 border-blue-500" : ""}`}
+                                    style={{ width: 32, height: 32 }}
+                                />
+                            ) : (
+                                <AvatarSilhouette className={c.isUser ? "border-2 border-blue-500" : ""} />
+                            )}
 
                             <div className="flex-1">
                                 <div className={`font-semibold ${c.isUser ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-gray-100'}`}>
                                     {c.name} {c.isUser && "(You)"}
                                 </div>
                                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                                    Member since 2024
+                                    Member since {getMemberSinceYear(c.name)}
                                 </div>
                             </div>
 
@@ -111,7 +159,7 @@ export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, us
                 </div>
 
                 <div className="p-4 bg-gray-50 dark:bg-gray-800/20 flex justify-end">
-                    <button 
+                    <button
                         onClick={onNext}
                         className="flex items-center gap-2 bg-[#0a66c2] hover:bg-[#004182] text-white px-6 py-2.5 rounded-full font-bold transition-all transform hover:scale-105 active:scale-95 shadow-md"
                     >
@@ -119,7 +167,7 @@ export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, us
                     </button>
                 </div>
             </div>
-            
+
             <div className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400 animate-pulse">
                 Your performance is verified by LinkedIn SmartScore™
             </div>

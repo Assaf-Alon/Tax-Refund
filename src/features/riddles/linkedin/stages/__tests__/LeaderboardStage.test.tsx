@@ -60,4 +60,13 @@ describe('LeaderboardStage', () => {
         // Fallback should be used
         expect(screen.getByText(/You solved it faster than/i)).toBeInTheDocument();
     });
+
+    it('renders stage-specific competitors and their names', () => {
+        render(<LeaderboardStage {...defaultProps} gameName="Crossclimb" />);
+        expect(screen.getByText("Roy Peled")).toBeInTheDocument();
+        expect(screen.getByText(/Meshi Peled/i)).toBeInTheDocument();
+        expect(screen.getByText("Ishigami Senku")).toBeInTheDocument();
+        expect(screen.getByText("Bill Gates")).toBeInTheDocument();
+        expect(screen.getByText("Assaf Alon")).toBeInTheDocument();
+    });
 });

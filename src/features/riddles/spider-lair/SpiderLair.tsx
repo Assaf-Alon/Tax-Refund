@@ -109,7 +109,7 @@ export const SpiderLair: React.FC = () => {
                         image={cogflyImg}
                         imageAlt="Allies in battle"
                         acceptedAnswers={['friends', 'cogfly']}
-                        hint="Small, buzzy, and loyal..."
+                        hint="You've got a ______ in me.."
                         hintCooldown={20}
                         errorMessage="That's not who helps you... 🛸"
                         onAdvance={handleAdvance}
