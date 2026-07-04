@@ -115,7 +115,24 @@ export const Expedition33: React.FC = () => {
                 return (
                     <CongratsStage
                         title="The Paintress Falls"
-                        subtitle="You have completed the Expedition."
+                        subtitle={
+                            <div className="space-y-6">
+                                <p className="text-xl md:text-2xl text-emerald-200/90 font-serif italic">
+                                    You have completed the Expedition.
+                                </p>
+                                <div className="max-w-md mx-auto p-6 rounded-2xl bg-black/40 border border-emerald-500/20 backdrop-blur-md shadow-[0_0_30px_rgba(16,185,129,0.1)] space-y-4">
+                                    <div className="flex justify-center text-4xl animate-bounce">
+                                        🍔🍟🍕
+                                    </div>
+                                    <p className="text-gray-300 text-sm md:text-base leading-relaxed">
+                                        The expedition is complete, and it is time <span className="text-emerald-400 font-bold">to eat!</span>
+                                    </p>
+                                    <p className="text-emerald-400/80 text-xs tracking-wider uppercase font-semibold">
+                                        For those who come after, Itadakimasu.
+                                    </p>
+                                </div>
+                            </div>
+                        }
                         theme={CONGRATS_THEME}
                     >
                         <button
@@ -133,7 +150,25 @@ export const Expedition33: React.FC = () => {
                 return (
                     <CongratsStage
                         title="The Paintress Falls"
-                        subtitle="You have completed the Expedition."
+                        subtitle={
+                            <div className="space-y-6">
+                                <p className="text-xl md:text-2xl text-emerald-200/90 font-serif italic">
+                                    You have completed the Expedition.
+                                </p>
+                                <div className="max-w-md mx-auto p-6 rounded-2xl bg-black/40 border border-emerald-500/20 backdrop-blur-md shadow-[0_0_30px_rgba(16,185,129,0.1)] space-y-4">
+                                    <div className="flex justify-center text-4xl animate-bounce">
+                                        🍔🍟🍕
+                                    </div>
+                                    <p className="text-gray-300 text-sm md:text-base leading-relaxed">
+                                        The expedition is complete, and it is time to eat!
+                                        The next riddle is answered near <span className="text-emerald-400 font-bold">"The French"</span> food truck in Herzliya (and other food trucks nearby).
+                                    </p>
+                                    <p className="text-emerald-400/80 text-xs tracking-wider uppercase font-semibold">
+                                        Follow your stomach to the food trucks!
+                                    </p>
+                                </div>
+                            </div>
+                        }
                         theme={CONGRATS_THEME}
                     >
                         <button
