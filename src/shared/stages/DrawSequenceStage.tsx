@@ -3,11 +3,15 @@ import React, { useState } from 'react';
 export interface DrawSequenceStageProps {
     expectedDigits: string[][][]; // Array of expected digits, where each digit is an array of valid edge arrays
     onAdvance: () => void;
+    image?: string;
+    imageAlt?: string;
 }
 
 export const DrawSequenceStage: React.FC<DrawSequenceStageProps> = ({
     expectedDigits,
     onAdvance,
+    image,
+    imageAlt,
 }) => {
     const [currentDigitIndex, setCurrentDigitIndex] = useState(0);
     const [selectedDots, setSelectedDots] = useState<number[]>([]);
@@ -123,7 +127,7 @@ export const DrawSequenceStage: React.FC<DrawSequenceStageProps> = ({
             style={{ touchAction: 'none' }}
         >
             <div className="text-center space-y-2">
-                <h2 className="text-2xl font-bold tracking-widest text-orange-400 uppercase">Input Sequence</h2>
+                <h2 className="text-2xl font-bold tracking-widest text-orange-400 uppercase">Input Coordinates of 👁️🌌</h2>
                 <div className="flex justify-center space-x-3">
                     {expectedDigits.map((_, idx) => (
                         <div
@@ -138,6 +142,16 @@ export const DrawSequenceStage: React.FC<DrawSequenceStageProps> = ({
                     ))}
                 </div>
             </div>
+
+            {image && (
+                <div className="flex justify-center max-w-xs">
+                    <img
+                        src={image}
+                        alt={imageAlt ?? 'Draw sequence clue'}
+                        className="max-w-[240px] md:max-w-[280px] rounded-lg border border-gray-700/50 shadow-md object-contain"
+                    />
+                </div>
+            )}
 
             <div className="relative bg-black/40 rounded-xl shadow-2xl border border-gray-700/50 backdrop-blur-sm" style={{ width: '200px', height: '320px' }}>
                 <svg

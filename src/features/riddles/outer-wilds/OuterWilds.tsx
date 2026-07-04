@@ -8,6 +8,7 @@ import { DevSkipButton } from '../../admin/DevSkipButton';
 import { QuantumStage } from './stages/QuantumStage';
 import { GhostMatterRiverStage } from './stages/GhostMatterRiverStage';
 import { QuantumEntanglementStage } from './stages/QuantumEntanglementStage';
+import { NomaiProjection } from './components/NomaiProjection';
 import outerWildsLogo from './assets/OuterWildsLogo.png';
 import outerWildsTheme from './assets/Outer Wilds.mp3';
 import feldsparImg from './assets/feldspar.jpg';
@@ -15,6 +16,7 @@ import nomaiImg from './assets/nomai.jpg';
 import supernovaImg from './assets/Supernova.gif';
 import darkBrambleImg from './assets/dark-bramble.gif';
 import hourglassTwinsImg from './assets/hourglass-twins.png';
+import vesselImg from './assets/vessel.png';
 import { useAudio } from '../../../shared/utils/useAudio';
 import { useFavicon } from '../../../hooks/useFavicon';
 import { useTitle } from '../../../hooks/useTitle';
@@ -63,6 +65,7 @@ export const OuterWilds: React.FC = () => {
     const [stage, setStage] = useState<number>(0);
     const [ashTwinHintRevealed, setAshTwinHintRevealed] = useState<boolean>(false);
     const [darkBrambleHintRevealed, setDarkBrambleHintRevealed] = useState<boolean>(false);
+    const [showRestartConfirm, setShowRestartConfirm] = useState<boolean>(false);
 
     // Audio should play starting from stage 0 through 10
     const audioSrc = stage >= 0 && stage < 11 ? outerWildsTheme : null;
@@ -203,6 +206,8 @@ export const OuterWilds: React.FC = () => {
                                 ],
                             ]}
                             onAdvance={handleAdvance}
+                            image={vesselImg}
+                            imageAlt="The Vessel"
                         />
 
                         {/* The component handles its own hook lifecycle */}
@@ -216,15 +221,39 @@ export const OuterWilds: React.FC = () => {
                         subtitle="The loop is broken."
                         theme={CONGRATS_THEME}
                     >
-                        <button
-                            onClick={() => {
-                                resetRiddleProgress(RIDDLE_ID);
-                                setStage(0);
-                            }}
-                            className="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-full font-bold transition-all duration-300 shadow-md uppercase tracking-wider text-xs"
-                        >
-                            Restart Loop
-                        </button>
+                        <NomaiProjection />
+                        <div className="mt-8 min-h-[100px] flex flex-col items-center justify-center">
+                            {!showRestartConfirm ? (
+                                <button
+                                    onClick={() => setShowRestartConfirm(true)}
+                                    className="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-full font-bold transition-all duration-300 shadow-md uppercase tracking-wider text-xs animate-in fade-in duration-1000 delay-[5s] cursor-pointer"
+                                >
+                                    Restart Loop
+                                </button>
+                            ) : (
+                                <div className="flex flex-col items-center gap-3 bg-black/40 p-4 rounded-xl border border-orange-500/20 animate-in zoom-in-95 duration-200">
+                                    <p className="text-orange-200 text-xs font-mono tracking-wider uppercase">Are you sure? This will wipe your progress for this loop.</p>
+                                    <div className="flex gap-4">
+                                        <button
+                                            onClick={() => {
+                                                resetRiddleProgress(RIDDLE_ID);
+                                                setStage(0);
+                                                setShowRestartConfirm(false);
+                                            }}
+                                            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold transition-all duration-200 shadow-md uppercase tracking-wider text-xs cursor-pointer"
+                                        >
+                                            Yes, Restart
+                                        </button>
+                                        <button
+                                            onClick={() => setShowRestartConfirm(false)}
+                                            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-bold transition-all duration-200 shadow-md uppercase tracking-wider text-xs cursor-pointer"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </CongratsStage>
                 );
             default:
@@ -234,15 +263,38 @@ export const OuterWilds: React.FC = () => {
                         subtitle="The loop is broken."
                         theme={CONGRATS_THEME}
                     >
-                        <button
-                            onClick={() => {
-                                resetRiddleProgress(RIDDLE_ID);
-                                setStage(0);
-                            }}
-                            className="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-full font-bold transition-all duration-300 shadow-md uppercase tracking-wider text-xs"
-                        >
-                            Restart Loop
-                        </button>
+                        <div className="mt-8 min-h-[100px] flex flex-col items-center justify-center">
+                            {!showRestartConfirm ? (
+                                <button
+                                    onClick={() => setShowRestartConfirm(true)}
+                                    className="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-full font-bold transition-all duration-300 shadow-md uppercase tracking-wider text-xs cursor-pointer"
+                                >
+                                    Restart Loop
+                                </button>
+                            ) : (
+                                <div className="flex flex-col items-center gap-3 bg-black/40 p-4 rounded-xl border border-orange-500/20 animate-in zoom-in-95 duration-200">
+                                    <p className="text-orange-200 text-xs font-mono tracking-wider uppercase">Are you sure? This will wipe your progress for this loop.</p>
+                                    <div className="flex gap-4">
+                                        <button
+                                            onClick={() => {
+                                                resetRiddleProgress(RIDDLE_ID);
+                                                setStage(0);
+                                                setShowRestartConfirm(false);
+                                            }}
+                                            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold transition-all duration-200 shadow-md uppercase tracking-wider text-xs cursor-pointer"
+                                        >
+                                            Yes, Restart
+                                        </button>
+                                        <button
+                                            onClick={() => setShowRestartConfirm(false)}
+                                            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-bold transition-all duration-200 shadow-md uppercase tracking-wider text-xs cursor-pointer"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </CongratsStage>
                 );
         }
