@@ -118,6 +118,7 @@ export const ItsAHitRiddle: React.FC = () => {
     isReady, 
     isPlaying, 
     prepare,
+    prefetch,
     playExcerpt,
     togglePlayback,
     stop,
@@ -162,10 +163,19 @@ export const ItsAHitRiddle: React.FC = () => {
     setValidationResults({});
     setIsButtonShaking(false);
 
-    // PRE-PREPARE: Fully initialize player instances to ensure gesture-safe instant play
+    // Prefetch all songs for the current stage in parallel
     filtered.forEach(song => {
-      prepare(song.youtubeId);
+      prefetch(song.youtubeId);
     });
+
+    // Prefetch songs for the next stage to warm the cache in advance
+    if (idx + 1 < IT_STAGE_DATA.length) {
+      const nextStage = IT_STAGE_DATA[idx + 1];
+      const nextStageSongs = allSongs.filter(s => nextStage.songIds.includes(s.id));
+      nextStageSongs.forEach(song => {
+        prefetch(song.youtubeId);
+      });
+    }
   };
 
   const currentStage = currentStageIdx !== null ? IT_STAGE_DATA[currentStageIdx] : null;

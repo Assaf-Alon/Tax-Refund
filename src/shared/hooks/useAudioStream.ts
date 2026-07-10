@@ -216,6 +216,27 @@ export const useAudioStream = () => {
 
   const prepare = useCallback(async (videoId: string, force = false, retryCount = 0) => {
     if (!videoId) return;
+
+    // Check if we already have this video stream URL in cache
+    const cachedUrl = urlCache.current.get(videoId);
+    if (cachedUrl && !force) {
+      Log.info(`Using cached stream URL for native playback: ${videoId}`);
+      isLoadingRef.current = null;
+      activeIdRef.current = videoId;
+      setEngine('native');
+      if (audioRef.current) {
+        audioRef.current.src = cachedUrl;
+        audioRef.current.load();
+      }
+      statusRef.current = 'ready';
+      setStatus('ready');
+      setLastError(null);
+      setCurrentVideoId(videoId);
+      setProgress(0);
+      setCurrentTime(0);
+      return;
+    }
+
     if (!force && videoId === activeIdRef.current && (statusRef.current === 'ready' || isLoadingRef.current === videoId)) return;
     Log.info(`Preparing ${videoId} (Retry: ${retryCount})`);
     isLoadingRef.current = videoId;
@@ -376,5 +397,9 @@ export const useAudioStream = () => {
     }
   }, [stop]);
 
-  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused' || status === 'ended', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch: async (id: string) => { if (!import.meta.env.PROD && id) await getStreamUrl(id); }, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatusSync('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
+  const prefetch = useCallback(async (id: string) => {
+    if (id) await getStreamUrl(id);
+  }, []);
+
+  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused' || status === 'ended', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatusSync('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
 };
