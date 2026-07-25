@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  DndContext, 
+import {
+  DndContext,
   closestCenter,
   PointerSensor,
   useSensor,
@@ -44,12 +44,12 @@ interface SortableItemProps {
   onSelect: (song: SongItem) => void;
 }
 
-const SortableVinylItem: React.FC<SortableItemProps> = ({ 
-  id, 
-  song, 
-  displayMode, 
-  isActive, 
-  isPlaying, 
+const SortableVinylItem: React.FC<SortableItemProps> = ({
+  id,
+  song,
+  displayMode,
+  isActive,
+  isPlaying,
   validationStatus,
   onSelect
 }) => {
@@ -70,18 +70,18 @@ const SortableVinylItem: React.FC<SortableItemProps> = ({
   };
 
   return (
-    <div 
-      ref={setNodeRef} 
-      style={style} 
+    <div
+      ref={setNodeRef}
+      style={style}
       className={`relative group touch-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
     >
-      <div 
-        {...attributes} 
+      <div
+        {...attributes}
         {...listeners}
         onClick={() => onSelect(song)}
       >
-        <VinylCard 
-          song={song} 
+        <VinylCard
+          song={song}
           displayMode={displayMode}
           isPlaying={isPlaying && isActive}
           showThumbnail={true}
@@ -113,10 +113,10 @@ export const ItsAHitRiddle: React.FC = () => {
   const [validationResults, setValidationResults] = useState<Record<number, 'correct' | 'incorrect'>>({});
   const [isButtonShaking, setIsButtonShaking] = useState(false);
 
-  const { 
+  const {
     status: playerStatus,
-    isReady, 
-    isPlaying, 
+    isReady,
+    isPlaying,
     prepare,
     prefetch,
     playExcerpt,
@@ -150,12 +150,12 @@ export const ItsAHitRiddle: React.FC = () => {
     // Ensure songs are in the order we expect for mapping revealWords correctly if they are sorted by player?
     // Wait, revealWords should match the SONG, not the position. 
     // Let's create a map or just ensure we store the correct word with the song.
-    
+
     // Actually, revealWords[i] matches stage.songIds[i]? No, the user provided them in chronological order.
     // So if the player sorts them correctly, we show the words in chronological order.
-    
+
     const shuffled = [...filtered].sort(() => Math.random() - 0.5);
-    
+
     setUserOrder(shuffled);
     setIsRevealed(false);
     setActiveSong(null);
@@ -191,8 +191,8 @@ export const ItsAHitRiddle: React.FC = () => {
   }, [activeSong, isReady, isPlaying, togglePlayback, playExcerpt]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { 
-      activationConstraint: { distance: 8 } 
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 }
     })
   );
 
@@ -222,7 +222,7 @@ export const ItsAHitRiddle: React.FC = () => {
     } else {
       // Calculate correct order based on stage data
       if (!currentStage) return;
-      
+
       const results: Record<number, 'correct' | 'incorrect'> = {};
       userOrder.forEach((song, idx) => {
         if (song.id === currentStage.songIds[idx]) {
@@ -231,7 +231,7 @@ export const ItsAHitRiddle: React.FC = () => {
           results[song.id] = 'incorrect';
         }
       });
-      
+
       setValidationResults(results);
       setIsButtonShaking(true);
       setTimeout(() => setIsButtonShaking(false), 1000);
@@ -240,18 +240,18 @@ export const ItsAHitRiddle: React.FC = () => {
 
   const handleSelectSong = useCallback(async (song: SongItem) => {
     if (isRevealed) return;
-    
+
     // Toggle logic: Use explicit ID comparison to avoid reference issues
     const currentActiveId = activeSong?.id ? Number(activeSong.id) : null;
     const clickedSongId = Number(song.id);
 
     if (currentActiveId === clickedSongId) {
-       togglePlayback();
+      togglePlayback();
     } else {
-       setActiveSong(song);
-       stop();
-       await prepare(song.youtubeId);
-       playExcerpt(song.youtubeId, song.startTime, 0); 
+      setActiveSong(song);
+      stop();
+      await prepare(song.youtubeId);
+      playExcerpt(song.youtubeId, song.startTime, 0);
     }
   }, [activeSong, isRevealed, togglePlayback, stop, prepare, playExcerpt]);
 
@@ -272,7 +272,7 @@ export const ItsAHitRiddle: React.FC = () => {
 
   const handleDevSkip = () => {
     if (currentStageIdx === null) return;
-    
+
     // If at the end but congrats is locked, unlock congrats
     if (currentStageIdx === IT_STAGE_DATA.length) {
       if (!isCongratsUnlocked) {
@@ -303,7 +303,7 @@ export const ItsAHitRiddle: React.FC = () => {
     if (!isCongratsUnlocked) {
       return (
         <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8">
-          <TextAnswerStage 
+          <TextAnswerStage
             title="Final Verification"
             prompt="You have reached the final destination. Enter the keyword found at the Hill to claim your victory."
             acceptedAnswers={['Raanana']}
@@ -325,17 +325,17 @@ export const ItsAHitRiddle: React.FC = () => {
 
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8">
-        <CongratsStage 
+        <CongratsStage
           title="Sonic Sequencer"
           subtitle={
             <div className="flex flex-col gap-4">
               <p>You've mastered the charts and reached the final hill.</p>
-              <p className="text-emerald-500 font-bold text-sm">Up next - Raanana Park! Might want to check out the lake there as well...</p>
+              <p className="text-emerald-500 font-bold text-sm">Up next - Raanana Park! A handy map should be nearby...</p>
             </div>
           }
           theme={theme.congrats}
         >
-          <button 
+          <button
             onClick={() => {
               setCurrentStageIdx(0);
               updateRiddleProgress(RIDDLE_ID, 0);
@@ -357,12 +357,12 @@ export const ItsAHitRiddle: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8">
         <div className="flex flex-col items-center mb-12">
-           <MapPin size={24} className="text-emerald-500 mb-4" />
-           <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">{currentStage.locationName}</h1>
-           <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Arrive at location to unlock</p>
+          <MapPin size={24} className="text-emerald-500 mb-4" />
+          <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">{currentStage.locationName}</h1>
+          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Arrive at location to unlock</p>
         </div>
 
-        <TextAnswerStage 
+        <TextAnswerStage
           title="Check-In Required"
           prompt={`Enter the keyword found at ${currentStage.locationName} to begin the riddle.`}
           acceptedAnswers={[currentStage.entryKeyword]}
@@ -387,8 +387,8 @@ export const ItsAHitRiddle: React.FC = () => {
       <div className="w-full px-6 py-8 sm:px-12 sm:py-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-50">
         <div className="flex flex-col">
           <div className="flex items-center gap-2 mb-1">
-             <MapPin size={12} className="text-emerald-500" />
-             <span className={theme.text.subtitle}>{currentStage.locationName}</span>
+            <MapPin size={12} className="text-emerald-500" />
+            <span className={theme.text.subtitle}>{currentStage.locationName}</span>
           </div>
           <h1 className={theme.text.title}>Sonic Sequencer</h1>
         </div>
@@ -404,15 +404,15 @@ export const ItsAHitRiddle: React.FC = () => {
       </div>
 
       <div className="w-full max-w-2xl px-6 mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
-         <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-6 backdrop-blur-xl flex gap-4 items-start">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
-               <Navigation size={20} className="text-emerald-500" />
-            </div>
-            <div>
-               <p className={theme.text.hint}>Next Destination</p>
-               <p className={theme.text.body}>{currentStage.hint}</p>
-            </div>
-         </div>
+        <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-6 backdrop-blur-xl flex gap-4 items-start">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+            <Navigation size={20} className="text-emerald-500" />
+          </div>
+          <div>
+            <p className={theme.text.hint}>Next Destination</p>
+            <p className={theme.text.body}>{currentStage.hint}</p>
+          </div>
+        </div>
       </div>
 
       <div className="relative w-full flex flex-col items-center gap-12 px-4">
@@ -421,7 +421,7 @@ export const ItsAHitRiddle: React.FC = () => {
             <SortableContext items={userOrder.map(s => String(s.id))} strategy={verticalListSortingStrategy}>
               {userOrder.map((song) => {
                 return (
-                  <SortableVinylItem 
+                  <SortableVinylItem
                     key={song.id}
                     id={String(song.id)}
                     song={song}
@@ -446,18 +446,18 @@ export const ItsAHitRiddle: React.FC = () => {
 
         {!isRevealed ? (
           <div className="flex flex-col items-center gap-8 w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            <VinylAudioController 
-              isPlaying={isPlaying} 
-              isReady={isReady} 
-              progress={progress} 
-              onToggle={handleTogglePlayback} 
-              playerStatus={playerStatus} 
-              lastError={lastError} 
-              onRetry={() => activeSong && prepare(activeSong.youtubeId, true)} 
-              hidePlayButton 
+            <VinylAudioController
+              isPlaying={isPlaying}
+              isReady={isReady}
+              progress={progress}
+              onToggle={handleTogglePlayback}
+              playerStatus={playerStatus}
+              lastError={lastError}
+              onRetry={() => activeSong && prepare(activeSong.youtubeId, true)}
+              hidePlayButton
             />
-            <button 
-              onClick={checkOrder} 
+            <button
+              onClick={checkOrder}
               className={`
                 ${theme.button.primary} 
                 ${isButtonShaking ? 'animate-shake bg-rose-600 hover:bg-rose-600 shadow-rose-500/40' : ''}
@@ -469,48 +469,48 @@ export const ItsAHitRiddle: React.FC = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center gap-12 w-full max-w-md animate-in zoom-in duration-700">
-             <div className="flex items-center gap-3 text-emerald-500">
-                <CheckCircle2 size={32} />
-                <h3 className="text-2xl font-black uppercase italic tracking-tighter">Correct Sequence!</h3>
-             </div>
-             
-             <div className="bg-white/5 border border-white/10 rounded-3xl p-8 text-center w-full">
-                <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-6">Location Key Unlocked</p>
-                <div className="flex flex-col gap-2 mb-8">
-                   {[...userOrder].sort((a,b) => (parseInt(a.year||'0') - parseInt(b.year||'0'))).map((s) => (
-                       <div key={s.id} className="text-xs text-emerald-500/80 font-medium">
-                          ✓ {s.year} {s.name}{s.category === 'Anime' ? ` - ${s.info}` : ''}
-                       </div>
-                   ))}
-                </div>
-                
-                <TextAnswerStage 
-                  title="Next Destination"
-                  prompt="Use your Field Guide and the information above to decode the next location."
-                  acceptedAnswers={[currentStage.nextLocationAnswer]}
-                  onAdvance={nextStage}
-                  errorMessage="That location doesn't seem right..."
-                  placeholder="Type the next location..."
-                  submitButtonLabel="Move to Destination"
-                  theme={{
-                    title: "text-sm font-black uppercase tracking-widest text-white mb-2",
-                    promptText: "text-[10px] text-slate-400 mb-6 max-w-[200px] mx-auto leading-relaxed",
-                    input: "w-full bg-black/40 border border-emerald-500/20 p-4 text-center focus:border-emerald-500 focus:outline-none transition-colors rounded-2xl text-emerald-500 font-bold tracking-widest uppercase mb-4",
-                    submitButton: theme.button.primary + " w-full text-sm py-4",
-                    errorText: "text-rose-500 text-[10px] font-bold mt-2"
-                  }}
-                />
-             </div>
+            <div className="flex items-center gap-3 text-emerald-500">
+              <CheckCircle2 size={32} />
+              <h3 className="text-2xl font-black uppercase italic tracking-tighter">Correct Sequence!</h3>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 text-center w-full">
+              <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-6">Location Key Unlocked</p>
+              <div className="flex flex-col gap-2 mb-8">
+                {[...userOrder].sort((a, b) => (parseInt(a.year || '0') - parseInt(b.year || '0'))).map((s) => (
+                  <div key={s.id} className="text-xs text-emerald-500/80 font-medium">
+                    ✓ {s.year} {s.name}{s.category === 'Anime' ? ` - ${s.info}` : ''}
+                  </div>
+                ))}
+              </div>
+
+              <TextAnswerStage
+                title="Next Destination"
+                prompt="Use your Field Guide and the information above to decode the next location."
+                acceptedAnswers={[currentStage.nextLocationAnswer]}
+                onAdvance={nextStage}
+                errorMessage="That location doesn't seem right..."
+                placeholder="Type the next location..."
+                submitButtonLabel="Move to Destination"
+                theme={{
+                  title: "text-sm font-black uppercase tracking-widest text-white mb-2",
+                  promptText: "text-[10px] text-slate-400 mb-6 max-w-[200px] mx-auto leading-relaxed",
+                  input: "w-full bg-black/40 border border-emerald-500/20 p-4 text-center focus:border-emerald-500 focus:outline-none transition-colors rounded-2xl text-emerald-500 font-bold tracking-widest uppercase mb-4",
+                  submitButton: theme.button.primary + " w-full text-sm py-4",
+                  errorText: "text-rose-500 text-[10px] font-bold mt-2"
+                }}
+              />
+            </div>
           </div>
         )}
       </div>
       <button onClick={() => window.history.back()} className="fixed bottom-8 left-8 p-4 rounded-full bg-slate-900/80 border border-white/5 text-slate-500 hover:text-white transition-all backdrop-blur-xl"><ArrowLeft size={20} /></button>
-      
-      <DevSkipButton 
-        riddleId={RIDDLE_ID} 
-        currentStage={currentStageIdx ?? 0} 
-        totalStages={IT_STAGE_DATA.length + 1} 
-        onSkip={handleDevSkip} 
+
+      <DevSkipButton
+        riddleId={RIDDLE_ID}
+        currentStage={currentStageIdx ?? 0}
+        totalStages={IT_STAGE_DATA.length + 1}
+        onSkip={handleDevSkip}
       />
     </div>
   );
