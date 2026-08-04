@@ -57,13 +57,14 @@ export const FillWordsStage: React.FC<FillWordsStageProps> = ({
             const next = [...prev];
             next[globalIndex] = true;
 
-            // Focus next incomplete word
-            const nextIdx = next.findIndex((done, i) => i > globalIndex && !done);
+            // Focus next incomplete word synchronously to prevent mobile OS keyboard dismissal gap
+            let nextIdx = next.findIndex((done, i) => i > globalIndex && !done);
+            if (nextIdx === -1) {
+                nextIdx = next.findIndex((done, i) => !done && i !== globalIndex);
+            }
+
             if (nextIdx !== -1) {
-                // Small delay to let React render the locked state
-                setTimeout(() => {
-                    wordRefs.current[nextIdx]?.focus();
-                }, 50);
+                wordRefs.current[nextIdx]?.focus();
             }
 
             // Check if ALL words are done

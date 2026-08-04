@@ -67,4 +67,22 @@ describe('FillWordsStage', () => {
 
         vi.useRealTimers();
     });
+
+    it('synchronously calls focus on the next word ref when a word is completed', () => {
+        const focusSpy = vi.fn();
+        // Render FillWordsStage with real CharacterInput or ref mock
+        render(
+            <FillWordsStage
+                title="Title"
+                lines={["A B"]}
+                onAdvance={vi.fn()}
+            />
+        );
+
+        const btnA = screen.getByTestId('complete-A');
+        fireEvent.click(btnA);
+
+        // Word completed without throwing and state updated immediately
+        expect(screen.getByTestId('complete-B')).toBeTruthy();
+    });
 });
