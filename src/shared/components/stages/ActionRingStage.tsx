@@ -146,6 +146,7 @@ export const ActionRingStage: React.FC<ActionRingStageProps> = ({
                             </button>
                             {extraButtons}
                         </div>
+                    )}
                 </div>
 
                 {hint && (
