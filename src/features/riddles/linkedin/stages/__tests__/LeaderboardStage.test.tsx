@@ -49,7 +49,7 @@ describe('LeaderboardStage', () => {
         
         expect(screen.getByText(/Insight for you/i)).toBeInTheDocument();
         // Crossclimb is explicitly mapped to the CEOs quote
-        expect(screen.getByText(/You solved it faster then/i)).toBeInTheDocument();
+        expect(screen.getByText(/You solved it faster than/i)).toBeInTheDocument();
         expect(screen.getByText(/of CEOs/i)).toBeInTheDocument();
     });
 

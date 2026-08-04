@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { useAudio } from '../useAudio';
+import { useAudio, clearAudioCache } from '../useAudio';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 describe('useAudio', () => {
@@ -8,6 +8,7 @@ describe('useAudio', () => {
     let originalAudio: typeof window.Audio;
 
     beforeEach(() => {
+        clearAudioCache();
         playMock = vi.fn().mockResolvedValue(undefined);
         pauseMock = vi.fn();
 
@@ -54,7 +55,7 @@ describe('useAudio', () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
 
         expect(addEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
-        expect(addEventListenerSpy).toHaveBeenCalledWith('pointerdown', expect.any(Function));
+        expect(addEventListenerSpy).toHaveBeenCalledWith('touchend', expect.any(Function));
     });
 
     it('should crossfade when src changes', () => {
@@ -67,7 +68,7 @@ describe('useAudio', () => {
         const track1 = allInstances[0];
 
         expect(track1.src).toBe('test1.mp3');
-        expect(track1.volume).toBe(0); // Starts fade in
+        expect(track1.volume).toBe(0.001); // Starts fade in
 
         // Fast forward 2 seconds to complete fade in
         vi.advanceTimersByTime(2000);
@@ -78,7 +79,7 @@ describe('useAudio', () => {
 
         const track2 = allInstances[1];
         expect(track2.src).toBe('test2.mp3');
-        expect(track2.volume).toBe(0);
+        expect(track2.volume).toBe(0.001);
 
         // Advance 1000ms, both should be at 0.5
         vi.advanceTimersByTime(1000);

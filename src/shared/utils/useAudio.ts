@@ -9,6 +9,10 @@ export interface UseAudioOptions {
 // and to keep them "blessed" for mobile autoplay once interacted with.
 const audioCache = new Map<string, HTMLAudioElement>();
 
+export function clearAudioCache() {
+    audioCache.clear();
+}
+
 export function useAudio(src: string | null, options: UseAudioOptions = {}) {
     const fadingAudioRef = useRef<HTMLAudioElement | null>(null);
     const activeAudioRef = useRef<HTMLAudioElement | null>(null);

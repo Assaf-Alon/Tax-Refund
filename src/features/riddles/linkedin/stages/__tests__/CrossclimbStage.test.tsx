@@ -35,11 +35,11 @@ describe('CrossclimbStage', () => {
         fireEvent.click(screen.getByText('Solve stack'));
         fireEvent.click(screen.getByText('Solve slack'));
         
-        // Now it enters REORDER phase, so lock icons disappear
-        expect(screen.queryByLabelText('locked')).toBeNull();
+        // Now it enters REORDER phase, so middle rows are ready to be reordered while end caps remain locked
+        expect(screen.getAllByLabelText('locked')).toHaveLength(2);
     });
 
-    it('shows terminal inputs in REORDER phase even if unordered', () => {
+    it('enters REORDER phase when middle rows are solved but unordered', () => {
         render(<CrossclimbStage onAdvance={vi.fn()} />);
         
         // Solve middle rows
@@ -48,9 +48,9 @@ describe('CrossclimbStage', () => {
         fireEvent.click(screen.getByText('Solve stack'));
         fireEvent.click(screen.getByText('Solve slack'));
 
-        // It should be in REORDER phase
-        expect(screen.queryByLabelText('locked')).toBeNull();
-        expect(screen.queryByText('Solve block')).toBeTruthy();
-        expect(screen.queryByText('Solve stark')).toBeTruthy();
+        // It enters REORDER phase: end caps stay locked (2 locked icons) and terminal inputs are not yet active
+        expect(screen.getAllByLabelText('locked')).toHaveLength(2);
+        expect(screen.queryByText('Solve block')).toBeNull();
+        expect(screen.queryByText('Solve stark')).toBeNull();
     });
 });

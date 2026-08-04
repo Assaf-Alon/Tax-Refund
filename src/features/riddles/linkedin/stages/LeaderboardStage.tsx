@@ -74,7 +74,7 @@ export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, us
             ];
         } else if (gameName === "Pinpoint") {
             return [
-                { name: "Roy Peled", time: displayTime * 0.85, rank: 1, avatarUrl: "/images/leaderboard/roy-peled.jpg" },
+                { name: "Roy Peled", time: displayTime * 0.65, rank: 1, avatarUrl: "/images/leaderboard/roy-peled.jpg" },
                 { name: "Meshi Peled", time: userTime, rank: 2, isUser: true, avatarUrl: "/images/leaderboard/meshi-peled.jpg" },
                 { name: "Zero", time: displayTime * 1.15, rank: 3, avatarUrl: "/images/leaderboard/zero.png" },
                 { name: "Bill Gates", time: displayTime * 1.42, rank: 4, avatarUrl: "/images/leaderboard/bill-gates.png" },
@@ -83,8 +83,8 @@ export const LeaderboardStage: React.FC<LeaderboardStageProps> = ({ gameName, us
         } else {
             // Queens or fallback
             return [
-                { name: "Roy Peled", time: displayTime * 0.85, rank: 1, avatarUrl: "/images/leaderboard/roy-peled.jpg" },
-                { name: "Meshi Peled", time: userTime, rank: 2, isUser: true, avatarUrl: "/images/leaderboard/meshi-peled.jpg" },
+                { name: "Meshi Peled", time: userTime, rank: 1, isUser: true, avatarUrl: "/images/leaderboard/meshi-peled.jpg" },
+                { name: "Roy Peled", time: displayTime * 1.02, rank: 2, avatarUrl: "/images/leaderboard/roy-peled.jpg" },
                 { name: "L.", time: displayTime * 1.15, rank: 3, avatarUrl: "/images/leaderboard/l.png" },
                 { name: "Jeffrey Bezos", time: displayTime * 1.42, rank: 4, avatarUrl: "/images/leaderboard/jeff-bezos.png" },
                 { name: "Shaul Almagor", time: displayTime * 1.68, rank: 5, avatarUrl: "/images/leaderboard/shaul-almagor.jpg" },

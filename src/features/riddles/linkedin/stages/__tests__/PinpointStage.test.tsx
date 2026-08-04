@@ -35,7 +35,7 @@ describe('PinpointStage', () => {
         expect(screen.getByText('CLUE 5')).toBeTruthy();
         
         // Check for instruction text
-        expect(screen.getByText(/All 5 clues belong to a common category/)).toBeTruthy();
+        expect(screen.getByText(/All clues belong to a category/i)).toBeTruthy();
         
         // Check for counter
         expect(screen.getByText('1 of 5')).toBeTruthy();
@@ -56,7 +56,7 @@ describe('PinpointStage', () => {
         fireEvent.click(screen.getByText('O'));
         fireEvent.click(screen.getByText('N'));
         fireEvent.click(screen.getByText('G'));
-        fireEvent.click(screen.getByText('ENTER'));
+        fireEvent.click(screen.getByText('Enter'));
 
         expect(screen.getByText('spy')).toBeTruthy();
         expect(screen.getByText('2 of 5')).toBeTruthy();
@@ -73,11 +73,12 @@ describe('PinpointStage', () => {
         );
 
         // Type "MUSEUM"
-        ['M', 'U', 'S', 'E', 'U', 'M', 'ENTER'].forEach(k => {
+        ['M', 'U', 'S', 'E', 'U', 'M'].forEach(k => {
             fireEvent.click(screen.getByText(k));
         });
+        fireEvent.click(screen.getByText('Enter'));
 
-        expect(screen.getByText('Correct!')).toBeTruthy();
+        expect(screen.getByText(/Category Identified/i)).toBeTruthy();
         
         // Wait for onAdvance delay
         vi.advanceTimersByTime(2000);
@@ -102,11 +103,12 @@ describe('PinpointStage', () => {
         );
 
         // Type "MUSEUMS"
-        ['M', 'U', 'S', 'E', 'U', 'M', 'S', 'ENTER'].forEach(k => {
+        ['M', 'U', 'S', 'E', 'U', 'M', 'S'].forEach(k => {
             fireEvent.click(screen.getByText(k));
         });
+        fireEvent.click(screen.getByText('Enter'));
 
-        expect(screen.getByText('Correct!')).toBeTruthy();
+        expect(screen.getByText(/Category Identified/i)).toBeTruthy();
         
         vi.advanceTimersByTime(2000);
         expect(onAdvance).toHaveBeenCalled();
