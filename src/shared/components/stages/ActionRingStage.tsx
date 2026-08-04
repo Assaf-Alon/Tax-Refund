@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { HintButton } from '../../ui/HintButton';
 
 export interface ActionRingStageProps {
     title: string;
@@ -10,6 +11,8 @@ export interface ActionRingStageProps {
     extraButtons?: React.ReactNode;
     isPaused?: boolean;
     actionAreaOverride?: React.ReactNode;
+    hint?: string;
+    hintCooldown?: number;
 }
 
 const START_SCALE = 2.5;
@@ -26,6 +29,8 @@ export const ActionRingStage: React.FC<ActionRingStageProps> = ({
     extraButtons,
     isPaused = false,
     actionAreaOverride,
+    hint,
+    hintCooldown = 60,
 }) => {
     const [scale, setScale] = useState(START_SCALE);
     const [failed, setFailed] = useState(false);
@@ -141,8 +146,11 @@ export const ActionRingStage: React.FC<ActionRingStageProps> = ({
                             </button>
                             {extraButtons}
                         </div>
-                    )}
                 </div>
+
+                {hint && (
+                    <HintButton hint={hint} cooldownSeconds={hintCooldown} />
+                )}
             </div>
         </div>
     );

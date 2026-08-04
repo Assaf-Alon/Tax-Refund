@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { HintButton } from '../../../../shared/ui/HintButton';
 
 import esquieImg from '../assets/Esquie.gif';
 
@@ -11,9 +12,11 @@ interface Particle {
 
 export interface EsquieStageProps {
     onAdvance: () => void;
+    hint?: string;
+    hintCooldown?: number;
 }
 
-export const EsquieStage: React.FC<EsquieStageProps> = ({ onAdvance }) => {
+export const EsquieStage: React.FC<EsquieStageProps> = ({ onAdvance, hint, hintCooldown = 60 }) => {
     const [pets, setPets] = useState(0);
     const [particles, setParticles] = useState<Particle[]>([]);
     const particleIdCounter = useRef(0);
@@ -110,6 +113,10 @@ export const EsquieStage: React.FC<EsquieStageProps> = ({ onAdvance }) => {
                     }`}>
                     {pets} <span className={pets >= 20 ? "text-emerald-500" : "text-emerald-700"}>/</span> 33
                 </div>
+
+                {hint && (
+                    <HintButton hint={hint} cooldownSeconds={hintCooldown} />
+                )}
             </div>
         </div>
     );

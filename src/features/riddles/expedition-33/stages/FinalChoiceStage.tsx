@@ -3,9 +3,12 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import versoImg from '../assets/verso.png';
 import maelleImg from '../assets/maelle.png';
 import { useLongPress } from '../../../../shared/hooks/useLongPress';
+import { HintButton } from '../../../../shared/ui/HintButton';
 
 export interface FinalChoiceStageProps {
     onAdvance: () => void;
+    hint?: string;
+    hintCooldown?: number;
 }
 
 type Choice = 'verso' | 'maelle';
@@ -24,7 +27,7 @@ interface DustParticle {
     size: number;
 }
 
-export const FinalChoiceStage: React.FC<FinalChoiceStageProps> = ({ onAdvance }) => {
+export const FinalChoiceStage: React.FC<FinalChoiceStageProps> = ({ onAdvance, hint, hintCooldown = 60 }) => {
     const [activeChoice, setActiveChoice] = useState<Choice | null>(null);
     const [progress, setProgress] = useState(0);
     const [completed, setCompleted] = useState(false);
@@ -225,6 +228,10 @@ export const FinalChoiceStage: React.FC<FinalChoiceStageProps> = ({ onAdvance })
                         </p>
                     )}
                 </div>
+
+                {hint && (
+                    <HintButton hint={hint} cooldownSeconds={hintCooldown} />
+                )}
             </div>
         </div>
     );

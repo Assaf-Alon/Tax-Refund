@@ -3,9 +3,11 @@ import { ActionRingStage } from '../../../../shared/components/stages/ActionRing
 
 export interface ReactiveParryStageProps {
     onAdvance: () => void;
+    hint?: string;
+    hintCooldown?: number;
 }
 
-export const ReactiveParryStage: React.FC<ReactiveParryStageProps> = ({ onAdvance }) => {
+export const ReactiveParryStage: React.FC<ReactiveParryStageProps> = ({ onAdvance, hint, hintCooldown }) => {
     const [dodgeUsed, setDodgeUsed] = useState(false);
     const [showDodgeMsg, setShowDodgeMsg] = useState(false);
 
@@ -25,6 +27,8 @@ export const ReactiveParryStage: React.FC<ReactiveParryStageProps> = ({ onAdvanc
             actionLabel="Parry"
             onAdvance={onAdvance}
             isPaused={showDodgeMsg}
+            hint={hint}
+            hintCooldown={hintCooldown}
             actionAreaOverride={
                 showDodgeMsg ? (
                     <div className="text-emerald-400 font-bold text-xl italic animate-pulse mt-4">

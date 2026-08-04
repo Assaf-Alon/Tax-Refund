@@ -73,17 +73,27 @@ export const Expedition33: React.FC = () => {
                         title="Lovely Feet"
                         prompt="She has lovely feet... 🦧"
                         acceptedAnswers={["lune"]}
+                        hint="Similar to Luna"
+                        hintCooldown={15}
                         onAdvance={handleAdvance}
                         theme={SHARED_TEXT_THEME}
                     />
                 );
             case 2:
                 return (
-                    <EsquieStage onAdvance={handleAdvance} />
+                    <EsquieStage
+                        hint="Just... Just PET HIM ALREADY!"
+                        hintCooldown={20}
+                        onAdvance={handleAdvance}
+                    />
                 );
             case 3:
                 return (
-                    <ReactiveParryStage onAdvance={handleAdvance} />
+                    <ReactiveParryStage
+                        hint="You got this. I believe in you"
+                        hintCooldown={15}
+                        onAdvance={handleAdvance}
+                    />
                 );
             case 4:
                 return (
@@ -91,25 +101,43 @@ export const Expedition33: React.FC = () => {
                         title="The Antagonist"
                         prompt="I stand in your way, cane in hand, guarding the Paintress to protect my own. Who am I?"
                         acceptedAnswers={['reunuar', 'renoir']}
+                        hint="There's a fashion store named after him"
+                        hintCooldown={25}
                         onAdvance={handleAdvance}
                         theme={SHARED_TEXT_THEME}
                     />
                 );
             case 5:
                 return (
-                    <TeamBuilderStage onAdvance={handleAdvance} />
+                    <TeamBuilderStage
+                        hint="Support and Offense are females. Girls get it done!"
+                        hintCooldown={30}
+                        onAdvance={handleAdvance}
+                    />
                 );
             case 6:
                 return (
-                    <FadingTextStage onAdvance={handleAdvance} />
+                    <FadingTextStage
+                        hint="Support from previous phase"
+                        hintCooldown={20}
+                        onAdvance={handleAdvance}
+                    />
                 );
             case 7:
                 return (
-                    <SimonOstStage onAdvance={handleAdvance} />
+                    <SimonOstStage
+                        hint="The track title reflects our defeat... or tells you not to shed tears"
+                        hintCooldown={30}
+                        onAdvance={handleAdvance}
+                    />
                 );
             case 8:
                 return (
-                    <FinalChoiceStage onAdvance={handleAdvance} />
+                    <FinalChoiceStage
+                        hint="You know what to do. It's an easy one"
+                        hintCooldown={15}
+                        onAdvance={handleAdvance}
+                    />
                 );
             case 9:
                 return (

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { shuffleArray } from '../../utils/array';
+import { HintButton } from '../../ui/HintButton';
 
 export interface Choice {
     label: string;
@@ -14,6 +15,8 @@ export interface MultipleChoiceStageProps {
     onAdvance: () => void;
     successMessageRenderer?: (correctLabel: string) => React.ReactNode;
     successDelay?: number;
+    hint?: string;
+    hintCooldown?: number;
 }
 
 
@@ -25,6 +28,8 @@ export const MultipleChoiceStage: React.FC<MultipleChoiceStageProps> = ({
     onAdvance,
     successMessageRenderer,
     successDelay = 1500,
+    hint,
+    hintCooldown = 60,
 }) => {
     const shuffledChoices = useMemo(() => shuffleArray(choices), [choices]);
 
@@ -95,6 +100,10 @@ export const MultipleChoiceStage: React.FC<MultipleChoiceStageProps> = ({
                 <p className="text-emerald-400 font-serif italic text-lg animate-pulse">
                     {successMessageRenderer(correctLabel)}
                 </p>
+            )}
+
+            {hint && (
+                <HintButton hint={hint} cooldownSeconds={hintCooldown} />
             )}
 
             <style>{`

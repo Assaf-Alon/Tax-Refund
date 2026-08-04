@@ -12,6 +12,7 @@ import sophieImg from '../assets/sophie.png';
 
 import { useDragAndDrop } from '../../../../shared/hooks/useDragAndDrop';
 import { shuffleArray } from '../../../../shared/utils/array';
+import { HintButton } from '../../../../shared/ui/HintButton';
 
 // ─── Types & Constants ──────────────────────────────────────────
 
@@ -54,9 +55,11 @@ const CORRECT_ASSIGNMENT: Record<string, string> = {
 
 export interface TeamBuilderStageProps {
     onAdvance: () => void;
+    hint?: string;
+    hintCooldown?: number;
 }
 
-export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance }) => {
+export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance, hint, hintCooldown = 60 }) => {
     const shuffledCharacters = useMemo<Character[]>(() => shuffleArray(CHARACTERS), []);
     const [slots, setSlots] = useState<SlotState[]>(INITIAL_SLOTS.map(s => ({ ...s })));
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -352,7 +355,9 @@ export const TeamBuilderStage: React.FC<TeamBuilderStageProps> = ({ onAdvance })
                     </p>
                 )}
 
-
+                {hint && (
+                    <HintButton hint={hint} cooldownSeconds={hintCooldown} />
+                )}
             </div>
 
             {/* Touch-drag clone */}

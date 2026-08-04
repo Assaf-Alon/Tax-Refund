@@ -3,6 +3,8 @@ import { TextAnswerStage } from '../../../../shared/stages/TextAnswerStage';
 
 export interface FadingTextStageProps {
     onAdvance: () => void;
+    hint?: string;
+    hintCooldown?: number;
 }
 
 const INITIAL_TEXT = "Assaf doesn't understand the mechanics of this 'Foretell' card lady.";
@@ -24,7 +26,7 @@ function getDelay(dropIndex: number, totalFadeable: number): number {
     return remaining > 0 ? Math.ceil(500 / remaining) : 15;
 }
 
-export const FadingTextStage: React.FC<FadingTextStageProps> = ({ onAdvance }) => {
+export const FadingTextStage: React.FC<FadingTextStageProps> = ({ onAdvance, hint, hintCooldown }) => {
     const [chars, setChars] = useState(() => buildChars(INITIAL_TEXT));
     const [allGone, setAllGone] = useState(false);
     const [attempt, setAttempt] = useState(0);
@@ -140,6 +142,8 @@ export const FadingTextStage: React.FC<FadingTextStageProps> = ({ onAdvance }) =
             placeholder="Type quickly..."
             submitButtonLabel="Recall"
             onAdvance={onAdvance}
+            hint={hint}
+            hintCooldown={hintCooldown}
         />
     );
 };

@@ -5,6 +5,8 @@ import { MultipleChoiceStage, type Choice } from '../../../../shared/components/
 
 interface SimonOstStageProps {
     onAdvance: () => void;
+    hint?: string;
+    hintCooldown?: number;
 }
 
 const ALL_CHOICES: Choice[] = [
@@ -23,7 +25,7 @@ const ALL_CHOICES: Choice[] = [
     { label: 'Symphony of the End', correct: false },
 ];
 
-export const SimonOstStage: React.FC<SimonOstStageProps> = ({ onAdvance }) => {
+export const SimonOstStage: React.FC<SimonOstStageProps> = ({ onAdvance, hint, hintCooldown }) => {
     return (
         <MultipleChoiceStage
             title="Simon's Melody"
@@ -31,6 +33,8 @@ export const SimonOstStage: React.FC<SimonOstStageProps> = ({ onAdvance }) => {
             choices={ALL_CHOICES}
             onAdvance={onAdvance}
             successDelay={4000}
+            hint={hint}
+            hintCooldown={hintCooldown}
             mediaRow={
                 <>
                     <img
@@ -51,7 +55,7 @@ export const SimonOstStage: React.FC<SimonOstStageProps> = ({ onAdvance }) => {
             successMessageRenderer={(correctLabel) => (
                 correctLabel === 'We Lost'
                     ? 'That is correct, but I was hoping you\'d go for the Don\'t Cry option 😜'
-                    : 'אללל תבכייייי אל תבכייי!!!!'
+                    : '!!!!אללל תבכייייי אל תבכייי'
             )}
         />
     );
