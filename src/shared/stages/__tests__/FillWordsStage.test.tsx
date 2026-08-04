@@ -69,7 +69,6 @@ describe('FillWordsStage', () => {
     });
 
     it('synchronously calls focus on the next word ref when a word is completed', () => {
-        const focusSpy = vi.fn();
         // Render FillWordsStage with real CharacterInput or ref mock
         render(
             <FillWordsStage

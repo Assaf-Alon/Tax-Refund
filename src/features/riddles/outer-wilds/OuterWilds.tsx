@@ -16,7 +16,6 @@ import nomaiImg from './assets/nomai.jpg';
 import supernovaImg from './assets/Supernova.gif';
 import darkBrambleImg from './assets/dark-bramble.gif';
 import hourglassTwinsImg from './assets/hourglass-twins.png';
-import vesselImg from './assets/vessel.png';
 import { useAudio } from '../../../shared/utils/useAudio';
 import { useFavicon } from '../../../hooks/useFavicon';
 import { useTitle } from '../../../hooks/useTitle';
@@ -206,8 +205,6 @@ export const OuterWilds: React.FC = () => {
                                 ],
                             ]}
                             onAdvance={handleAdvance}
-                            image={vesselImg}
-                            imageAlt="The Vessel"
                         />
 
                         {/* The component handles its own hook lifecycle */}
