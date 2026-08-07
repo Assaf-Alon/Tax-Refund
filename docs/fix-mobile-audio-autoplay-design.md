@@ -26,26 +26,20 @@ This document details the root cause fix for the mobile audio playback rejection
 - **Failure Point**: By the time `prepare()` completes and calls `playExcerpt()`, execution has crossed multiple microtask/macrotask boundaries. The browser's ephemeral user gesture context is lost.
 - **Result**: `audioRef.current.play()` is rejected with `NotSupportedError: Native audio play() blocked by browser (Autoplay Policy)`.
 
-### Root Cause 3: Mobile Restrictions on YouTube IFrame API
-- **Mechanism**: On iOS Safari and Android Chrome, programmatic `playVideo()` calls on YouTube `<iframe>` elements outside of direct user gesture turns are blocked by mobile autoplay policies.
-- **Result**: `ytPlayerRef.current.playVideo()` fails on mobile when cued asynchronously. Conversely, an HTML5 `<audio>` element (`HTMLAudioElement`) CAN remain unlocked across `src` changes once initialized with a gesture token.
+### Root Cause 3: Mobile Restrictions on YouTube IFrame API vs Native Audio Engine
+- **Mechanism**: On iOS Safari and Android Chrome, programmatic `playVideo()` calls on YouTube `<iframe>` elements outside of direct user gesture turns are strictly blocked by mobile autoplay policies.
+- **Log Observation**: The recent logs show `unlockAudio: Audio element successfully unlocked` was achieved! However, because `prepare()` selected `engine = 'youtube'` in production mode, subsequent `togglePlayback()` calls targeted `ytPlayerRef.current.playVideo()`, bypassing the unlocked `HTMLAudioElement` (`audioRef.current`).
+- **Solution**: Mobile/touch devices cannot play YouTube `<iframe>` elements programmatically via JS. `useAudioStream` must automatically route mobile/touch devices to the **Native Audio Engine** (`fallbackToNative`), which directly utilizes the unlocked `HTMLAudioElement`. Once `getStreamUrl()` resolves, `audioRef.current.src = url` and `audioRef.current.play()` execute seamlessly on the unlocked audio element.
 
 ---
 
 ## 3. How it will be implemented
 
 ### 1. `src/shared/hooks/useAudioStream.ts`
-- **Track Unlock State**: Maintain `isUnlockedRef` boolean ref.
-- **Safe `unlockAudio()` Execution**:
-  - `unlockAudio()` will play the silent WAV data URL on `audioRef.current`.
-  - Once `play()` succeeds, set `isUnlockedRef.current = true`.
-- **Prevent Aborting Gesture Token**:
-  - Update `prepare()` and `stop()` to NOT clear `audioRef.current.src = ""` or call `.pause()` if `unlockAudio()` is currently in-flight.
-- **Seamless Native Audio Stream Transition**:
-  - When `getStreamUrl()` resolves with a stream URL, update `audioRef.current.src = url` directly.
-  - If `audioRef.current` was already unlocked (or `pendingPlayRef` is set), execute `audioRef.current.play()`. Because the `HTMLAudioElement` instance is already unlocked by the user gesture, setting a new `src` and calling `.play()` will succeed without triggering browser autoplay policy blocks.
-- **Optimize Proxy Fetching**:
-  - Refactor `getStreamUrl` to fail fast on proxy errors to avoid cascading 3-second timeouts during prefetching.
+- **Mobile Device Detection**: Detect touch/mobile environment (`'ontouchstart' in window || navigator.maxTouchPoints > 0 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)`).
+- **Force Native Audio Streaming on Mobile**: Update `prepare()` to route mobile/touch devices directly to `fallbackToNative(videoId)`.
+- **Seamless Stream Playback on URL Resolution**: In `fallbackToNative()`, when `getStreamUrl()` resolves, assign `audioRef.current.src = url`. If `pendingPlayRef` or `activeIdRef` matches the video ID, call `audioRef.current.play()`. Because `audioRef.current` was unlocked by `unlockAudio()`, playback begins immediately without triggering autoplay errors.
+- **Optimize Proxy Fetching**: Fail fast on slow/errored Piped API instances to minimize latency between tap and playback.
 
 ### 2. `src/features/riddles/its-a-hit/ItsAHitRiddle.tsx`
 - **Synchronous Tap Flow**:

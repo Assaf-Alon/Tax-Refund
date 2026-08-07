@@ -218,9 +218,12 @@ export const useAudioStream = () => {
       if (audioRef.current) {
         audioRef.current.src = url;
         audioRef.current.load();
-        // If play was requested while stream was loading, execute play now that media element is unlocked
-        if (pendingPlayRef.current === videoId) {
+        // If play was requested while stream was loading or this is the currently active video, execute play now that media element is unlocked
+        if (pendingPlayRef.current === videoId || activeIdRef.current === videoId) {
           pendingPlayRef.current = null;
+          if (excerptBounds.current) {
+            audioRef.current.currentTime = excerptBounds.current.start;
+          }
           const p = audioRef.current.play();
           if (p) {
             p.then(() => Log.success(`Native audio auto-played after fetch for ${videoId}`))
@@ -247,6 +250,13 @@ export const useAudioStream = () => {
       if (audioRef.current) {
         audioRef.current.src = cachedUrl;
         audioRef.current.load();
+        if (pendingPlayRef.current === videoId || activeIdRef.current === videoId) {
+          pendingPlayRef.current = null;
+          if (excerptBounds.current) {
+            audioRef.current.currentTime = excerptBounds.current.start;
+          }
+          audioRef.current.play().catch(err => Log.error("Cached play error", err));
+        }
       }
       statusRef.current = 'ready';
       setStatus('ready');
@@ -275,6 +285,12 @@ export const useAudioStream = () => {
     }
     if (ytPlayerRef.current?.pauseVideo) { try { ytPlayerRef.current.pauseVideo(); } catch { } }
     if (progressIntervalRef.current) { clearInterval(progressIntervalRef.current); progressIntervalRef.current = null; }
+
+    const isMobileDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+
+    if (isMobileDevice || !import.meta.env.PROD) {
+      return fallbackToNative(videoId);
+    }
 
     if (import.meta.env.PROD) {
       try {
