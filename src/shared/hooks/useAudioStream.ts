@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { logger } from '../utils/logger';
 
 // Define YT types for internal use since they might not be in global @types
 declare global {
@@ -38,6 +39,7 @@ const ensureYTAPI = () => {
 
 const Log = {
   info: (msg: string, ...args: any[]) => {
+    logger.info(msg, args.length === 1 ? args[0] : args.length > 1 ? args : undefined);
     if (typeof window !== 'undefined') {
        window._audioLogs = window._audioLogs || [];
        window._audioLogs.push({ t: Date.now(), level: 'info', msg, args });
@@ -45,6 +47,7 @@ const Log = {
     console.log(`%c[AudioEngine] ${msg}`, 'color: #3b82f6; font-weight: bold', ...args);
   },
   warn: (msg: string, ...args: any[]) => {
+    logger.warn(msg, args.length === 1 ? args[0] : args.length > 1 ? args : undefined);
     if (typeof window !== 'undefined') {
        window._audioLogs = window._audioLogs || [];
        window._audioLogs.push({ t: Date.now(), level: 'warn', msg, args });
@@ -52,6 +55,7 @@ const Log = {
     console.warn(`%c[AudioEngine] ${msg}`, 'color: #f59e0b; font-weight: bold', ...args);
   },
   error: (msg: string, ...args: any[]) => {
+    logger.error(msg, args.length === 1 ? args[0] : args.length > 1 ? args : undefined);
     if (typeof window !== 'undefined') {
        window._audioLogs = window._audioLogs || [];
        window._audioLogs.push({ t: Date.now(), level: 'error', msg, args });
@@ -59,6 +63,7 @@ const Log = {
     console.error(`%c[AudioEngine] ${msg}`, 'color: #ef4444; font-weight: bold', ...args);
   },
   success: (msg: string, ...args: any[]) => {
+    logger.success(msg, args.length === 1 ? args[0] : args.length > 1 ? args : undefined);
     if (typeof window !== 'undefined') {
        window._audioLogs = window._audioLogs || [];
        window._audioLogs.push({ t: Date.now(), level: 'success', msg, args });
@@ -358,7 +363,11 @@ export const useAudioStream = () => {
   };
 
   const playExcerpt = useCallback((videoId: string, start: number, end: number, onEnd?: () => void) => {
-    if (statusRef.current === 'error') return;
+    Log.info(`playExcerpt called for ${videoId}`, { start, end, engine: engineRef.current, status: statusRef.current });
+    if (statusRef.current === 'error') {
+      Log.error(`Cannot playExcerpt: Player is in error state`, { videoId });
+      return;
+    }
     onEndRef.current = onEnd || null;
     
     // Default to a very large end time if none provided or it's 0
@@ -370,28 +379,44 @@ export const useAudioStream = () => {
             setCurrentVideoId(videoId);
             ytPlayerRef.current.seekTo(start, true);
             ytPlayerRef.current.playVideo();
-            // REMOVE setStatusSync('playing') - Let onStateChange handle it for gesture-safe feedback
+            Log.info(`YT playVideo invoked for ${videoId}`);
             if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
             progressIntervalRef.current = window.setInterval(() => {
                 if (ytPlayerRef.current?.getCurrentTime) handleTimeUpdate(ytPlayerRef.current.getCurrentTime());
             }, 100);
-        } catch { setStatusSync('error'); }
+        } catch (err: any) {
+            Log.error(`YT playVideo exception`, { error: err?.message || String(err) });
+            setStatusSync('error');
+        }
     } else if (audioRef.current) {
         setCurrentVideoId(videoId);
         audioRef.current.currentTime = start;
-        audioRef.current.play().catch(() => Log.warn("Native blocked"));
+        const playPromise = audioRef.current.play();
+        if (playPromise) {
+          playPromise
+            .then(() => Log.success(`Native audio play succeeded for ${videoId}`))
+            .catch((err) => Log.error(`Native audio play() blocked by browser (Autoplay Policy)`, { error: err?.name || err?.message || String(err) }));
+        }
+    } else {
+        Log.warn(`playExcerpt: No player engine available for ${videoId}`);
     }
   }, [currentVideoId]);
 
   const togglePlayback = useCallback(() => {
     const s = statusRef.current;
+    Log.info(`togglePlayback called`, { currentStatus: s, engine: engineRef.current });
     if (s === 'ready' || s === 'paused' || s === 'ended') {
       if (engineRef.current === 'youtube' && ytPlayerRef.current?.playVideo) {
         ytPlayerRef.current.playVideo();
+        Log.info(`togglePlayback: YT playVideo called`);
       } else if (audioRef.current) {
-        audioRef.current.play();
+        const playPromise = audioRef.current.play();
+        if (playPromise) {
+          playPromise
+            .then(() => Log.success(`togglePlayback: Native audio play succeeded`))
+            .catch((err) => Log.error(`togglePlayback: Native audio play() blocked`, { error: err?.name || err?.message || String(err) }));
+        }
       }
-      // REMOVE setStatusSync('playing') - Event driven for accuracy
     } else if (s === 'playing') {
       stop();
     }

@@ -28,6 +28,8 @@ import { TextAnswerStage } from '../../../shared/stages/TextAnswerStage';
 import { DevSkipButton } from '../../admin/DevSkipButton';
 import { IT_STAGE_DATA } from './data/stages';
 import { HP_THEME as theme } from './theme';
+import { MiniDebugTerminal } from '../../../shared/components/Debug/MiniDebugTerminal';
+import { logger } from '../../../shared/utils/logger';
 import type { SongItem } from '../../../shared/types/music';
 import { useTitle } from '../../../hooks/useTitle';
 import { useFavicon } from '../../../hooks/useFavicon';
@@ -78,7 +80,13 @@ const SortableVinylItem: React.FC<SortableItemProps> = ({
       <div
         {...attributes}
         {...listeners}
-        onClick={() => onSelect(song)}
+        onPointerDown={(e) => {
+          logger.info(`[Touch/Pointer] PointerDown on vinyl #${song.id}`, { pointerType: e.pointerType, isPrimary: e.isPrimary });
+        }}
+        onClick={() => {
+          logger.info(`[Touch/Pointer] onClick triggered on vinyl #${song.id}`);
+          onSelect(song);
+        }}
       >
         <VinylCard
           song={song}
@@ -239,21 +247,36 @@ export const ItsAHitRiddle: React.FC = () => {
   };
 
   const handleSelectSong = useCallback(async (song: SongItem) => {
-    if (isRevealed) return;
+    logger.info(`[Riddle] handleSelectSong called for song #${song.id} ("${song.name}")`, { 
+      clickedId: song.id, 
+      activeSongId: activeSong?.id,
+      isRevealed,
+      playerStatus,
+      isPlaying 
+    });
+
+    if (isRevealed) {
+      logger.warn(`[Riddle] Selection ignored: stage already revealed`);
+      return;
+    }
 
     // Toggle logic: Use explicit ID comparison to avoid reference issues
     const currentActiveId = activeSong?.id ? Number(activeSong.id) : null;
     const clickedSongId = Number(song.id);
 
     if (currentActiveId === clickedSongId) {
+      logger.info(`[Riddle] Same record tapped again (${clickedSongId}). Toggling playback...`);
       togglePlayback();
     } else {
+      logger.info(`[Riddle] New record selected (${clickedSongId}). Setting active song & preparing audio...`);
       setActiveSong(song);
       stop();
+      logger.info(`[Riddle] Awaiting prepare() for YouTube ID ${song.youtubeId}...`);
       await prepare(song.youtubeId);
+      logger.info(`[Riddle] prepare() finished. Calling playExcerpt()...`);
       playExcerpt(song.youtubeId, song.startTime, 0);
     }
-  }, [activeSong, isRevealed, togglePlayback, stop, prepare, playExcerpt]);
+  }, [activeSong, isRevealed, togglePlayback, stop, prepare, playExcerpt, playerStatus, isPlaying]);
 
   // Stop music on unmount or stage change
   useEffect(() => {
@@ -512,6 +535,8 @@ export const ItsAHitRiddle: React.FC = () => {
         totalStages={IT_STAGE_DATA.length + 1}
         onSkip={handleDevSkip}
       />
+
+      <MiniDebugTerminal />
     </div>
   );
 };
