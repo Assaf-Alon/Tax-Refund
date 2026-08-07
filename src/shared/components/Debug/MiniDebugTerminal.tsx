@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Trash2, ChevronDown, ChevronUp, AlertCircle, AlertTriangle, Info, CheckCircle2, SlidersHorizontal } from 'lucide-react';
+import { Terminal, Trash2, ChevronDown, ChevronUp, AlertCircle, AlertTriangle, Info, CheckCircle2, SlidersHorizontal, Copy, Check } from 'lucide-react';
 import { logger, type LogEntry, type LogLevel } from '../../utils/logger';
 
 export const MiniDebugTerminal: React.FC = () => {
@@ -8,6 +8,7 @@ export const MiniDebugTerminal: React.FC = () => {
   const [isExpandedFull, setIsExpandedFull] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
   const [filterLevel, setFilterLevel] = useState<LogLevel | 'all'>('all');
+  const [copied, setCopied] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -24,6 +25,24 @@ export const MiniDebugTerminal: React.FC = () => {
 
     return unsubscribe;
   }, []);
+
+  const handleCopyLogs = () => {
+    const textToCopy = filteredLogs.map((log) => {
+      let line = `[${log.timestamp}] [${log.level.toUpperCase()}] ${log.message}`;
+      if (log.details !== undefined) {
+        const detailsStr = typeof log.details === 'object' ? JSON.stringify(log.details, null, 2) : String(log.details);
+        line += `\n${detailsStr}`;
+      }
+      return line;
+    }).join('\n\n');
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch((err) => {
+      console.error('Failed to copy logs:', err);
+    });
+  };
 
   useEffect(() => {
     if (autoScroll && scrollRef.current && isOpen) {
@@ -105,6 +124,20 @@ export const MiniDebugTerminal: React.FC = () => {
                   <option value="success">Success</option>
                 </select>
               </div>
+
+              {/* Copy Logs button */}
+              <button
+                onClick={handleCopyLogs}
+                title="Copy Logs to Clipboard"
+                className={`p-1.5 flex items-center gap-1 text-[11px] rounded transition-colors ${
+                  copied 
+                    ? 'text-emerald-400 bg-emerald-950/60 font-bold' 
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                {copied ? <Check size={13} /> : <Copy size={13} />}
+                <span className="text-[10px]">{copied ? 'Copied!' : 'Copy'}</span>
+              </button>
 
               {/* Clear button */}
               <button

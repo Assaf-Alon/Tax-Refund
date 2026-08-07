@@ -87,6 +87,7 @@ export const useAudioStream = () => {
   const excerptBounds = useRef<{ start: number; end: number } | null>(null);
   const activeIdRef = useRef<string | null>(null);
   const isLoadingRef = useRef<string | null>(null);
+  const pendingPlayRef = useRef<string | null>(null);
   const fetchPromises = useRef<Map<string, Promise<string | null>>>(new Map());
   const urlCache = useRef<Map<string, string>>(new Map());
   const onEndRef = useRef<(() => void) | null>(null);
@@ -212,7 +213,19 @@ export const useAudioStream = () => {
     if (activeIdRef.current !== videoId) return;
     if (url) {
       setEngine('native');
-      if (audioRef.current) { audioRef.current.src = url; audioRef.current.load(); }
+      if (audioRef.current) {
+        audioRef.current.src = url;
+        audioRef.current.load();
+        // If play was requested while stream was loading, execute play now that media element is unlocked
+        if (pendingPlayRef.current === videoId) {
+          pendingPlayRef.current = null;
+          const p = audioRef.current.play();
+          if (p) {
+            p.then(() => Log.success(`Native audio auto-played after fetch for ${videoId}`))
+             .catch((err) => Log.error(`Native audio play() blocked after fetch`, { error: err?.name || err?.message || String(err) }));
+          }
+        }
+      }
     } else {
       setStatus('error');
     }
@@ -390,12 +403,17 @@ export const useAudioStream = () => {
         }
     } else if (audioRef.current) {
         setCurrentVideoId(videoId);
-        audioRef.current.currentTime = start;
-        const playPromise = audioRef.current.play();
-        if (playPromise) {
-          playPromise
-            .then(() => Log.success(`Native audio play succeeded for ${videoId}`))
-            .catch((err) => Log.error(`Native audio play() blocked by browser (Autoplay Policy)`, { error: err?.name || err?.message || String(err) }));
+        if (audioRef.current.src && audioRef.current.src !== "" && !audioRef.current.src.startsWith("data:audio")) {
+          audioRef.current.currentTime = start;
+          const playPromise = audioRef.current.play();
+          if (playPromise) {
+            playPromise
+              .then(() => Log.success(`Native audio play succeeded for ${videoId}`))
+              .catch((err) => Log.error(`Native audio play() blocked by browser (Autoplay Policy)`, { error: err?.name || err?.message || String(err) }));
+          }
+        } else {
+          Log.info(`Stream still loading for ${videoId}. Storing pending play request.`);
+          pendingPlayRef.current = videoId;
         }
     } else {
         Log.warn(`playExcerpt: No player engine available for ${videoId}`);
@@ -429,14 +447,15 @@ export const useAudioStream = () => {
   const unlockAudio = useCallback(() => {
     Log.info(`unlockAudio called to prime media element gesture token`);
     if (audioRef.current) {
+      if (!audioRef.current.src || audioRef.current.src === "" || audioRef.current.src === window.location.href) {
+        // Silent 0.1s WAV data URL to unlock browser audio context without AbortError
+        audioRef.current.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+        audioRef.current.load();
+      }
       const p = audioRef.current.play();
       if (p) {
         p.then(() => {
           Log.info(`unlockAudio: Audio element successfully unlocked`);
-          // If we were just unlocking, pause immediately unless audio is playing a track
-          if (!activeIdRef.current) {
-            audioRef.current?.pause();
-          }
         }).catch((err) => {
           Log.warn(`unlockAudio: Play attempt ignored or restricted`, { error: err?.name || err?.message || String(err) });
         });
