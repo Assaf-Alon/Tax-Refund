@@ -426,5 +426,24 @@ export const useAudioStream = () => {
     if (id) await getStreamUrl(id);
   }, []);
 
-  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused' || status === 'ended', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatusSync('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
+  const unlockAudio = useCallback(() => {
+    Log.info(`unlockAudio called to prime media element gesture token`);
+    if (audioRef.current) {
+      const p = audioRef.current.play();
+      if (p) {
+        p.then(() => {
+          Log.info(`unlockAudio: Audio element successfully unlocked`);
+          // If we were just unlocking, pause immediately unless audio is playing a track
+          if (!activeIdRef.current) {
+            audioRef.current?.pause();
+          }
+        }).catch((err) => {
+          Log.warn(`unlockAudio: Play attempt ignored or restricted`, { error: err?.name || err?.message || String(err) });
+        });
+      }
+    }
+  }, []);
+
+  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused' || status === 'ended', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch, unlockAudio, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatusSync('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
 };
+

@@ -127,6 +127,7 @@ export const ItsAHitRiddle: React.FC = () => {
     isPlaying,
     prepare,
     prefetch,
+    unlockAudio,
     playExcerpt,
     togglePlayback,
     stop,
@@ -260,6 +261,9 @@ export const ItsAHitRiddle: React.FC = () => {
       return;
     }
 
+    // Synchronously unlock browser media context within user gesture
+    unlockAudio();
+
     // Toggle logic: Use explicit ID comparison to avoid reference issues
     const currentActiveId = activeSong?.id ? Number(activeSong.id) : null;
     const clickedSongId = Number(song.id);
@@ -276,7 +280,7 @@ export const ItsAHitRiddle: React.FC = () => {
       logger.info(`[Riddle] prepare() finished. Calling playExcerpt()...`);
       playExcerpt(song.youtubeId, song.startTime, 0);
     }
-  }, [activeSong, isRevealed, togglePlayback, stop, prepare, playExcerpt, playerStatus, isPlaying]);
+  }, [activeSong, isRevealed, togglePlayback, stop, prepare, playExcerpt, unlockAudio, playerStatus, isPlaying]);
 
   // Stop music on unmount or stage change
   useEffect(() => {
