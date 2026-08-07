@@ -246,7 +246,7 @@ export const useAudioStream = () => {
         audioRef.current.src = url;
         audioRef.current.load();
         // If play was requested while stream was loading or this is the currently active video, execute play now that media element is unlocked
-        if (pendingPlayRef.current === videoId || activeIdRef.current === videoId) {
+        if (pendingPlayRef.current === videoId) {
           pendingPlayRef.current = null;
           if (excerptBounds.current) {
             audioRef.current.currentTime = excerptBounds.current.start;
@@ -284,7 +284,7 @@ export const useAudioStream = () => {
           audioRef.current.src = localUrl;
           audioRef.current.load();
         }
-        if (pendingPlayRef.current === activeKey || activeIdRef.current === activeKey) {
+        if (pendingPlayRef.current === activeKey) {
           pendingPlayRef.current = null;
           if (excerptBounds.current) {
             audioRef.current.currentTime = excerptBounds.current.start;
@@ -311,7 +311,7 @@ export const useAudioStream = () => {
       if (audioRef.current) {
         audioRef.current.src = cachedUrl;
         audioRef.current.load();
-        if (pendingPlayRef.current === videoId || activeIdRef.current === videoId) {
+        if (pendingPlayRef.current === videoId) {
           pendingPlayRef.current = null;
           if (excerptBounds.current) {
             audioRef.current.currentTime = excerptBounds.current.start;
