@@ -85,4 +85,11 @@ describe('CharacterInput', () => {
         const input0 = screen.getByTestId('input-0') as HTMLInputElement;
         expect(input0.readOnly).toBe(true);
     });
+
+    it('sets autoCapitalize attribute to characters by default', () => {
+        render(<CharacterInput expectedValue="HI" onComplete={onComplete} />);
+
+        const input0 = screen.getByTestId('input-0') as HTMLInputElement;
+        expect(input0.getAttribute('autocapitalize')).toBe('characters');
+    });
 });

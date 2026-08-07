@@ -35,6 +35,8 @@ interface CharacterInputProps {
     backgroundColor?: string;
     /** Callback when any input in the group is focused */
     onFocus?: () => void;
+    /** Capitalization mode for mobile soft keyboard ('characters' | 'words' | 'sentences' | 'none'). Defaults to 'characters'. */
+    autoCapitalize?: string;
 }
 
 /**
@@ -55,6 +57,7 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
     textColor,
     backgroundColor,
     onFocus,
+    autoCapitalize = 'characters',
 }, ref) => {
     const chars = expectedValue.split('');
     const [internalValues, setInternalValues] = useState<string[]>(() => chars.map(() => ''));
@@ -211,6 +214,7 @@ export const CharacterInput = forwardRef<CharacterInputHandle, CharacterInputPro
                         readOnly={locked || readOnlyMode}
                         autoComplete="off"
                         autoCorrect="off"
+                        autoCapitalize={autoCapitalize}
                         spellCheck={false}
                         inputMode={readOnlyMode ? 'none' : 'text'}
                         className={`
