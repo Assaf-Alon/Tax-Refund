@@ -133,17 +133,25 @@ export const useAudioStream = () => {
     ytContainerRef.current = container;
 
     audio.oncanplaythrough = () => { 
-      if (statusRef.current === 'loading' && engineRef.current === 'native') setStatus('ready'); 
+      if (statusRef.current === 'loading' && engineRef.current === 'native' && !audio.src.startsWith('data:audio')) setStatus('ready'); 
     };
-    audio.onplaying = () => { if (engineRef.current === 'native') setStatus('playing'); };
-    audio.onpause = () => { if (engineRef.current === 'native') setStatus('paused'); };
-    audio.ontimeupdate = () => { if (engineRef.current === 'native') handleTimeUpdate(audio.currentTime); };
-    audio.onended = () => { if (engineRef.current === 'native') handleEnded(); };
+    audio.onplaying = () => { 
+      if (engineRef.current === 'native' && !audio.src.startsWith('data:audio') && !isUnlockingRef.current) setStatus('playing'); 
+    };
+    audio.onpause = () => { 
+      if (engineRef.current === 'native' && !audio.src.startsWith('data:audio') && !isUnlockingRef.current) setStatus('paused'); 
+    };
+    audio.ontimeupdate = () => { 
+      if (engineRef.current === 'native' && !audio.src.startsWith('data:audio') && !isUnlockingRef.current) handleTimeUpdate(audio.currentTime); 
+    };
+    audio.onended = () => { 
+      if (engineRef.current === 'native' && !audio.src.startsWith('data:audio') && !isUnlockingRef.current) handleEnded(); 
+    };
     audio.onerror = () => {
       if (engineRef.current !== 'native') return;
       const src = audio.src;
-      // Filter out intentional resets or initial state or during loading transition
-      if (!src || src === window.location.href || src.endsWith('/') || statusRef.current === 'loading' || isLoadingRef.current) return;
+      // Filter out intentional resets or initial state or during loading transition or silent unlock
+      if (!src || src.startsWith('data:audio') || src === window.location.href || src.endsWith('/') || statusRef.current === 'loading' || isLoadingRef.current) return;
       
       const errorMsg = audio.error?.message || `Code ${audio.error?.code}`;
       if (errorMsg.includes("Empty src")) return; // Silence this specific noise
