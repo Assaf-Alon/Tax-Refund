@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Terminal, Trash2, ChevronDown, ChevronUp, AlertCircle, AlertTriangle, Info, CheckCircle2, SlidersHorizontal, Copy, Check } from 'lucide-react';
 import { logger, type LogEntry, type LogLevel } from '../../utils/logger';
+import { SHOW_DEBUG_TERMINAL } from '../../config/featureFlags';
 
 export const MiniDebugTerminal: React.FC = () => {
+  if (!SHOW_DEBUG_TERMINAL) return null;
+
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isExpandedFull, setIsExpandedFull] = useState(false);

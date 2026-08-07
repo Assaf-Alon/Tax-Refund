@@ -29,6 +29,7 @@ import { DevSkipButton } from '../../admin/DevSkipButton';
 import { IT_STAGE_DATA } from './data/stages';
 import { HP_THEME as theme } from './theme';
 import { MiniDebugTerminal } from '../../../shared/components/Debug/MiniDebugTerminal';
+import { SHOW_DEBUG_TERMINAL } from '../../../shared/config/featureFlags';
 import { logger } from '../../../shared/utils/logger';
 import type { SongItem } from '../../../shared/types/music';
 import { useTitle } from '../../../hooks/useTitle';
@@ -516,7 +517,7 @@ export const ItsAHitRiddle: React.FC = () => {
         onSkip={handleDevSkip}
       />
 
-      <MiniDebugTerminal />
+      {SHOW_DEBUG_TERMINAL && <MiniDebugTerminal />}
     </div>
   );
 };
