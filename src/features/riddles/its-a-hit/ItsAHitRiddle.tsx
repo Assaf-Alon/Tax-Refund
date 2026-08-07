@@ -274,13 +274,12 @@ export const ItsAHitRiddle: React.FC = () => {
     } else {
       logger.info(`[Riddle] New record selected (${clickedSongId}). Setting active song & preparing audio...`);
       setActiveSong(song);
-      stop();
       logger.info(`[Riddle] Awaiting prepare() for YouTube ID ${song.youtubeId}...`);
       await prepare(song.youtubeId);
       logger.info(`[Riddle] prepare() finished. Calling playExcerpt()...`);
       playExcerpt(song.youtubeId, song.startTime, 0);
     }
-  }, [activeSong, isRevealed, togglePlayback, stop, prepare, playExcerpt, unlockAudio, playerStatus, isPlaying]);
+  }, [activeSong, isRevealed, togglePlayback, prepare, playExcerpt, unlockAudio, playerStatus, isPlaying]);
 
   // Stop music on unmount or stage change
   useEffect(() => {

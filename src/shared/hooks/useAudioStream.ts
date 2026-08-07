@@ -88,6 +88,8 @@ export const useAudioStream = () => {
   const activeIdRef = useRef<string | null>(null);
   const isLoadingRef = useRef<string | null>(null);
   const pendingPlayRef = useRef<string | null>(null);
+  const isUnlockingRef = useRef<boolean>(false);
+  const isUnlockedRef = useRef<boolean>(false);
   const fetchPromises = useRef<Map<string, Promise<string | null>>>(new Map());
   const urlCache = useRef<Map<string, string>>(new Map());
   const onEndRef = useRef<(() => void) | null>(null);
@@ -266,7 +268,11 @@ export const useAudioStream = () => {
     setProgress(0);
     setCurrentTime(0);
 
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; }
+    if (audioRef.current) {
+      if (!isUnlockingRef.current && audioRef.current.src && !audioRef.current.src.startsWith("data:audio")) {
+        audioRef.current.pause();
+      }
+    }
     if (ytPlayerRef.current?.pauseVideo) { try { ytPlayerRef.current.pauseVideo(); } catch { } }
     if (progressIntervalRef.current) { clearInterval(progressIntervalRef.current); progressIntervalRef.current = null; }
 
@@ -447,6 +453,11 @@ export const useAudioStream = () => {
   const unlockAudio = useCallback(() => {
     Log.info(`unlockAudio called to prime media element gesture token`);
     if (audioRef.current) {
+      if (isUnlockedRef.current && audioRef.current.src && !audioRef.current.src.startsWith("data:audio")) {
+        Log.info(`unlockAudio: Audio element already unlocked`);
+        return;
+      }
+      isUnlockingRef.current = true;
       if (!audioRef.current.src || audioRef.current.src === "" || audioRef.current.src === window.location.href) {
         // Silent 0.1s WAV data URL to unlock browser audio context without AbortError
         audioRef.current.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
@@ -455,8 +466,11 @@ export const useAudioStream = () => {
       const p = audioRef.current.play();
       if (p) {
         p.then(() => {
+          isUnlockingRef.current = false;
+          isUnlockedRef.current = true;
           Log.info(`unlockAudio: Audio element successfully unlocked`);
         }).catch((err) => {
+          isUnlockingRef.current = false;
           Log.warn(`unlockAudio: Play attempt ignored or restricted`, { error: err?.name || err?.message || String(err) });
         });
       }
