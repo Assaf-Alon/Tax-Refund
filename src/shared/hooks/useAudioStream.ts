@@ -466,6 +466,12 @@ export const useAudioStream = () => {
     if (id) await getStreamUrl(id);
   }, []);
 
+  const prefetchStreams = useCallback(async (ids: string[]) => {
+    if (!ids || ids.length === 0) return;
+    Log.info(`prefetchStreams: Batch pre-fetching ${ids.length} stream URLs...`);
+    await Promise.allSettled(ids.map(id => getStreamUrl(id)));
+  }, []);
+
   const unlockAudio = useCallback(() => {
     Log.info(`unlockAudio called to prime media element gesture token`);
     if (audioRef.current) {
@@ -493,6 +499,6 @@ export const useAudioStream = () => {
     }
   }, []);
 
-  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused' || status === 'ended', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch, unlockAudio, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatusSync('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
+  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused' || status === 'ended', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch, prefetchStreams, unlockAudio, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatusSync('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
 };
 

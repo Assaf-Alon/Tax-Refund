@@ -16,7 +16,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MapPin, Navigation, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { MapPin, Navigation, CheckCircle2, ArrowLeft, Disc, Power } from 'lucide-react';
 
 import { VinylCard } from '../../../shared/components/Vinyl/VinylCard';
 import { VinylAudioController } from '../../../shared/components/Vinyl/VinylAudioController';
@@ -109,6 +109,7 @@ export const ItsAHitRiddle: React.FC = () => {
   useTitle("Sonic Sequencer");
   useFavicon(`${import.meta.env.BASE_URL}ih-48.png`);
 
+  const [isPoweredOn, setIsPoweredOn] = useState(false);
   const [currentStageIdx, setCurrentStageIdx] = useState<number | null>(null);
   const [songs, setSongs] = useState<SongItem[]>([]);
   const [userOrder, setUserOrder] = useState<SongItem[]>([]);
@@ -126,7 +127,7 @@ export const ItsAHitRiddle: React.FC = () => {
     isReady,
     isPlaying,
     prepare,
-    prefetch,
+    prefetchStreams,
     unlockAudio,
     playExcerpt,
     togglePlayback,
@@ -156,13 +157,6 @@ export const ItsAHitRiddle: React.FC = () => {
     if (!stage) return;
 
     const filtered = allSongs.filter(s => stage.songIds.includes(s.id));
-    // Ensure songs are in the order we expect for mapping revealWords correctly if they are sorted by player?
-    // Wait, revealWords should match the SONG, not the position. 
-    // Let's create a map or just ensure we store the correct word with the song.
-
-    // Actually, revealWords[i] matches stage.songIds[i]? No, the user provided them in chronological order.
-    // So if the player sorts them correctly, we show the words in chronological order.
-
     const shuffled = [...filtered].sort(() => Math.random() - 0.5);
 
     setUserOrder(shuffled);
@@ -172,19 +166,14 @@ export const ItsAHitRiddle: React.FC = () => {
     setValidationResults({});
     setIsButtonShaking(false);
 
-    // Prefetch all songs for the current stage in parallel
-    filtered.forEach(song => {
-      prefetch(song.youtubeId);
-    });
-
-    // Prefetch songs for the next stage to warm the cache in advance
+    // Prefetch stream URLs for current stage and next stage
+    const idsToFetch = filtered.map(s => s.youtubeId);
     if (idx + 1 < IT_STAGE_DATA.length) {
       const nextStage = IT_STAGE_DATA[idx + 1];
       const nextStageSongs = allSongs.filter(s => nextStage.songIds.includes(s.id));
-      nextStageSongs.forEach(song => {
-        prefetch(song.youtubeId);
-      });
+      idsToFetch.push(...nextStageSongs.map(s => s.youtubeId));
     }
+    prefetchStreams(idsToFetch);
   };
 
   const currentStage = currentStageIdx !== null ? IT_STAGE_DATA[currentStageIdx] : null;
@@ -404,6 +393,48 @@ export const ItsAHitRiddle: React.FC = () => {
             errorText: "text-rose-500 text-[10px] font-bold mt-2"
           }}
         />
+      </div>
+    );
+  }
+
+  if (!isPoweredOn) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+        <div className="w-24 h-24 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(16,185,129,0.25)] relative group">
+          <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-ping opacity-25" />
+          <Disc size={48} className="text-emerald-400 animate-spin-slow" />
+        </div>
+
+        <h1 className="text-3xl font-black uppercase tracking-wider text-white mb-3">
+          Turntable Power Required
+        </h1>
+        
+        <p className="text-xs text-slate-400 max-w-xs mb-10 leading-relaxed uppercase tracking-wider font-semibold">
+          Tap below to power on the audio engine, prime your browser media token, and load the record streams.
+        </p>
+
+        <button
+          onClick={() => {
+            unlockAudio();
+            setIsPoweredOn(true);
+            if (currentStage) {
+              const currentSongs = songs.filter(s => currentStage.songIds.includes(s.id));
+              const idsToFetch = currentSongs.map(s => s.youtubeId);
+              if ((currentStageIdx ?? 0) + 1 < IT_STAGE_DATA.length) {
+                const nextStage = IT_STAGE_DATA[(currentStageIdx ?? 0) + 1];
+                const nextSongs = songs.filter(s => nextStage.songIds.includes(s.id));
+                idsToFetch.push(...nextSongs.map(s => s.youtubeId));
+              }
+              prefetchStreams(idsToFetch);
+            }
+          }}
+          className={`${theme.button.primary} flex items-center justify-center gap-3 px-8 py-5 text-sm font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all`}
+        >
+          <Power size={20} className="text-slate-950" />
+          Power On Turntable
+        </button>
+
+        <MiniDebugTerminal />
       </div>
     );
   }
