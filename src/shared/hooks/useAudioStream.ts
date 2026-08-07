@@ -90,6 +90,7 @@ export const useAudioStream = () => {
   const pendingPlayRef = useRef<string | null>(null);
   const isUnlockingRef = useRef<boolean>(false);
   const isUnlockedRef = useRef<boolean>(false);
+  const localAudioCache = useRef<Map<string, string | null>>(new Map());
   const fetchPromises = useRef<Map<string, Promise<string | null>>>(new Map());
   const urlCache = useRef<Map<string, string>>(new Map());
   const onEndRef = useRef<(() => void) | null>(null);
@@ -99,6 +100,24 @@ export const useAudioStream = () => {
 
   useEffect(() => { statusRef.current = status; }, [status]);
   useEffect(() => { engineRef.current = engine; }, [engine]);
+
+  const checkLocalAudio = async (songIdOrVideoId: string | number): Promise<string | null> => {
+    const key = String(songIdOrVideoId);
+    if (localAudioCache.current.has(key)) {
+      return localAudioCache.current.get(key) || null;
+    }
+    const localUrl = `${import.meta.env.BASE_URL}audio/${key}.mp3`;
+    try {
+      const res = await fetch(localUrl, { method: 'HEAD' });
+      if (res.ok) {
+        Log.info(`Local MP3 audio clip found for ${key}: ${localUrl}`);
+        localAudioCache.current.set(key, localUrl);
+        return localUrl;
+      }
+    } catch {}
+    localAudioCache.current.set(key, null);
+    return null;
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -237,10 +256,44 @@ export const useAudioStream = () => {
     isLoadingRef.current = null;
   };
 
-  const prepare = useCallback(async (videoId: string, force = false, retryCount = 0) => {
-    if (!videoId) return;
+  const prepare = useCallback(async (songIdOrVideoId: string | number, fallbackYoutubeId?: string, force = false, retryCount = 0) => {
+    if (!songIdOrVideoId && !fallbackYoutubeId) return;
 
-    // Check if we already have this video stream URL in cache
+    const songId = songIdOrVideoId;
+    const videoId = fallbackYoutubeId || String(songIdOrVideoId);
+    const activeKey = String(songId);
+
+    // 1. Check local audio clip first
+    const localUrl = await checkLocalAudio(songId);
+    if (localUrl && !force) {
+      Log.info(`Using local MP3 audio clip for song #${songId}: ${localUrl}`);
+      isLoadingRef.current = null;
+      activeIdRef.current = activeKey;
+      setEngine('native');
+      if (audioRef.current) {
+        const fullUrl = new URL(localUrl, window.location.href).href;
+        if (audioRef.current.src !== fullUrl) {
+          audioRef.current.src = localUrl;
+          audioRef.current.load();
+        }
+        if (pendingPlayRef.current === activeKey || activeIdRef.current === activeKey) {
+          pendingPlayRef.current = null;
+          if (excerptBounds.current) {
+            audioRef.current.currentTime = excerptBounds.current.start;
+          }
+          audioRef.current.play().catch(err => Log.error("Local audio play error", err));
+        }
+      }
+      statusRef.current = 'ready';
+      setStatus('ready');
+      setLastError(null);
+      setCurrentVideoId(activeKey);
+      setProgress(0);
+      setCurrentTime(0);
+      return;
+    }
+
+    // 2. Check cached YouTube stream URL
     const cachedUrl = urlCache.current.get(videoId);
     if (cachedUrl && !force) {
       Log.info(`Using cached stream URL for native playback: ${videoId}`);
@@ -304,7 +357,7 @@ export const useAudioStream = () => {
             fallbackToNative(videoId).then(() => {
               if (statusRef.current === 'error' && retryCount < 1) {
                  Log.info("Auto-retrying after backup failure...");
-                 prepare(videoId, true, retryCount + 1).then(resolve);
+                 prepare(songIdOrVideoId, fallbackYoutubeId, true, retryCount + 1).then(resolve);
               } else {
                  resolve();
               }
@@ -376,7 +429,7 @@ export const useAudioStream = () => {
                        clearTimeout(timeout); 
                        if (retryCount < 1) {
                           Log.info("Auto-retrying after YT error...");
-                          prepare(videoId, true, retryCount + 1).then(resolve);
+                          prepare(songIdOrVideoId, fallbackYoutubeId, true, retryCount + 1).then(resolve);
                        } else {
                           fallbackToNative(videoId).then(resolve); 
                        }
@@ -397,10 +450,34 @@ export const useAudioStream = () => {
     setStatus(s);
   };
 
-  const playExcerpt = useCallback((videoId: string, start: number, end: number, onEnd?: () => void) => {
-    Log.info(`playExcerpt called for ${videoId}`, { start, end, engine: engineRef.current, status: statusRef.current });
+  const playExcerpt = useCallback((
+    songIdOrVideoId: string | number,
+    arg2?: string | number,
+    arg3?: number,
+    arg4?: number | (() => void),
+    arg5?: () => void
+  ) => {
+    let songId: string | number = songIdOrVideoId;
+    let videoId: string;
+    let start: number;
+    let end: number;
+    let onEnd: (() => void) | null = null;
+
+    if (typeof arg2 === 'string') {
+      videoId = arg2;
+      start = typeof arg3 === 'number' ? arg3 : 0;
+      end = typeof arg4 === 'number' ? arg4 : 0;
+      onEnd = typeof arg5 === 'function' ? arg5 : null;
+    } else {
+      videoId = String(songIdOrVideoId);
+      start = typeof arg2 === 'number' ? arg2 : 0;
+      end = typeof arg3 === 'number' ? arg3 : 0;
+      onEnd = typeof arg4 === 'function' ? arg4 : null;
+    }
+
+    Log.info(`playExcerpt called for song ${songId} (video ${videoId})`, { start, end, engine: engineRef.current, status: statusRef.current });
     if (statusRef.current === 'error') {
-      Log.error(`Cannot playExcerpt: Player is in error state`, { videoId });
+      Log.error(`Cannot playExcerpt: Player is in error state`, { songId, videoId });
       return;
     }
     onEndRef.current = onEnd || null;
@@ -424,21 +501,21 @@ export const useAudioStream = () => {
             setStatusSync('error');
         }
     } else if (audioRef.current) {
-        setCurrentVideoId(videoId);
+        setCurrentVideoId(String(songId));
         if (audioRef.current.src && audioRef.current.src !== "" && !audioRef.current.src.startsWith("data:audio")) {
           audioRef.current.currentTime = start;
           const playPromise = audioRef.current.play();
           if (playPromise) {
             playPromise
-              .then(() => Log.success(`Native audio play succeeded for ${videoId}`))
+              .then(() => Log.success(`Native audio play succeeded for ${songId}`))
               .catch((err) => Log.error(`Native audio play() blocked by browser (Autoplay Policy)`, { error: err?.name || err?.message || String(err) }));
           }
         } else {
-          Log.info(`Stream still loading for ${videoId}. Storing pending play request.`);
-          pendingPlayRef.current = videoId;
+          Log.info(`Stream still loading for ${songId}. Storing pending play request.`);
+          pendingPlayRef.current = String(songId);
         }
     } else {
-        Log.warn(`playExcerpt: No player engine available for ${videoId}`);
+        Log.warn(`playExcerpt: No player engine available for ${songId}`);
     }
   }, [currentVideoId]);
 
@@ -464,12 +541,6 @@ export const useAudioStream = () => {
 
   const prefetch = useCallback(async (id: string) => {
     if (id) await getStreamUrl(id);
-  }, []);
-
-  const prefetchStreams = useCallback(async (ids: string[]) => {
-    if (!ids || ids.length === 0) return;
-    Log.info(`prefetchStreams: Batch pre-fetching ${ids.length} stream URLs...`);
-    await Promise.allSettled(ids.map(id => getStreamUrl(id)));
   }, []);
 
   const unlockAudio = useCallback(() => {
@@ -499,6 +570,7 @@ export const useAudioStream = () => {
     }
   }, []);
 
-  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused' || status === 'ended', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch, prefetchStreams, unlockAudio, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatusSync('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
+  return { status, isReady: status === 'ready' || status === 'playing' || status === 'paused' || status === 'ended', isPlaying: status === 'playing', progress, currentTime, lastError, prepare, playExcerpt, stop, togglePlayback, prefetch, unlockAudio, reset: () => { stop(); if (audioRef.current) audioRef.current.src = ""; if (ytPlayerRef.current?.stopVideo) ytPlayerRef.current.stopVideo(); setCurrentVideoId(null); setStatusSync('uninitialized'); setEngine('native'); setProgress(0); setCurrentTime(0); activeIdRef.current = null; isLoadingRef.current = null; } };
 };
+
 

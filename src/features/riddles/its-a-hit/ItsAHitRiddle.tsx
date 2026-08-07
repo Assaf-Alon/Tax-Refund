@@ -16,7 +16,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MapPin, Navigation, CheckCircle2, ArrowLeft, Disc, Power } from 'lucide-react';
+import { MapPin, Navigation, CheckCircle2, ArrowLeft } from 'lucide-react';
 
 import { VinylCard } from '../../../shared/components/Vinyl/VinylCard';
 import { VinylAudioController } from '../../../shared/components/Vinyl/VinylAudioController';
@@ -109,7 +109,6 @@ export const ItsAHitRiddle: React.FC = () => {
   useTitle("Sonic Sequencer");
   useFavicon(`${import.meta.env.BASE_URL}ih-48.png`);
 
-  const [isPoweredOn, setIsPoweredOn] = useState(false);
   const [currentStageIdx, setCurrentStageIdx] = useState<number | null>(null);
   const [songs, setSongs] = useState<SongItem[]>([]);
   const [userOrder, setUserOrder] = useState<SongItem[]>([]);
@@ -127,7 +126,6 @@ export const ItsAHitRiddle: React.FC = () => {
     isReady,
     isPlaying,
     prepare,
-    prefetchStreams,
     unlockAudio,
     playExcerpt,
     togglePlayback,
@@ -165,15 +163,6 @@ export const ItsAHitRiddle: React.FC = () => {
     setIsStageUnlocked(false);
     setValidationResults({});
     setIsButtonShaking(false);
-
-    // Prefetch stream URLs for current stage and next stage
-    const idsToFetch = filtered.map(s => s.youtubeId);
-    if (idx + 1 < IT_STAGE_DATA.length) {
-      const nextStage = IT_STAGE_DATA[idx + 1];
-      const nextStageSongs = allSongs.filter(s => nextStage.songIds.includes(s.id));
-      idsToFetch.push(...nextStageSongs.map(s => s.youtubeId));
-    }
-    prefetchStreams(idsToFetch);
   };
 
   const currentStage = currentStageIdx !== null ? IT_STAGE_DATA[currentStageIdx] : null;
@@ -184,7 +173,7 @@ export const ItsAHitRiddle: React.FC = () => {
     if (isPlaying) {
       togglePlayback();
     } else {
-      playExcerpt(activeSong.youtubeId, activeSong.startTime, activeSong.endTime);
+      playExcerpt(activeSong.id, activeSong.youtubeId, activeSong.startTime, activeSong.endTime);
     }
   }, [activeSong, isReady, isPlaying, togglePlayback, playExcerpt]);
 
@@ -263,10 +252,8 @@ export const ItsAHitRiddle: React.FC = () => {
     } else {
       logger.info(`[Riddle] New record selected (${clickedSongId}). Setting active song & preparing audio...`);
       setActiveSong(song);
-      logger.info(`[Riddle] Awaiting prepare() for YouTube ID ${song.youtubeId}...`);
-      await prepare(song.youtubeId);
-      logger.info(`[Riddle] prepare() finished. Calling playExcerpt()...`);
-      playExcerpt(song.youtubeId, song.startTime, 0);
+      await prepare(song.id, song.youtubeId);
+      playExcerpt(song.id, song.youtubeId, song.startTime, 0);
     }
   }, [activeSong, isRevealed, togglePlayback, prepare, playExcerpt, unlockAudio, playerStatus, isPlaying]);
 
@@ -397,50 +384,9 @@ export const ItsAHitRiddle: React.FC = () => {
     );
   }
 
-  if (!isPoweredOn) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
-        <div className="w-24 h-24 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(16,185,129,0.25)] relative group">
-          <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-ping opacity-25" />
-          <Disc size={48} className="text-emerald-400 animate-spin-slow" />
-        </div>
-
-        <h1 className="text-3xl font-black uppercase tracking-wider text-white mb-3">
-          Turntable Power Required
-        </h1>
-        
-        <p className="text-xs text-slate-400 max-w-xs mb-10 leading-relaxed uppercase tracking-wider font-semibold">
-          Tap below to power on the audio engine, prime your browser media token, and load the record streams.
-        </p>
-
-        <button
-          onClick={() => {
-            unlockAudio();
-            setIsPoweredOn(true);
-            if (currentStage) {
-              const currentSongs = songs.filter(s => currentStage.songIds.includes(s.id));
-              const idsToFetch = currentSongs.map(s => s.youtubeId);
-              if ((currentStageIdx ?? 0) + 1 < IT_STAGE_DATA.length) {
-                const nextStage = IT_STAGE_DATA[(currentStageIdx ?? 0) + 1];
-                const nextSongs = songs.filter(s => nextStage.songIds.includes(s.id));
-                idsToFetch.push(...nextSongs.map(s => s.youtubeId));
-              }
-              prefetchStreams(idsToFetch);
-            }
-          }}
-          className={`${theme.button.primary} flex items-center justify-center gap-3 px-8 py-5 text-sm font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all`}
-        >
-          <Power size={20} className="text-slate-950" />
-          Power On Turntable
-        </button>
-
-        <MiniDebugTerminal />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center overflow-x-hidden pb-32">
+
       <div className="w-full px-6 py-8 sm:px-12 sm:py-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-50">
         <div className="flex flex-col">
           <div className="flex items-center gap-2 mb-1">
@@ -510,7 +456,7 @@ export const ItsAHitRiddle: React.FC = () => {
               onToggle={handleTogglePlayback}
               playerStatus={playerStatus}
               lastError={lastError}
-              onRetry={() => activeSong && prepare(activeSong.youtubeId, true)}
+              onRetry={() => activeSong && prepare(activeSong.id, activeSong.youtubeId, true)}
               hidePlayButton
             />
             <button

@@ -88,7 +88,7 @@ export const VinylTimelinePage: React.FC = () => {
   // 1. Auto-prepare stream & reset state
   useEffect(() => {
     if (state.status === 'playing' && state.mysteryCard?.youtubeId) {
-      prepare(state.mysteryCard.youtubeId);
+      prepare(state.mysteryCard.id, state.mysteryCard.youtubeId);
       setLocalIsPlaying(false);
       setShowResultModal(false);
       if (state.players.filter(p => p.lives > 0).length > 1) {
@@ -96,7 +96,7 @@ export const VinylTimelinePage: React.FC = () => {
       }
     } else if (state.status === 'setup' && state.candidateMystery?.youtubeId) {
       // PRELOAD the first song while in setup screen
-      prepare(state.candidateMystery.youtubeId);
+      prepare(state.candidateMystery.id, state.candidateMystery.youtubeId);
     }
   }, [state.status, state?.mysteryCard?.id, state?.candidateMystery?.youtubeId, state.playbackStart, state.playbackEnd, prepare]);
 
@@ -496,7 +496,7 @@ export const VinylTimelinePage: React.FC = () => {
                onToggle={handlePlaySnippet}
                playerStatus={playerStatus}
                lastError={lastError}
-               onRetry={() => state.mysteryCard && prepare(state.mysteryCard.youtubeId, true)}
+               onRetry={() => state.mysteryCard && prepare(state.mysteryCard.id, state.mysteryCard.youtubeId, true)}
                oneListenOnly={state.oneListenOnly}
                listenedCurrentRound={state.listenedCurrentRound}
              />
@@ -525,7 +525,7 @@ export const VinylTimelinePage: React.FC = () => {
           isOpen={playerStatus === 'error' && !!state.mysteryCard}
           song={state.mysteryCard}
           lastError={lastError}
-          onRetry={() => state.mysteryCard && prepare(state.mysteryCard.youtubeId, true)}
+          onRetry={() => state.mysteryCard && prepare(state.mysteryCard.id, state.mysteryCard.youtubeId, true)}
           onSkip={skipCurrentMystery}
         />
 
