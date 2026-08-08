@@ -572,7 +572,11 @@ export const useAudioStream = () => {
           Log.info(`unlockAudio: Audio element successfully unlocked`);
         }).catch((err) => {
           isUnlockingRef.current = false;
-          Log.warn(`unlockAudio: Play attempt ignored or restricted`, { error: err?.name || err?.message || String(err) });
+          if (err?.name === 'AbortError') {
+            Log.info(`unlockAudio: Silent unlock clip interrupted by source transition`);
+          } else {
+            Log.warn(`unlockAudio: Play attempt ignored or restricted`, { error: err?.name || err?.message || String(err) });
+          }
         });
       }
     }
