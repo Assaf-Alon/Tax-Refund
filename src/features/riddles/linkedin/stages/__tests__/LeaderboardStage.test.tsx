@@ -69,4 +69,22 @@ describe('LeaderboardStage', () => {
         expect(screen.getByText("Bill Gates")).toBeInTheDocument();
         expect(screen.getByText("Assaf Alon")).toBeInTheDocument();
     });
+
+    it('renders Steve Jobs in Pinpoint stage leaderboard', () => {
+        render(<LeaderboardStage {...defaultProps} gameName="Pinpoint" />);
+        expect(screen.getByText("Roy Peled")).toBeInTheDocument();
+        expect(screen.getByText(/Meshi Peled/i)).toBeInTheDocument();
+        expect(screen.getByText("Zero")).toBeInTheDocument();
+        expect(screen.getByText("Steve Jobs")).toBeInTheDocument();
+        expect(screen.getByText("Yves (Eve) Godin")).toBeInTheDocument();
+    });
+
+    it('renders Jeffrey Bezos in Queens stage leaderboard', () => {
+        render(<LeaderboardStage {...defaultProps} gameName="Queens" />);
+        expect(screen.getByText(/Meshi Peled/i)).toBeInTheDocument();
+        expect(screen.getByText("Roy Peled")).toBeInTheDocument();
+        expect(screen.getByText("L.")).toBeInTheDocument();
+        expect(screen.getByText("Jeffrey Bezos")).toBeInTheDocument();
+        expect(screen.getByText("Shaul Almagor")).toBeInTheDocument();
+    });
 });

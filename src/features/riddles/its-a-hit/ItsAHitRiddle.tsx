@@ -3,6 +3,7 @@ import {
   DndContext,
   closestCenter,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -82,6 +83,7 @@ const SortableVinylItem: React.FC<SortableItemProps> = ({
         {...attributes}
         {...listeners}
         onPointerDown={(e) => {
+          listeners?.onPointerDown?.(e);
           logger.info(`[Touch/Pointer] PointerDown on vinyl #${song.id}`, { pointerType: e.pointerType, isPrimary: e.isPrimary });
         }}
         onClick={() => {
@@ -181,6 +183,9 @@ export const ItsAHitRiddle: React.FC = () => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 }
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 }
     })
   );
 
