@@ -117,7 +117,7 @@ export const OuterWilds: React.FC = () => {
                         prompt="Who plays the harmonica deep inside a corrupted seed?"
                         acceptedAnswers={["feldspar"]}
                         exactMatchOnly={false}
-                        hint="The first Hearthian to ever launch into space, now stranded in Dark Bramble."
+                        hint="The first Hearthian to ever launch into space, now stranded in Dark Bramble. 8 letters, the later 4 are also a friendly fight in Hajime no Ippo"
                         hintCooldown={20}
                         image={feldsparImg}
                         imageAlt="Feldspar"
